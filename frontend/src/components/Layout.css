@@ -1,0 +1,68 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.layout {
+    display: grid;
+    grid-template:
+        'navbar navbar' 1fr
+        'sidebar main' 20fr
+        'sidebar footer' 1fr
+        / 15% 85%;
+    min-height: 100vh
+}
+
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    grid-area: navbar;
+    height: 25%;
+    padding: 1rem;
+}
+
+.nav-items {
+    display: flex;
+    justify-content: space-between;
+}
+
+.nav-end {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+aside {
+    position: fixed;
+    top: 6%;
+    grid-area: sidebar;
+    align-self: start;
+    width: calc(14% - 1rem);
+    height: 94%;
+    padding: 1rem;
+}
+
+.aside-items {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    grid-area: main;
+    padding: 2rem;
+}
+
+footer {
+    grid-area: footer;
+}
+
+nav,
+aside,
+main,
+footer {
+    outline: 2px solid red;
+}

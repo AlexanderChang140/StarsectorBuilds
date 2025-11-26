@@ -1,0 +1,27 @@
+.table-container {
+    width: fit-content;
+    max-width: 1500px;
+    max-height: 750px;
+    overflow: auto;
+    border: 1px solid #ccc;
+}
+
+table,
+th,
+td {
+    width: auto;
+    border-collapse: collapse;
+    border: 3px solid black;
+}
+
+th,
+td {
+    padding: 10px;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: black;
+}

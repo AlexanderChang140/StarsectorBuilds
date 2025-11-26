@@ -1,0 +1,57 @@
+.display {
+    display: grid;
+    grid-template: auto auto / minmax(300px, 1000px) 1fr;
+    grid-template-areas:
+        'title profile'
+        'body profile';
+    height: 10vh;
+}
+
+.title {
+    grid-area: title;
+}
+
+.body {
+    grid-area: body;
+    font-style: italic;
+    white-space: pre-line;
+}
+
+.profile {
+    display: flex;
+    flex-direction: column;
+    grid-area: profile;
+    justify-self: center;
+    outline: 2px solid blue;
+}
+
+.name {
+    width: 100%;
+    height: 5rem;
+    outline: 2px solid red;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 2rem;
+    outline: 2px solid green;
+}
+
+.base,
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.overlay {
+    z-index: 1;
+}
+
+.stats {
+    outline: 2px solid green;
+}
