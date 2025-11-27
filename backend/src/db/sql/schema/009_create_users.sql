@@ -78,11 +78,11 @@ CREATE TABLE IF NOT EXISTS build_wings
 (
     build_id integer NOT NULL,
     ship_weapon_slot_id integer NOT NULL,
-    wing_id integer NOT NULL,
+    ship_id integer NOT NULL,
     PRIMARY KEY (build_id, ship_weapon_slot_id),
     FOREIGN KEY (build_id) REFERENCES builds(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_weapon_slot_id) REFERENCES ship_weapon_slots(id),
-    FOREIGN KEY (wing_id) REFERENCES wings(id)
+    FOREIGN KEY (ship_id) REFERENCES ships(id)
 );
 
 CREATE TABLE IF NOT EXISTS build_comments

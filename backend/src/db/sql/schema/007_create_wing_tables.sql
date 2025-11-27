@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS wing_instances
     data_hash varchar(256) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (data_hash),
-    FOREIGN KEY (wing_id) REFERENCES wings(id)
+    FOREIGN KEY (ship_id) REFERENCES ships(id)
 );
 
 CREATE TABLE IF NOT EXISTS wing_versions
@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS wing_versions
     wing_instance_id integer NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, ship_id),
-    FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE
+    FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_id) REFERENCES ships(id) ON DELETE CASCADE,
-    FOREIGN KEY (wing_instance_id) REFERENCES wing_instances(id) ON DELETE CASCADE,
+    FOREIGN KEY (wing_instance_id) REFERENCES wing_instances(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS wing_data
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS wing_data
     num_fighters integer,
     refit_time integer,
     base_value integer,
-    vents integer NOT NULL DEFAULT 0;
-    capacitors integer NOT NULL DEFAULT 0;
+    vents integer NOT NULL DEFAULT 0,
+    capacitors integer NOT NULL DEFAULT 0,
     PRIMARY KEY (wing_instance_id),
     FOREIGN KEY (wing_instance_id) REFERENCES wing_instances(id) ON DELETE CASCADE,
     FOREIGN KEY (formation_id) REFERENCES wing_formations(id),
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS wing_hullmods
 
 CREATE TABLE IF NOT EXISTS wing_weapon_groups
 (
-    id integer NOT NULL
+    id integer NOT NULL,
     wing_instance_id integer NOT NULL,
     mode text,
     PRIMARY KEY (id),
@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS wing_weapon_groups
 
 CREATE TABLE IF NOT EXISTS wing_weapons
 (
-    id integer NOT NULL
-    wing_weapon_group_id integer NOT NULL
+    id integer NOT NULL,
+    wing_weapon_group_id integer NOT NULL,
     weapon_slot_code text NOT NULL,
     weapon_id integer NOT NULL,
     PRIMARY KEY (id),
