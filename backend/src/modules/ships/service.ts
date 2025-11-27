@@ -27,6 +27,12 @@ import type {
     ShipHintJunction,
     InsertedShipTagJunction,
     ShipTagJunction,
+    BuiltInWeapon,
+    InsertedBuiltInWeapon,
+    InsertedBuiltInHullmod,
+    BuiltInHullmod,
+    InsertedBuiltInWing,
+    BuiltInWing,
 } from './types.ts';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
@@ -124,3 +130,18 @@ export const insertShipTagJunction = makeInsertReturn<
     InsertedShipTagJunction,
     ShipTagJunction
 >('ship_tag_junction', ['ship_instance_id', 'tag_id']);
+
+export const insertBuiltInWeapon = makeInsertReturn<
+    InsertedBuiltInWeapon,
+    BuiltInWeapon
+>('built_in_weapons', ['ship_instance_id']);
+
+export const insertBuiltInHullmod = makeInsertReturn<
+    InsertedBuiltInHullmod,
+    BuiltInHullmod
+>('built_in_hullmods', ['ship_instance_id']);
+
+export const insertBuiltInWing = makeInsertReturn<
+    InsertedBuiltInWing,
+    BuiltInWing
+>('built_in_wings', ['ship_instance_id']);
