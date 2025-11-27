@@ -134,12 +134,12 @@ export const insertShipTagJunction = makeInsertReturn<
 export const insertBuiltInWeapon = makeInsertReturn<
     InsertedBuiltInWeapon,
     BuiltInWeapon
->('built_in_weapons', ['ship_instance_id']);
+>('built_in_weapons', ['ship_instance_id', 'slot_code']);
 
 export const insertBuiltInHullmod = makeInsertReturn<
     InsertedBuiltInHullmod,
     BuiltInHullmod
->('built_in_hullmods', ['ship_instance_id']);
+>('built_in_hullmods', ['ship_instance_id', 'hullmod_id']);
 
 export const insertBuiltInWing = makeInsertReturn<
     InsertedBuiltInWing,
