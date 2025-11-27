@@ -22,7 +22,7 @@ import {
 } from '../../wings/service.ts';
 import type { PreparedFullWing } from '../../wings/types.ts';
 
-export async function importShips(
+export async function importWings(
     modInfo: ModInfo,
     client: PoolClient,
     wings: {
