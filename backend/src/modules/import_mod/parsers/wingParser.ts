@@ -3,8 +3,10 @@ import fsp from 'fs/promises';
 import path from 'path';
 
 import { parse } from 'csv';
+import fg from 'fast-glob';
 import { parse as jparse } from 'jsonc-parser';
 
+import { assertDefined } from '../../../utils/helpers.ts';
 import type { PreparedFullWing, PreparedWingData } from '../../wings/types.ts';
 import { isWingFormation, isWingRole } from '../../wings/utils/validate.ts';
 import {
@@ -125,14 +127,19 @@ async function parseWingVariant(
     ctx: ParseContext,
 ): Promise<VariantData> {
     try {
-        const variantFilePath = path.join(
-            ctx.fileDir,
-            'data',
-            'variants',
-            'fighters',
-            variant + '.variant',
+        const variantFilePath = path.join(ctx.fileDir, 'data', 'variants');
+        const files = await fg(`**/${variant}.variant`, {
+            cwd: variantFilePath,
+            absolute: true,
+        });
+
+        assertDefined(
+            files[0],
+            `Failed to find wing variant file at: ${variantFilePath}`,
         );
-        const raw = await fsp.readFile(variantFilePath, 'utf8');
+
+        const raw = await fsp.readFile(files[0], 'utf8');
+
         return jparse(raw);
     } catch (err) {
         throw new Error(`Failed to parse wing variant: ${variant}`, {
