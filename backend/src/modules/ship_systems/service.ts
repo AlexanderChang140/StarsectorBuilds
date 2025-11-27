@@ -11,12 +11,13 @@ import type {
     ShipSystemVersion,
 } from './types.ts';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
-import { makeSelect } from '../../db/helpers/select.ts';
+import { makeSelectOne } from '../../db/helpers/select.ts';
 
-export const getShipSystemId = makeSelect<ShipSystem, Pick<ShipSystem, 'code'>>(
-    'ship_systems',
-    ['id'],
-);
+export const getShipSystemId = makeSelectOne<
+    ShipSystem,
+    'id',
+    Pick<ShipSystem, 'code'>
+>('ship_systems', ['id']);
 
 export const insertShipSystem = makeInsertReturn<
     InsertedShipSystem,
