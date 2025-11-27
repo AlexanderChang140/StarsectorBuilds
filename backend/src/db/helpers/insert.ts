@@ -100,12 +100,12 @@ type MakeInsertReturn<T, R> = <K extends keyof R = never>(
 
 export function makeInsertReturn<T extends object>(
     tableName: string,
-    conflictKeys: (keyof T)[],
+    conflictKeys?: (keyof T)[],
 ): MakeInsertReturn<T, T>;
 
 export function makeInsertReturn<T extends object, R extends object>(
     tableName: string,
-    conflictKeys: (keyof T)[],
+    conflictKeys?: (keyof T)[],
 ): MakeInsertReturn<T, R>;
 
 /**
@@ -128,7 +128,7 @@ export function makeInsertReturn<T extends object, R extends object>(
  */
 export function makeInsertReturn<T extends object, R extends object>(
     tableName: string,
-    conflictKeys: (keyof T)[],
+    conflictKeys?: (keyof T)[],
 ): MakeInsertReturn<T, R> {
     return async <K extends keyof R = never>(
         record: T,
