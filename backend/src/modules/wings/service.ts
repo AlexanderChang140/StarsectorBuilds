@@ -45,7 +45,7 @@ export const insertWingHullmod = makeInsertReturn<WingInstanceId & HullmodId>(
 export const insertWingWeaponGroup = makeInsertReturn<
     InsertedWingWeaponGroup,
     WingWeaponGroup
->('wing_weapon_groups', ['wing_instance_id']);
+>('wing_weapon_groups');
 
 export const insertWingWeapon = makeInsertReturn<
     InsertedWingWeapon,
