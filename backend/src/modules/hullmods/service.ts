@@ -1,5 +1,5 @@
-import type { ValidHullmodInstance } from './types/combined.ts';
 import type {
+    ValidHullmodInstance,
     InsertedHullmod,
     Hullmod,
     InsertedHullmodInstance,
@@ -8,13 +8,11 @@ import type {
     HullmodVersion,
     InsertedHullmodData,
     HullmodData,
-} from './types/instance.ts';
-import type {
     InsertedHullmodTagJunction,
     HullmodTagJunction,
     InsertedHullmodUiTagJunction,
     HullmodUiTagJunction,
-} from './types/junction.ts';
+} from './types.ts';
 import { pool } from '../../db/client.ts';
 import {
     createFilterWithAliases,
