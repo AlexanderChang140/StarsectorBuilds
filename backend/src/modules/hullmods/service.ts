@@ -19,6 +19,7 @@ import {
     type Filter,
 } from '../../db/helpers/filter.ts';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
+import { makeSelectOne } from '../../db/helpers/select.ts';
 import type { Code, CodeTable } from '../../types/generic.ts';
 
 export async function getHullmodVersions(
@@ -55,6 +56,11 @@ export async function getHullmodVersions(
     const result = await pool.query<ValidHullmodInstance>(query, params);
     return result.rows;
 }
+
+export const getHullmodId = makeSelectOne<Hullmod, 'id', Pick<Hullmod, 'code'>>(
+    'hullmods',
+    ['id'],
+);
 
 export const insertHullmod = makeInsertReturn<InsertedHullmod, Hullmod>(
     'hullmods',
