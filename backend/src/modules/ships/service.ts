@@ -144,4 +144,4 @@ export const insertBuiltInHullmod = makeInsertReturn<
 export const insertBuiltInWing = makeInsertReturn<
     InsertedBuiltInWing,
     BuiltInWing
->('built_in_wings', ['ship_instance_id']);
+>('built_in_wings', ['ship_instance_id', 'ship_id']);
