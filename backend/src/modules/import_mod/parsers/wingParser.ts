@@ -3,6 +3,7 @@ import fsp from 'fs/promises';
 import path from 'path';
 
 import { parse } from 'csv';
+import { parse as jparse } from 'jsonc-parser';
 
 import type { PreparedFullWing, PreparedWingData } from '../../wings/types.ts';
 import { isWingFormation, isWingRole } from '../../wings/utils/validate.ts';
@@ -83,10 +84,12 @@ async function buildWing(
 ): Promise<{
     preparedFullWing: PreparedFullWing;
 } | null> {
-    const code = record.id.split('_');
+    const parts = record.id.split('_');
+    const last = parts[parts.length - 1];
+    const code = parts.slice(0, -1).join('_');
 
     try {
-        if (code.length !== 2 || code[1] !== '_wing' || !code[0]) {
+        if (!code || last !== 'wing') {
             throw new Error(`Invalid wing id: ${code}`);
         }
 
@@ -130,7 +133,7 @@ async function parseWingVariant(
             variant + '.variant',
         );
         const raw = await fsp.readFile(variantFilePath, 'utf8');
-        return JSON.parse(raw);
+        return jparse(raw);
     } catch (err) {
         throw new Error(`Failed to parse wing variant: ${variant}`, {
             cause: err,
