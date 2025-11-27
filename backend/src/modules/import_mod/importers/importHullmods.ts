@@ -33,41 +33,49 @@ export async function importHullmods(
         const image = buildImage(modInfo.modCode, 'hullmods', preparedImage);
 
         const imageId = image
-            ? (await insertImage(image, { returning: ['id'], client })).id
+            ? (await insertImage({ record: image, returnKeys: ['id'], client }))
+                  .id
             : null;
 
         const hullmodId = (
-            await insertHullmod(
-                { mod_id: modInfo.modId, code: code },
-                { returning: ['id'], client },
-            )
+            await insertHullmod({
+                record: { mod_id: modInfo.modId, code: code },
+                returnKeys: ['id'],
+                client,
+            })
         ).id;
 
         const { id: hullmodInstanceId, inserted } = await insertHullmodInstance(
-            { hullmod_id: hullmodId, ...hullmod.preparedHullmodInstance },
-            { returning: ['id'], client },
+            {
+                record: {
+                    hullmod_id: hullmodId,
+                    ...hullmod.preparedHullmodInstance,
+                },
+                returnKeys: ['id'],
+                client,
+            },
         );
         dataChanged ||= inserted;
 
-        await insertHullmodVersion(
-            {
+        await insertHullmodVersion({
+            record: {
                 mod_version_id: modInfo.modVersionId,
                 hullmod_id: hullmodId,
                 hullmod_instance_id: hullmodInstanceId,
                 hullmod_image_id: imageId,
             },
-            { client },
-        );
+            client,
+        });
 
         if (!inserted) continue;
 
-        await insertHullmodData(
-            {
+        await insertHullmodData({
+            record: {
                 hullmod_instance_id: hullmodInstanceId,
                 ...hullmod.preparedHullmodData,
             },
-            { client },
-        );
+            client,
+        });
 
         insertJunctionItems(
             hullmod.hullmodTags,

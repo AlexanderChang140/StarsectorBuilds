@@ -3,12 +3,8 @@ import type { PoolClient } from 'pg';
 import type { ModInfo } from './importMod.ts';
 import { insertJunctionItems } from '../../../db/helpers/insert.ts';
 import { getOrThrow } from '../../../utils/helpers.ts';
-import {
-    getShipId,
-} from '../../ships/service.ts';
-import {
-    getWeaponId,
-} from '../../weapons/service.ts';
+import { getShipId } from '../../ships/service.ts';
+import { getWeaponId } from '../../weapons/service.ts';
 import {
     getWingFormations,
     getWingRoles,
@@ -49,47 +45,49 @@ export async function importWings(
                 throw new Error(`Failed to find ship id for: ${code}`);
             }
 
-            const { id: wingInstanceId, inserted } = await insertWingInstance(
-                {
+            const { id: wingInstanceId, inserted } = await insertWingInstance({
+                record: {
                     ship_id: shipId,
                     ...wing.preparedWingInstance,
                 },
-                { returning: ['id'], client },
-            );
+                returnKeys: ['id'],
+                client,
+            });
             dataChanged ||= inserted;
 
-            await insertWingVersion(
-                {
+            await insertWingVersion({
+                record: {
                     mod_version_id: modInfo.modVersionId,
                     ship_id: shipId,
                     wing_instance_id: wingInstanceId,
                 },
-                { client },
-            );
+                client,
+            });
 
             if (!inserted) continue;
 
             const { formation, role, ...preparedWingData } =
                 wing.preparedWingData;
 
-            await insertWingData(
-                {
+            await insertWingData({
+                record: {
                     wing_instance_id: wingInstanceId,
                     formation_id: getOrThrow(wingFormations, formation),
                     role_id: getOrThrow(wingRoles, role),
                     ...preparedWingData,
                 },
-                { client },
-            );
+                client,
+            });
 
             for (const weaponGroup of wing.preparedWingWeaponGroups) {
-                const { id: weaponGroupId } = await insertWingWeaponGroup(
-                    {
+                const { id: weaponGroupId } = await insertWingWeaponGroup({
+                    record: {
                         wing_instance_id: wingInstanceId,
                         mode: weaponGroup.mode,
                     },
-                    { returning: ['id'], client },
-                );
+                    returnKeys: ['id'],
+                    client,
+                });
 
                 for (const [slot, weapon] of Object.entries(
                     weaponGroup.weapons,
@@ -107,14 +105,14 @@ export async function importWings(
                         );
                     }
 
-                    await insertWingWeapon(
-                        {
+                    await insertWingWeapon({
+                        record: {
                             wing_weapon_group_id: weaponGroupId,
                             weapon_slot_code: slot,
                             weapon_id: weaponId,
                         },
-                        { client },
-                    );
+                        client,
+                    });
                 }
             }
 

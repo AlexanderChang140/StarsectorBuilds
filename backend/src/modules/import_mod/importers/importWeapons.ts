@@ -70,44 +70,63 @@ export async function importWeapons(
         );
 
         const turretImageId = turretImage
-            ? (await insertImage(turretImage, { returning: ['id'], client })).id
+            ? (
+                  await insertImage({
+                      record: turretImage,
+                      returnKeys: ['id'],
+                      client,
+                  })
+              ).id
             : null;
         const turretImageGunId = turretGunImage
-            ? (await insertImage(turretGunImage, { returning: ['id'], client }))
-                  .id
+            ? (
+                  await insertImage({
+                      record: turretGunImage,
+                      returnKeys: ['id'],
+                      client,
+                  })
+              ).id
             : null;
         const hardpointImageId = hardpointImage
-            ? (await insertImage(hardpointImage, { returning: ['id'], client }))
-                  .id
+            ? (
+                  await insertImage({
+                      record: hardpointImage,
+                      returnKeys: ['id'],
+                      client,
+                  })
+              ).id
             : null;
         const hardpointGunImageId = hardpointGunImage
             ? (
-                  await insertImage(hardpointGunImage, {
-                      returning: ['id'],
+                  await insertImage({
+                      record: hardpointGunImage,
+                      returnKeys: ['id'],
                       client,
                   })
               ).id
             : null;
 
-        const { id: weaponId } = await insertWeapon(
-            {
+        const { id: weaponId } = await insertWeapon({
+            record: {
                 mod_id: modInfo.modId,
                 code,
             },
-            { returning: ['id'], client },
-        );
+            returnKeys: ['id'],
+            client,
+        });
 
-        const { id: weaponInstanceId, inserted } = await insertWeaponInstance(
-            {
+        const { id: weaponInstanceId, inserted } = await insertWeaponInstance({
+            record: {
                 weapon_id: weaponId,
                 ...preparedFullWeapon.preparedWeaponInstance,
             },
-            { returning: ['id'], client },
-        );
+            returnKeys: ['id'],
+            client,
+        });
         dataChanged ||= inserted;
 
-        await insertWeaponVersion(
-            {
+        await insertWeaponVersion({
+            record: {
                 mod_version_id: modInfo.modVersionId,
                 weapon_id: weaponId,
                 weapon_instance_id: weaponInstanceId,
@@ -116,77 +135,77 @@ export async function importWeapons(
                 hardpoint_image_id: hardpointImageId,
                 hardpoint_gun_image_id: hardpointGunImageId,
             },
-            { client },
-        );
+            client,
+        });
 
         if (!inserted) continue;
 
         const { weapon_type, weapon_size, damage_type } =
             preparedFullWeapon.preparedWeaponSpecs;
-        await insertWeaponSpecs(
-            {
+        await insertWeaponSpecs({
+            record: {
                 weapon_instance_id: weaponInstanceId,
                 weapon_type_id: getOrThrow(weaponTypes, weapon_type),
                 weapon_size_id: getOrThrow(weaponSizes, weapon_size),
                 damage_type_id: getOrThrow(damageTypes, damage_type),
             },
-            { client },
-        );
+            client,
+        });
 
-        await insertWeaponStats(
-            {
+        await insertWeaponStats({
+            record: {
                 weapon_instance_id: weaponInstanceId,
                 ...preparedFullWeapon.preparedWeaponStats,
             },
-            { client },
-        );
+            client,
+        });
 
-        await insertWeaponText(
-            {
+        await insertWeaponText({
+            record: {
                 weapon_instance_id: weaponInstanceId,
                 ...preparedFullWeapon.preparedWeaponText,
             },
-            { client },
-        );
+            client,
+        });
 
         if (preparedFullWeapon.preparedWeaponDesc) {
-            await insertWeaponDesc(
-                {
+            await insertWeaponDesc({
+                record: {
                     weapon_instance_id: weaponInstanceId,
                     ...preparedFullWeapon.preparedWeaponDesc,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
         if (preparedFullWeapon.preparedProjWeapon) {
-            await insertProjWeapon(
-                {
+            await insertProjWeapon({
+                record: {
                     weapon_instance_id: weaponInstanceId,
                     ...preparedFullWeapon.preparedProjWeapon,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
         if (preparedFullWeapon.preparedAmmoWeapon) {
-            await insertAmmoWeapon(
-                {
+            await insertAmmoWeapon({
+                record: {
                     weapon_instance_id: weaponInstanceId,
                     ...preparedFullWeapon.preparedAmmoWeapon,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
         if (preparedFullWeapon.preparedBeamWeapon) {
-            await insertBeamWeapon(
-                {
+            await insertBeamWeapon({
+                record: {
                     weapon_instance_id: weaponInstanceId,
                     ...preparedFullWeapon.preparedBeamWeapon,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
         await insertJunctionItems(

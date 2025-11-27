@@ -34,20 +34,22 @@ export async function importMod(fileDir: string, update: boolean = false) {
         const modInfo = await parseModInfo(fileDir);
         const version = await parseVersionFile(fileDir);
         const modId = (
-            await insertMod(
-                { code: modInfo.code, display_name: modInfo.name },
-                { returning: ['id'], client },
-            )
+            await insertMod({
+                record: { code: modInfo.code, display_name: modInfo.name },
+                returnKeys: ['id'],
+                client,
+            })
         ).id;
-        const modVersion = await insertModVersion(
-            {
+        const modVersion = await insertModVersion({
+            record: {
                 mod_id: modId,
                 major: version.major,
                 minor: version.minor,
                 patch: version.patch,
             },
-            { returning: ['id'], client },
-        );
+            returnKeys: ['id'],
+            client,
+        });
         const descs = await parseDescriptions(fileDir);
 
         if (!update && !modVersion.inserted) {
@@ -89,20 +91,22 @@ export async function importVanilla(
         const modCode = 'starsector';
         const modName = 'Starsector';
         const modId = (
-            await insertMod(
-                { code: modCode, display_name: modName },
-                { returning: ['id'], client },
-            )
+            await insertMod({
+                record: { code: modCode, display_name: modName },
+                returnKeys: ['id'],
+                client,
+            })
         ).id;
-        const modVersion = await insertModVersion(
-            {
+        const modVersion = await insertModVersion({
+            record: {
                 mod_id: modId,
                 major: major,
                 minor: minor,
                 patch: patch,
             },
-            { returning: ['id'], client },
-        );
+            returnKeys: ['id'],
+            client,
+        });
         const descs = await parseDescriptions(fileDir);
 
         if (!update && !modVersion.inserted) {

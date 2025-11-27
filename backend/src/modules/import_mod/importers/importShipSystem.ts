@@ -33,55 +33,58 @@ export async function importShipSystem(
         );
 
         const imageId = image
-            ? (await insertImage(image, { returning: ['id'], client })).id
+            ? (await insertImage({ record: image, returnKeys: ['id'], client }))
+                  .id
             : null;
 
         const shipSystemId = (
-            await insertShipSystem(
-                {
+            await insertShipSystem({
+                record: {
                     mod_id: modInfo.modId,
                     code,
                 },
-                { returning: ['id'], client },
-            )
+                returnKeys: ['id'],
+                client,
+            })
         ).id;
 
         const { id: shipSystemInstanceId, inserted } =
-            await insertShipSystemInstance(
-                {
+            await insertShipSystemInstance({
+                record: {
                     ship_system_id: shipSystemId,
                     ...shipSystem.preparedShipSystemInstance,
                 },
-                { returning: ['id'], client },
-            );
+                returnKeys: ['id'],
+                client,
+            });
         dataChanged ||= inserted;
 
-        await insertShipSystemVersion(
-            {
+        await insertShipSystemVersion({
+            record: {
                 mod_version_id: modInfo.modVersionId,
                 ship_system_id: shipSystemId,
                 ship_system_instance_id: shipSystemInstanceId,
                 image_id: imageId,
             },
-            { client },
-        );
+            client,
+        });
 
-        await insertShipSystemData(
-            {
+        await insertShipSystemData({
+            record: {
                 ship_system_instance_id: shipSystemInstanceId,
                 ...shipSystem.preparedShipSystemData,
             },
-            { client },
-        );
+            client,
+        });
 
         if (shipSystem.preparedShipSystemDesc) {
-            await insertShipSystemDesc(
-                {
+            await insertShipSystemDesc({
+                record: {
                     ship_system_instance_id: shipSystemInstanceId,
                     ...shipSystem.preparedShipSystemDesc,
                 },
-                { client },
-            );
+                client,
+            });
         }
     }
     console.log(`Successfully imported ship systems from: ${modInfo.modCode}`);

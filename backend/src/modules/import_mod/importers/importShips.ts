@@ -38,10 +38,13 @@ export async function importShips(
         preparedFullShips: Record<string, PreparedFullShip>;
         preparedImages: Record<string, PreparedImage | null>;
     },
-): Promise<boolean> {
+): Promise<{ dataChanged: boolean; shipInstanceIds: Record<string, number> }> {
     const { preparedFullShips, preparedImages } = ships;
 
-    let dataChanged = false;
+    const out: {
+        dataChanged: boolean;
+        shipInstanceIds: Record<string, number>;
+    } = { dataChanged: false, shipInstanceIds: {} };
 
     const mountTypes = await getMountTypes(client);
     const shieldTypes = await getShieldTypes(client);
@@ -54,37 +57,42 @@ export async function importShips(
         const image = buildImage(modInfo.modCode, 'ships', preparedImage);
 
         const imageId = image
-            ? (await insertImage(image, { returning: ['id'], client })).id
+            ? (await insertImage({ record: image, returnKeys: ['id'], client }))
+                  .id
             : null;
 
         const shipId = (
-            await insertShip(
-                {
+            await insertShip({
+                record: {
                     mod_id: modInfo.modId,
                     code,
                 },
-                { returning: ['id'], client },
-            )
+                returnKeys: ['id'],
+                client,
+            })
         ).id;
 
-        const { id: shipInstanceId, inserted } = await insertShipInstance(
-            {
+        const { id: shipInstanceId, inserted } = await insertShipInstance({
+            record: {
                 ship_id: shipId,
                 ...ship.preparedShipInstance,
             },
-            { returning: ['id'], client },
-        );
-        dataChanged ||= inserted;
+            returnKeys: ['id'],
+            client,
+        });
 
-        await insertShipVersion(
-            {
+        out.dataChanged ||= inserted;
+        out.shipInstanceIds[code] = shipInstanceId;
+
+        await insertShipVersion({
+            record: {
                 mod_version_id: modInfo.modVersionId,
                 ship_id: shipId,
                 ship_instance_id: shipInstanceId,
                 ship_image_id: imageId,
             },
-            { client },
-        );
+            client,
+        });
 
         if (!inserted) continue;
 
@@ -100,65 +108,65 @@ export async function importShips(
                   await getShipSystemId({
                       where: { code: shipSystemCode },
                   })
-              )[0]?.id
+              )?.id
             : null;
 
-        await insertShipSpecs(
-            {
+        await insertShipSpecs({
+            record: {
                 ship_instance_id: shipInstanceId,
                 ship_size_id: getOrThrow(shipSizes, shipSize),
                 shield_type_id: getOrThrow(shieldTypes, shieldType),
                 ship_system_id: ship_system_id ?? null,
                 defense_code,
             },
-            { client },
-        );
+            client,
+        });
 
-        await insertShipStats(
-            {
+        await insertShipStats({
+            record: {
                 ship_instance_id: shipInstanceId,
                 ...ship.preparedShipStats,
             },
-            { client },
-        );
+            client,
+        });
 
-        await insertShipText(
-            {
+        await insertShipText({
+            record: {
                 ship_instance_id: shipInstanceId,
                 ...ship.preparedShipText,
             },
-            { client },
-        );
+            client,
+        });
 
         if (ship.preparedShipDesc) {
-            await insertShipDesc(
-                {
+            await insertShipDesc({
+                record: {
                     ship_instance_id: shipInstanceId,
                     ...ship.preparedShipDesc,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
-        await insertShipPosition(
-            {
+        await insertShipPosition({
+            record: {
                 ship_instance_id: shipInstanceId,
                 ...ship.preparedShipPosition,
             },
-            { client },
-        );
+            client,
+        });
 
-        await insertShipLogisticStats(
-            {
+        await insertShipLogisticStats({
+            record: {
                 ship_instance_id: shipInstanceId,
                 ...ship.preparedShipLogisticStats,
             },
-            { client },
-        );
+            client,
+        });
 
         for (const slot of ship.preparedShipWeaponSlots) {
-            await insertShipWeaponSlot(
-                {
+            await insertShipWeaponSlot({
+                record: {
                     ship_instance_id: shipInstanceId,
                     weapon_size_id: getOrThrow(weaponSizes, slot.weaponSize),
                     weapon_type_id: getOrThrow(weaponTypes, slot.weaponType),
@@ -168,28 +176,28 @@ export async function importShips(
                     arc: slot.arc,
                     position: slot.position,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
         if (ship.preparedShieldStats) {
-            await insertShieldStats(
-                {
+            await insertShieldStats({
+                record: {
                     ship_instance_id: shipInstanceId,
                     ...ship.preparedShieldStats,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
         if (ship.preparedPhaseStats) {
-            await insertPhaseStats(
-                {
+            await insertPhaseStats({
+                record: {
                     ship_instance_id: shipInstanceId,
                     ...ship.preparedPhaseStats,
                 },
-                { client },
-            );
+                client,
+            });
         }
 
         await insertJunctionItems(
@@ -211,5 +219,5 @@ export async function importShips(
         );
     }
     console.log(`Successfully imported ships from: ${modInfo.modCode}`);
-    return dataChanged;
+    return out;
 }
