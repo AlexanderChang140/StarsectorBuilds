@@ -193,7 +193,7 @@ function buildWingData(
         role_desc: convertString(record['role desc']),
         op_cost: convertInteger(record['op cost']),
         deployment_range: convertInteger(record.range),
-        num_fighers: convertInteger(record.num),
+        num_fighters: convertInteger(record.num),
         refit_time: convertInteger(record.refit),
         base_value: convertInteger(record['base value']),
         vents: variantData.fluxVents,

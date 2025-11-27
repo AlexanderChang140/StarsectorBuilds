@@ -44,7 +44,7 @@ export type PreparedWingData = {
     role_desc: string | null;
     op_cost: number | null;
     deployment_range: number | null;
-    num_fighers: number | null;
+    num_fighters: number | null;
     refit_time: number | null;
     base_value: number | null;
     vents: number | null;
