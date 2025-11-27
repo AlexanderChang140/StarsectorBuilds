@@ -171,7 +171,7 @@ export type InsertedBuiltInHullmod = WithShipInstanceId<{
 }>;
 
 export type BuiltInWing = InsertedBuiltInWing;
-export type InsertedBuiltInWing = WithShipInstanceId<{
-    wing_id: number;
-    num_wings: number;
-}>;
+export type InsertedBuiltInWing = ShipInstanceId &
+    ShipId & {
+        num_wings: number;
+    };
