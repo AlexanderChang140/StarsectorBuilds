@@ -268,7 +268,7 @@ function buildShipStats(record: ShipRecord): PreparedShipStats {
         armor_rating: convertInteger(record['armor rating']),
         max_flux: convertInteger(record['max flux']),
         flux_dissipation: convertInteger(record['flux dissipation']),
-        ordinance_points: convertInteger(record['ordinance points']),
+        op_cost: convertInteger(record['ordinance points']),
         fighter_bays: convertInteger(record['fighter bays']),
         acceleration: convertInteger(record['acceleration']),
         deceleration: convertInteger(record['deceleration']),

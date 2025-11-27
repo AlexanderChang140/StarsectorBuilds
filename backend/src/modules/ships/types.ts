@@ -62,7 +62,7 @@ export type PreparedShipStats = {
     armor_rating: number | null;
     max_flux: number | null;
     flux_dissipation: number | null;
-    ordinance_points: number | null;
+    op_cost: number | null;
     fighter_bays: number | null;
     acceleration: number | null;
     deceleration: number | null;
