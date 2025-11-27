@@ -75,14 +75,11 @@ async function execute(
     client: PoolClient,
     queries: string[],
     values: (string | number)[][] = [],
-): Promise<boolean> {
-    let success = false;
-    for (let i = 0; i < queries.length; i++) {
+) {
+    for (const i in queries) {
         const q = queries[i]!;
-        const result = await client.query(q, values[i]);
-        success &&= (result.rowCount ?? 0) > 0;
+        await client.query(q, values[i]);
     }
-    return success;
 }
 
 async function executeOrThrow(
@@ -92,16 +89,22 @@ async function executeOrThrow(
 ): Promise<void> {
     for (let i = 0; i < queries.length; i++) {
         const q = queries[i]!;
-        const result = await client.query(q, values[i]);
-        const success = (result.rowCount ?? 0) > 0;
-        if (!success) throw new Error(`Failed query: ${q}`);
+        await client.query(q, values[i]);
     }
 }
 
 export async function cleanup(): Promise<void> {
     const client = await pool.connect();
-    await execute(client, cleanupSequence());
-    client.release();
+    try {
+        await client.query('BEGIN');
+        await execute(client, cleanupSequence());
+        await client.query('COMMIT');
+    } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+    } finally {
+        client.release();
+    }
 }
 
 function cleanupSequence(): string[] {
@@ -172,7 +175,6 @@ function cleanupImagesQuery(): string {
         { table: 'weapon_versions', column: 'turret_image_id' },
         { table: 'weapon_versions', column: 'hardpoint_image_id' },
         { table: 'hullmod_versions', column: 'hullmod_image_id' },
-        { table: 'wing_versions', column: 'wing_image_id' },
         { table: 'ship_versions', column: 'ship_image_id' },
     ]);
 }
