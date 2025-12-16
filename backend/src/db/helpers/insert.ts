@@ -26,11 +26,12 @@ export async function insert<TRecord extends object, TReturning extends object>(
     const returningClause = returnKeys.length
         ? `RETURNING ${returnString}`
         : 'RETURNING 1';
-    const whereClause = conflictKeys.length
+    const whereString = conflictKeys.length
         ? conflictKeys
               .map((c, i) => `${String(c)} = $${keys.length + i + 1}`)
               .join(' AND ')
         : '';
+    const whereClause = conflictKeys.length ? `WHERE ${whereString}` : '';
     const whereValues = conflictKeys.map((c) => record[c]);
 
     const query = `
@@ -46,7 +47,7 @@ export async function insert<TRecord extends object, TReturning extends object>(
         UNION ALL
         SELECT ${returnKeys}${returnKeys.length ? ',' : ''} FALSE AS inserted
         FROM ${tableName}
-        WHERE ${whereClause}
+        ${whereClause}
         LIMIT 1;
     `;
 
