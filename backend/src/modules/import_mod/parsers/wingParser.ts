@@ -64,12 +64,9 @@ export async function parseWings(fileDir: string): Promise<{
 
             const prepared = await buildWing(record, ctx);
             if (prepared === null) continue;
-            const { preparedFullWing } = prepared;
+            const { preparedFullWing, code } = prepared;
 
-            const code = record.id.split('_');
-            if (!code[0]) continue;
-
-            preparedWings[code[0]] = preparedFullWing;
+            preparedWings[code] = preparedFullWing;
         }
 
         return {
@@ -85,24 +82,24 @@ async function buildWing(
     ctx: ParseContext,
 ): Promise<{
     preparedFullWing: PreparedFullWing;
+    code: string;
 } | null> {
-    const parts = record.id.split('_');
-    const last = parts[parts.length - 1];
-    const code = parts.slice(0, -1).join('_');
+    const name = record.id;
 
     try {
-        if (!code || last !== 'wing') {
-            throw new Error(`Invalid wing id: ${code}`);
-        }
-
         const variantData = await parseWingVariant(record.variant, ctx);
         const preparedFullWing = prepareFullWing(record, variantData);
 
+        if (!variantData.hullId) {
+            throw new Error('No hull ID found');
+        }
+
         return {
             preparedFullWing,
+            code: variantData.hullId,
         };
     } catch (err) {
-        const formatted = new Error(`Failed to build wing: ${code}`, {
+        const formatted = new Error(`Failed to build wing: ${name}`, {
             cause: err,
         });
         console.log(formatted);
@@ -111,6 +108,7 @@ async function buildWing(
 }
 
 type VariantData = {
+    hullId: string;
     fluxVents: number;
     fluxCapacitors: number;
     hullmods: string[];

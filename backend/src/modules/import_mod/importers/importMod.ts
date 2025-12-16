@@ -1,9 +1,11 @@
 import type { PoolClient } from 'pg';
 
+import { importBuiltIn } from './importBuiltIn.ts';
 import { importHullmods } from './importHullmods.ts';
 import { importShips } from './importShips.ts';
 import { importShipSystem } from './importShipSystem.ts';
 import { importWeapons } from './importWeapons.ts';
+import { importWings } from './importWings.ts';
 import { pool } from '../../../db/client.ts';
 import {
     insertMod,
@@ -19,6 +21,7 @@ import { parseModInfo, parseVersionFile } from '../parsers/modParser.ts';
 import { parseShips } from '../parsers/shipParser.ts';
 import { parseShipSystems } from '../parsers/shipSystemParser.ts';
 import { parseWeapons } from '../parsers/weaponParser.ts';
+import { parseWings } from '../parsers/wingParser.ts';
 
 /**
  * Parses the mod data and imports it into the database
@@ -156,6 +159,7 @@ export async function importContent(
         descs.preparedShipSystemDescs,
     );
     const ships = await parseShips(fileDir, descs.preparedShipDescs);
+    const wings = await parseWings(fileDir);
 
     const weaponDataChanged = await importWeapons(modInfo, client, weapons);
     const hullmodDataChanged = await importHullmods(modInfo, client, hullmods);
@@ -164,16 +168,31 @@ export async function importContent(
         client,
         shipSystems,
     );
-    const shipDataChanged = await importShips(modInfo, client, {
-        preparedFullShips: ships.preparedShips,
-        preparedImages: ships.preparedImages,
+    const { dataChanged: shipDataChanged, shipInstanceIds } = await importShips(
+        modInfo,
+        client,
+        {
+            preparedFullShips: ships.preparedShips,
+            preparedImages: ships.preparedImages,
+        },
+    );
+    const wingDataChanged = await importWings(modInfo, client, {
+        preparedFullWings: wings.preparedWings,
     });
+
+    await importBuiltIn(
+        modInfo,
+        client,
+        ships.preparedBuiltIns,
+        shipInstanceIds,
+    );
 
     if (
         weaponDataChanged ||
         hullmodDataChanged ||
         shipSystemDataChanged ||
-        shipDataChanged
+        shipDataChanged ||
+        wingDataChanged
     ) {
         await setDataChanged(modVersionId, client);
     }
