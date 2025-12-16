@@ -131,6 +131,6 @@ export async function importWings(
             console.log(formatted);
         }
     }
-    console.log(`Successfully imported ships from: ${modInfo.modCode}`);
+    console.log(`Successfully imported wings from: ${modInfo.modCode}`);
     return dataChanged;
 }
