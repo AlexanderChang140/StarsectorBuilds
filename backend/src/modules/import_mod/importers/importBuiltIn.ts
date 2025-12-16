@@ -17,6 +17,7 @@ export async function importBuiltIn(
     client: PoolClient,
     preparedBuiltIn: Record<string, PreparedBuiltIn>,
     shipInstanceIds: Record<string, number>,
+    csvIdToShipCode: Record<string, string>,
 ): Promise<boolean> {
     let dataChanged = false;
 
@@ -75,12 +76,22 @@ export async function importBuiltIn(
             for (const [wingCode, numWings] of Object.entries(
                 builtIn.preparedBuiltInWings,
             )) {
+                const wingShipCode = csvIdToShipCode[wingCode];
+
+                assertDefined(
+                    wingShipCode,
+                    `Failed to find ship code for ${wingCode}`,
+                );
+
                 const wing = await getShipId({
-                    where: { code: wingCode, mod_id: modInfo.modId },
+                    where: { code: wingShipCode, mod_id: modInfo.modId },
                     client,
                 });
 
-                assertDefined(wing, `Failed to find wing id for: ${wingCode}`);
+                assertDefined(
+                    wing,
+                    `Failed to find ship id for: ${wingShipCode}`,
+                );
 
                 await insertBuiltInWing({
                     record: {

@@ -185,6 +185,7 @@ export async function importContent(
         client,
         ships.preparedBuiltIns,
         shipInstanceIds,
+        wings.csvIdToShipCode,
     );
 
     if (

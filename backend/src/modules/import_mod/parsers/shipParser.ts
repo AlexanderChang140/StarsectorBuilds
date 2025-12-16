@@ -3,6 +3,8 @@ import fsp from 'fs/promises';
 import path from 'path';
 
 import { parse } from 'csv';
+import fg from 'fast-glob';
+import { parse as jparse } from 'jsonc-parser';
 
 import { prepareImage } from './imageParser.ts';
 import type { PreparedImage } from '../../images/types.ts';
@@ -106,11 +108,17 @@ export async function parseShips(
                 }),
             );
 
+        const shipDataById = await parseShipData(ctx);
+
         for await (const record of parser) {
             if (record.name.startsWith('#')) continue;
             if (!record.id) continue;
 
-            const prepared = await buildShip(record, ctx);
+            const prepared = await buildShip(
+                record,
+                shipDataById[record.id],
+                ctx,
+            );
             if (prepared === null) continue;
             const { preparedFullShip, preparedImage, preparedBuiltIn } =
                 prepared;
@@ -131,42 +139,8 @@ export async function parseShips(
     }
 }
 
-async function buildShip(
-    record: ShipRecord,
-    ctx: ParseContext,
-): Promise<{
-    preparedFullShip: PreparedFullShip;
-    preparedImage: PreparedImage | null;
-    preparedBuiltIn: PreparedBuiltIn;
-} | null> {
-    const code = record.id;
-
-    try {
-        const shipData = await parseShipData(code, ctx);
-        const preparedFullShip = prepareFullShip(record, shipData, ctx);
-
-        const preparedImage =
-            convertString(shipData.spriteName) != null
-                ? await prepareImage(ctx.fileDir, shipData.spriteName)
-                : null;
-
-        const preparedBuiltIn = prepareBuiltIn(shipData);
-
-        return {
-            preparedFullShip,
-            preparedImage,
-            preparedBuiltIn,
-        };
-    } catch (err) {
-        const formatted = new Error(`Failed to build ship: ${code}`, {
-            cause: err,
-        });
-        console.log(formatted);
-        return null;
-    }
-}
-
 type ShipData = {
+    hullId: string;
     builtInMods: string[];
     builtInWings: string[];
     builtInWeapons: Record<string, string>;
@@ -187,22 +161,69 @@ type WeaponSlot = {
 };
 
 async function parseShipData(
-    shipCode: string,
     ctx: ParseContext,
-): Promise<ShipData> {
+): Promise<Record<string, ShipData>> {
+    const filePath = path.join(ctx.fileDir, 'data', 'hulls');
+
     try {
-        const shipFilePath = path.join(
-            ctx.fileDir,
-            'data',
-            'hulls',
-            shipCode + '.ship',
+        const files = await fg(`**/*.ship`, {
+            cwd: filePath,
+            absolute: true,
+        });
+
+        const records = await Promise.all(
+            files.map(async (file) => jparse(await fsp.readFile(file, 'utf8'))),
         );
-        const raw = await fsp.readFile(shipFilePath, 'utf8');
-        return JSON.parse(raw);
+
+        const shipDataById: Record<string, ShipData> = {};
+        for (const record of records) {
+            shipDataById[record.hullId] = record;
+        }
+
+        return shipDataById;
     } catch (err) {
-        throw new Error(`Failed to parse ship file: ${shipCode}`, {
+        throw new Error(`Failed to parse ship data`, {
             cause: err,
         });
+    }
+}
+
+async function buildShip(
+    record: ShipRecord,
+    shipData: ShipData | undefined,
+    ctx: ParseContext,
+): Promise<{
+    preparedFullShip: PreparedFullShip;
+    preparedImage: PreparedImage | null;
+    preparedBuiltIn: PreparedBuiltIn;
+} | null> {
+    const code = record.id;
+
+    try {
+        if (!shipData) {
+            throw new Error(`Failed to find ship file: ${code} `);
+        }
+
+        const preparedFullShip = prepareFullShip(record, shipData, ctx);
+
+        const preparedImage =
+            convertString(shipData.spriteName) != null
+                ? await prepareImage(ctx.fileDir, shipData.spriteName)
+                : null;
+
+        const preparedBuiltIn = prepareBuiltIn(shipData);
+
+        return {
+            preparedFullShip,
+            preparedImage,
+            preparedBuiltIn,
+        };
+    } catch (err) {
+        const formatted = new Error(`Failed to build ship: ${code}`, {
+            cause: err,
+        });
+        console.log(formatted);
+        return null;
     }
 }
 

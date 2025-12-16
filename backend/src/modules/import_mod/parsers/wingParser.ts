@@ -41,8 +41,10 @@ type ParseContext = {
  */
 export async function parseWings(fileDir: string): Promise<{
     preparedWings: Record<string, PreparedFullWing>;
+    csvIdToShipCode: Record<string, string>;
 }> {
     const preparedWings: Record<string, PreparedFullWing> = {};
+    const csvIdToShipCode: Record<string, string> = {};
     const csvFilePath = path.join(fileDir, 'data', 'hulls', 'wing_data.csv');
 
     const ctx = { fileDir } as const;
@@ -58,19 +60,26 @@ export async function parseWings(fileDir: string): Promise<{
                 }),
             );
 
+        const variantDataById = await parseVariants(ctx);
+
         for await (const record of parser) {
             if (!record.id) continue;
             if (record.id.startsWith('#')) continue;
 
-            const prepared = await buildWing(record, ctx);
+            const prepared = await buildWing(
+                record,
+                variantDataById[record.variant],
+            );
             if (prepared === null) continue;
             const { preparedFullWing, code } = prepared;
 
             preparedWings[code] = preparedFullWing;
+            csvIdToShipCode[record.id] = code;
         }
 
         return {
             preparedWings,
+            csvIdToShipCode,
         };
     } catch (err) {
         throw new Error(`Failed to parse wings`, { cause: err });
@@ -79,7 +88,7 @@ export async function parseWings(fileDir: string): Promise<{
 
 async function buildWing(
     record: WingRecord,
-    ctx: ParseContext,
+    variantData: VariantData | undefined,
 ): Promise<{
     preparedFullWing: PreparedFullWing;
     code: string;
@@ -87,12 +96,11 @@ async function buildWing(
     const name = record.id;
 
     try {
-        const variantData = await parseWingVariant(record.variant, ctx);
-        const preparedFullWing = prepareFullWing(record, variantData);
 
-        if (!variantData.hullId) {
-            throw new Error('No hull ID found');
-        }
+        assertDefined(variantData, 'No variant found');
+        assertDefined(variantData.hullId, 'No hull ID found')
+        
+        const preparedFullWing = prepareFullWing(record, variantData);
 
         return {
             preparedFullWing,
@@ -109,6 +117,7 @@ async function buildWing(
 
 type VariantData = {
     hullId: string;
+    variantId: string;
     fluxVents: number;
     fluxCapacitors: number;
     hullmods: string[];
@@ -120,27 +129,28 @@ type WeaponGroup = {
     weapons: Record<string, string>;
 };
 
-async function parseWingVariant(
-    variant: string,
+async function parseVariants(
     ctx: ParseContext,
-): Promise<VariantData> {
+): Promise<Record<string, VariantData>> {
     try {
         const variantFilePath = path.join(ctx.fileDir, 'data', 'variants');
-        const files = await fg(`**/${variant}.variant`, {
+        const files = await fg(`**/*.variant`, {
             cwd: variantFilePath,
             absolute: true,
         });
 
-        assertDefined(
-            files[0],
-            `Failed to find wing variant file at: ${variantFilePath}`,
+        const records: VariantData[] = await Promise.all(
+            files.map(async (file) => jparse(await fsp.readFile(file, 'utf8'))),
         );
 
-        const raw = await fsp.readFile(files[0], 'utf8');
+        const variantDataByVariantId: Record<string, VariantData> = {};
+        for (const record of records) {
+            variantDataByVariantId[record.variantId] = record;
+        }
 
-        return jparse(raw);
+        return variantDataByVariantId;
     } catch (err) {
-        throw new Error(`Failed to parse wing variant: ${variant}`, {
+        throw new Error(`Failed to parse variants`, {
             cause: err,
         });
     }
