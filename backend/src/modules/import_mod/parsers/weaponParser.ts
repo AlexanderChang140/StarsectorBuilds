@@ -206,19 +206,33 @@ async function parseWeaponData(
     weaponCode: string,
     ctx: ParseContext,
 ): Promise<WeaponData> {
+    const primaryWeaponFilePath = path.join(
+        ctx.fileDir,
+        'data',
+        'weapons',
+        weaponCode + '.wpn',
+    );
+
+    const secondaryWeaponFilePath = path.join(
+        ctx.fileDir,
+        'data',
+        'shipsystems',
+        'wpn',
+        weaponCode + '.wpn',
+    );
+
     try {
-        const weaponFilePath = path.join(
-            ctx.fileDir,
-            'data',
-            'weapons',
-            weaponCode + '.wpn',
-        );
-        const raw = await fsp.readFile(weaponFilePath, 'utf8');
+        const raw = await fsp.readFile(primaryWeaponFilePath, 'utf8');
         return jparse(raw);
-    } catch (err) {
-        throw new Error(`Failed to parse weapon file: ${weaponCode}`, {
-            cause: err,
-        });
+    } catch {
+        try {
+            const raw = await fsp.readFile(secondaryWeaponFilePath, 'utf8');
+            return jparse(raw);
+        } catch (err) {
+            throw new Error(`Failed to parse weapon file: ${weaponCode}`, {
+                cause: err,
+            });
+        }
     }
 }
 
