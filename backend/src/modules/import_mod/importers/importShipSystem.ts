@@ -64,7 +64,7 @@ export async function importShipSystem(
                 mod_version_id: modInfo.modVersionId,
                 ship_system_id: shipSystemId,
                 ship_system_instance_id: shipSystemInstanceId,
-                image_id: imageId,
+                ship_system_image_id: imageId,
             },
             client,
         });

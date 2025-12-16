@@ -25,13 +25,13 @@ CREATE TABLE IF NOT EXISTS ship_system_versions
     mod_version_id integer NOT NULL,
     ship_system_id integer NOT NULL,
     ship_system_instance_id integer NOT NULL,
-    image_id integer,
+    ship_system_image_id integer,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, ship_system_id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_system_id) REFERENCES ship_systems(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_system_instance_id) REFERENCES ship_system_instances(id) ON DELETE CASCADE,
-    FOREIGN KEY (image_id) REFERENCES images(id)
+    FOREIGN KEY (ship_system_image_id) REFERENCES images(id)
 );
 
 CREATE TABLE IF NOT EXISTS ship_system_data

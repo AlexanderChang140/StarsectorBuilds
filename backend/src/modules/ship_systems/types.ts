@@ -29,7 +29,7 @@ export type InsertedShipSystemVersion = {
     mod_version_id: number;
     ship_system_id: number;
     ship_system_instance_id: number;
-    image_id: number | null;
+    ship_system_image_id: number | null;
 };
 
 export type ShipSystemData = InsertedShipSystemData;
