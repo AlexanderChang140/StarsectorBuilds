@@ -29,71 +29,86 @@ export async function importHullmods(
 
     let dataChanged = false;
     for (const [code, hullmod] of Object.entries(preparedFullHullmods)) {
-        const preparedImage = preparedImages[code] ?? null;
-        const image = buildImage(modInfo.modCode, 'hullmods', preparedImage);
+        try {
+            const preparedImage = preparedImages[code] ?? null;
+            const image = buildImage(
+                modInfo.modCode,
+                'hullmods',
+                preparedImage,
+            );
 
-        const imageId = image
-            ? (await insertImage({ record: image, returnKeys: ['id'], client }))
-                  .id
-            : null;
+            const imageId = image
+                ? (
+                      await insertImage({
+                          record: image,
+                          returnKeys: ['id'],
+                          client,
+                      })
+                  ).id
+                : null;
 
-        const hullmodId = (
-            await insertHullmod({
-                record: { mod_id: modInfo.modId, code: code },
-                returnKeys: ['id'],
-                client,
-            })
-        ).id;
+            const hullmodId = (
+                await insertHullmod({
+                    record: { mod_id: modInfo.modId, code: code },
+                    returnKeys: ['id'],
+                    client,
+                })
+            ).id;
 
-        const { id: hullmodInstanceId, inserted } = await insertHullmodInstance(
-            {
+            const { id: hullmodInstanceId, inserted } =
+                await insertHullmodInstance({
+                    record: {
+                        hullmod_id: hullmodId,
+                        ...hullmod.preparedHullmodInstance,
+                    },
+                    returnKeys: ['id'],
+                    client,
+                });
+            dataChanged ||= inserted;
+
+            await insertHullmodVersion({
                 record: {
+                    mod_version_id: modInfo.modVersionId,
                     hullmod_id: hullmodId,
-                    ...hullmod.preparedHullmodInstance,
+                    hullmod_instance_id: hullmodInstanceId,
+                    hullmod_image_id: imageId,
                 },
-                returnKeys: ['id'],
                 client,
-            },
-        );
-        dataChanged ||= inserted;
+            });
 
-        await insertHullmodVersion({
-            record: {
-                mod_version_id: modInfo.modVersionId,
-                hullmod_id: hullmodId,
-                hullmod_instance_id: hullmodInstanceId,
-                hullmod_image_id: imageId,
-            },
-            client,
-        });
+            if (!inserted) continue;
 
-        if (!inserted) continue;
+            await insertHullmodData({
+                record: {
+                    hullmod_instance_id: hullmodInstanceId,
+                    ...hullmod.preparedHullmodData,
+                },
+                client,
+            });
 
-        await insertHullmodData({
-            record: {
-                hullmod_instance_id: hullmodInstanceId,
-                ...hullmod.preparedHullmodData,
-            },
-            client,
-        });
+            insertJunctionItems(
+                hullmod.hullmodTags,
+                hullmodInstanceId,
+                insertHullmodTag,
+                insertHullmodTagJunction,
+                { instanceKey: 'hullmod_instance_id', itemKey: 'tag_id' },
+                client,
+            );
 
-        insertJunctionItems(
-            hullmod.hullmodTags,
-            hullmodInstanceId,
-            insertHullmodTag,
-            insertHullmodTagJunction,
-            { instanceKey: 'hullmod_instance_id', itemKey: 'tag_id' },
-            client,
-        );
-
-        insertJunctionItems(
-            hullmod.hullmodUiTags,
-            hullmodInstanceId,
-            insertHullmodUiTag,
-            insertHullmodUiTagJunction,
-            { instanceKey: 'hullmod_instance_id', itemKey: 'tag_id' },
-            client,
-        );
+            insertJunctionItems(
+                hullmod.hullmodUiTags,
+                hullmodInstanceId,
+                insertHullmodUiTag,
+                insertHullmodUiTagJunction,
+                { instanceKey: 'hullmod_instance_id', itemKey: 'tag_id' },
+                client,
+            );
+        } catch (err) {
+            const formatted = new Error(`Failed to insert hullmod: ${code}`, {
+                cause: err,
+            });
+            console.log(formatted);
+        }
     }
     console.log(`Successfully imported hullmods from: ${modInfo.modCode}`);
     return dataChanged;

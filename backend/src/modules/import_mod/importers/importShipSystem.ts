@@ -26,65 +26,81 @@ export async function importShipSystem(
     let dataChanged = false;
     for (const [code, shipSystem] of Object.entries(preparedFullShipSystems)) {
         const preparedImage = preparedImages[code] ?? null;
-        const image = buildImage(
-            modInfo.modCode,
-            'ship_systems',
-            preparedImage,
-        );
 
-        const imageId = image
-            ? (await insertImage({ record: image, returnKeys: ['id'], client }))
-                  .id
-            : null;
+        try {
+            const image = buildImage(
+                modInfo.modCode,
+                'ship_systems',
+                preparedImage,
+            );
 
-        const shipSystemId = (
-            await insertShipSystem({
+            const imageId = image
+                ? (
+                      await insertImage({
+                          record: image,
+                          returnKeys: ['id'],
+                          client,
+                      })
+                  ).id
+                : null;
+
+            const shipSystemId = (
+                await insertShipSystem({
+                    record: {
+                        mod_id: modInfo.modId,
+                        code,
+                    },
+                    returnKeys: ['id'],
+                    client,
+                })
+            ).id;
+
+            const { id: shipSystemInstanceId, inserted } =
+                await insertShipSystemInstance({
+                    record: {
+                        ship_system_id: shipSystemId,
+                        ...shipSystem.preparedShipSystemInstance,
+                    },
+                    returnKeys: ['id'],
+                    client,
+                });
+            dataChanged ||= inserted;
+
+            await insertShipSystemVersion({
                 record: {
-                    mod_id: modInfo.modId,
-                    code,
-                },
-                returnKeys: ['id'],
-                client,
-            })
-        ).id;
-
-        const { id: shipSystemInstanceId, inserted } =
-            await insertShipSystemInstance({
-                record: {
+                    mod_version_id: modInfo.modVersionId,
                     ship_system_id: shipSystemId,
-                    ...shipSystem.preparedShipSystemInstance,
+                    ship_system_instance_id: shipSystemInstanceId,
+                    ship_system_image_id: imageId,
                 },
-                returnKeys: ['id'],
                 client,
             });
-        dataChanged ||= inserted;
 
-        await insertShipSystemVersion({
-            record: {
-                mod_version_id: modInfo.modVersionId,
-                ship_system_id: shipSystemId,
-                ship_system_instance_id: shipSystemInstanceId,
-                ship_system_image_id: imageId,
-            },
-            client,
-        });
-
-        await insertShipSystemData({
-            record: {
-                ship_system_instance_id: shipSystemInstanceId,
-                ...shipSystem.preparedShipSystemData,
-            },
-            client,
-        });
-
-        if (shipSystem.preparedShipSystemDesc) {
-            await insertShipSystemDesc({
+            await insertShipSystemData({
                 record: {
                     ship_system_instance_id: shipSystemInstanceId,
-                    ...shipSystem.preparedShipSystemDesc,
+                    ...shipSystem.preparedShipSystemData,
                 },
                 client,
             });
+
+            if (shipSystem.preparedShipSystemDesc) {
+                await insertShipSystemDesc({
+                    record: {
+                        ship_system_instance_id: shipSystemInstanceId,
+                        ...shipSystem.preparedShipSystemDesc,
+                    },
+                    client,
+                });
+            }
+        } catch (err) {
+            const formatted = new Error(
+                `Failed to insert ship_system: ${code}`,
+                {
+                    cause: err,
+                },
+            );
+            console.log(formatted);
         }
     }
     console.log(`Successfully imported ship systems from: ${modInfo.modCode}`);
