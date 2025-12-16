@@ -16,8 +16,8 @@ export async function deleteMod(modCode: string) {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        await executeOrThrow(client, [query], [[modCode]]);
-        await execute(client, cleanupSequence());
+        await executeAll(client, [query], [[modCode]]);
+        await executeAll(client, CLEANUP_QUERIES);
         await client.query('COMMIT');
     } catch (err) {
         await client.query('ROLLBACK');
@@ -54,35 +54,37 @@ export async function deleteModVersion(
         AND minor = $3 
         AND patch = $4;
     `;
-    const client = await pool.connect();
     try {
-        await client.query('BEGIN');
-        await executeOrThrow(client, [query], [[modCode, major, minor, patch]]);
-        await execute(client, cleanupSequence());
-        await client.query('COMMIT');
+        await withTransaction(async (client) => {
+            await client.query(query, [modCode, major, minor, patch]);
+            await executeAll(client, CLEANUP_QUERIES);
+        });
     } catch (err) {
-        await client.query('ROLLBACK');
         throw new Error(
             `Failed to delete mod version: ${modCode} ${major}.${minor}.${patch}`,
             { cause: err },
         );
+    }
+}
+
+async function withTransaction<T>(
+    fn: (client: PoolClient) => Promise<T>,
+): Promise<T> {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const result = await fn(client);
+        await client.query('COMMIT');
+        return result;
+    } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
     } finally {
         client.release();
     }
 }
 
-async function execute(
-    client: PoolClient,
-    queries: string[],
-    values: (string | number)[][] = [],
-) {
-    for (const i in queries) {
-        const q = queries[i]!;
-        await client.query(q, values[i]);
-    }
-}
-
-async function executeOrThrow(
+async function executeAll(
     client: PoolClient,
     queries: string[],
     values: (string | number)[][] = [],
@@ -94,31 +96,24 @@ async function executeOrThrow(
 }
 
 export async function cleanup(): Promise<void> {
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
-        await execute(client, cleanupSequence());
-        await client.query('COMMIT');
-    } catch (err) {
-        await client.query('ROLLBACK');
-        throw err;
-    } finally {
-        client.release();
-    }
+    await withTransaction(async (client) => {
+        await executeAll(client, CLEANUP_QUERIES);
+    });
 }
 
-function cleanupSequence(): string[] {
-    return [
-        cleanupWeaponInstancesQuery(),
-        cleanupWeaponsQuery(),
-        cleanupImagesQuery(),
-        cleanupWeaponHintsQuery(),
-        cleanupWeaponTagsQuery(),
-        cleanupWeaponGroupsQuery(),
-        cleanupHullUiTagsQuery(),
-        cleanupShipTagsQuery(),
-    ];
-}
+/**
+ * Tables must be cleaned from most-dependent
+ * to least-dependent.
+ * Tags/groups/hints are fully independent.
+ */
+const CLEANUP_QUERIES = [
+    cleanupImagesQuery(),
+    cleanupWeaponHintsQuery(),
+    cleanupWeaponTagsQuery(),
+    cleanupWeaponGroupsQuery(),
+    cleanupHullUiTagsQuery(),
+    cleanupShipTagsQuery(),
+];
 
 interface TableReference {
     table: string;
@@ -158,23 +153,15 @@ function cleanupTablesQuery(
     return query;
 }
 
-function cleanupWeaponInstancesQuery(): string {
-    return cleanupTablesQuery('weapon_instances', 'id', [
-        { table: 'weapon_versions', column: 'weapon_instance_id' },
-    ]);
-}
-
-function cleanupWeaponsQuery(): string {
-    return cleanupTablesQuery('weapons', 'id', [
-        { table: 'weapon_instances', column: 'weapon_id' },
-    ]);
-}
-
 function cleanupImagesQuery(): string {
     return cleanupTablesQuery('images', 'id', [
         { table: 'weapon_versions', column: 'turret_image_id' },
+        { table: 'weapon_versions', column: 'turret_gun_image_id' },
         { table: 'weapon_versions', column: 'hardpoint_image_id' },
+        { table: 'weapon_versions', column: 'hardpoint_gun_image_id' },
+
         { table: 'hullmod_versions', column: 'hullmod_image_id' },
+        { table: 'ship_system_versions', column: 'ship_system_image_id' },
         { table: 'ship_versions', column: 'ship_image_id' },
     ]);
 }
