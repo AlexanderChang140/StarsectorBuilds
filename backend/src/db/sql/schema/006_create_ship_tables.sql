@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS ship_descs (
 
 CREATE TABLE IF NOT EXISTS ship_positions (
     ship_instance_id integer NOT NULL,
-    center integer[2],
+    center numeric[2],
     PRIMARY KEY (ship_instance_id),
     FOREIGN KEY (ship_instance_id) REFERENCES ship_instances(id) ON DELETE CASCADE
 );

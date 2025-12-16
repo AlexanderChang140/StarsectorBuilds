@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS weapon_stats
     flux_per_shot numeric,
     emp integer,
     impact integer,
-    turn_rate integer,
+    turn_rate numeric,
     op_cost integer,
     chargeup numeric,
     chargedown numeric,
