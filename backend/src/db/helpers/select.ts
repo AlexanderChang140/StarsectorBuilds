@@ -48,14 +48,15 @@ export async function select<
 }
 
 /**
- * Build a typed multi-row selector for a table.
+ * Build a typed select with optional allowed WHERE keys.
  *
  * @template TTable - Table name in the schema.
  * @template TSelection - Column keys to return from the table.
- * @template TWhere - Shape allowed in the WHERE clause (defaults to partial row).
+ * @template TWhereKey - Keys permitted in the WHERE clause.
  * @param table - Target table name.
  * @param selection - Readonly array of columns to return.
- * @returns Function that runs the select with optional where/client.
+ * @param allowedKeys - Optional whitelist for WHERE keys.
+ * @returns Function that executes select with optional where/client.
  */
 export function makeSelect<
     TTable extends keyof DB,
