@@ -1,7 +1,7 @@
-import type { ColumnOrder } from '../../../db/helpers/order.ts';
+import type { ColumnOrder } from '../../../db/fragments/order.ts';
 import type { ReqQuery } from '../../../types/generic.ts';
 import { parseSort } from '../../../utils/parser/sortParser.ts';
-import type { FullWeaponVersion } from '../types/combined.ts';
+import type { FullWeaponVersion } from '../types/view.ts';
 
 export const WEAPON_TABLE_KEYS = [
     'display_name',

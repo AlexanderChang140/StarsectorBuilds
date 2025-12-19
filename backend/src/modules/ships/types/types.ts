@@ -1,4 +1,4 @@
-import type { WithId } from '../../types/generic.ts';
+import type { WithId } from '../../../types/generic.ts';
 
 type ShipId = { ship_id: number };
 export type WithShipId<T> = T & ShipId;

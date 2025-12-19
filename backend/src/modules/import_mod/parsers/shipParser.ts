@@ -20,8 +20,8 @@ import type {
     PreparedShipStats,
     PreparedShipText,
     PreparedShipWeaponSlot,
-} from '../../ships/types.ts';
-import { isShieldType, isShipSize } from '../../ships/util/validate.ts';
+} from '../../ships/types/types.ts';
+import { isShieldType, isShipSize } from '../../ships/utils/validate.ts';
 import {
     convertString,
     convertDecimal,

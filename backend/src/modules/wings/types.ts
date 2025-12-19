@@ -1,5 +1,5 @@
 import type { WithId } from '../../types/generic.ts';
-import type { WithShipId } from '../ships/types.ts';
+import type { WithShipId } from '../ships/types/types.ts';
 
 export type WingId = { wing_id: number };
 export type WithWingId<T> = T & WingId;
@@ -47,8 +47,8 @@ export type PreparedWingData = {
     num_fighters: number | null;
     refit_time: number | null;
     base_value: number | null;
-    vents: number | null;
-    capacitors: number | null;
+    vents: number | null | undefined;
+    capacitors: number | null | undefined;
 };
 
 export type WingWeaponGroup = WithId<InsertedWingWeaponGroup>;

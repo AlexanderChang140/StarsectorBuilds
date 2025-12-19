@@ -12,16 +12,16 @@ import type {
     PreparedWeaponDesc,
     PreparedWeaponText,
 } from '../../weapons/types/desc.ts';
-import type { PreparedFullWeapon } from '../../weapons/types/instance.ts';
 import type {
     PreparedProjWeapon,
     PreparedAmmoWeapon,
     PreparedBeamWeapon,
 } from '../../weapons/types/projectile.ts';
 import type {
+    PreparedFullWeapon,
     PreparedWeaponSpecs,
     PreparedWeaponStats,
-} from '../../weapons/types/stats.ts';
+} from '../../weapons/types/types.ts';
 import {
     isDamageType,
     isWeaponSize,
