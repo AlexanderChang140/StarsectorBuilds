@@ -1,13 +1,30 @@
 import type { Entries, Order } from '../../types/generic.ts';
+import type { DB } from '../db.js';
 
 export type ColumnOrder<T> = Partial<Record<keyof T, Order>>;
 
-export function createOrder<T>(columns: ColumnOrder<T> | undefined): string {
-    if (!columns) return '';
+export function createOrderClause<TTable extends keyof DB>(
+    columns: ColumnOrder<DB[TTable]> | undefined,
+) {
+    if (columns === undefined || Object.keys(columns).length === 0) {
+        return '';
+    }
+
+    const fragment = createOrderFragment<TTable>(columns);
+    const clause = `ORDER BY ${fragment}`;
+    return clause;
+}
+
+export function createOrderFragment<TTable extends keyof DB>(
+    columns: ColumnOrder<DB[TTable]> | undefined,
+): string {
+    if (columns === undefined) {
+        return '';
+    }
 
     const columnFragments: string[] = [];
     for (const [col, order] of Object.entries(columns) as Entries<
-        ColumnOrder<T>
+        ColumnOrder<DB[TTable]>
     >) {
         columnFragments.push(`${String(col)} ${order}`);
     }
@@ -15,14 +32,14 @@ export function createOrder<T>(columns: ColumnOrder<T> | undefined): string {
     return clause;
 }
 
-export function createOrderWithAliases<T>(
-    aliases: Record<string, ColumnOrder<T> | undefined>,
+export function createOrderFragmentWithAliases<TTable extends keyof DB>(
+    aliases: Record<string, ColumnOrder<TTable> | undefined>,
 ): string {
     const columnFragments: string[] = [];
     for (const [alias, columns] of Object.entries(aliases)) {
         if (!columns) continue;
         for (const [column, order] of Object.entries(columns) as Entries<
-            ColumnOrder<T>
+            ColumnOrder<TTable>
         >)
             columnFragments.push(`${alias}.${String(column)} ${order}`);
     }

@@ -2,12 +2,7 @@ import type { PoolClient } from 'pg';
 
 import { pool } from '../db/client.ts';
 import { makeInsertReturn } from '../db/helpers/insert.ts';
-import {
-    type Mod,
-    type ModVersion,
-    type InsertedMod,
-    type InsertedModVersion,
-} from '../types/mod.ts';
+import type { ModVersion } from '../types/mod.ts';
 
 export async function getMod() {}
 
@@ -89,9 +84,11 @@ export async function setDataChanged(modVersionId: number, client: PoolClient) {
     await client.query(query, [modVersionId]);
 }
 
-export const insertMod = makeInsertReturn<InsertedMod, Mod>('mods', ['code']);
+export const insertMod = makeInsertReturn('mods', ['code']);
 
-export const insertModVersion = makeInsertReturn<
-    InsertedModVersion,
-    ModVersion
->('mod_versions', ['mod_id', 'major', 'minor', 'patch']);
+export const insertModVersion = makeInsertReturn('mod_versions', [
+    'mod_id',
+    'major',
+    'minor',
+    'patch',
+]);

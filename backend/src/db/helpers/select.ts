@@ -1,245 +1,347 @@
-import type { PoolClient, QueryResultRow } from 'pg';
+import type { PoolClient } from 'pg';
 
 import { pool } from '../client.ts';
+import type { DB, Generated } from '../db.js';
+import { type Filter, createFilterFragment } from './filter.ts';
+import type { SelectableRow } from '../../types/generic.ts';
+import { createFromClause } from '../fragments/from.ts';
+import { createLimitClause } from '../fragments/limit.ts';
+import { createOffsetClause } from '../fragments/offset.ts';
+import { createOrderClause, type ColumnOrder } from '../fragments/order.ts';
+import { createSelectClause } from '../fragments/select.ts';
+import { createWhereClause } from '../fragments/where.ts';
 
 /**
- * Retrieve multiple rows from a database table selecting only the specified columns.
+ * Select multiple rows with a typed column list.
  *
- * @template TRow - The full row type returned by the query (must extend QueryResultRow).
- * @template TSelection - Keys of TRow that should be selected (columns to include in the result).
- *
- * @param tableName - The name of the database table to query.
- * @param selection - An array of keys from TRow indicating which columns to return.
- * @param options - Optional settings for the query.
- * @param options.where - Partial object used to build the WHERE clause; only rows matching these column/value pairs are returned.
- * @param options.client - Optional database client to execute the query (useful for transactions).
- *
- * @returns A promise that resolves to an array of rows with only the selected columns (Pick<TRow, TSelection>[]).
- *
- * @throws Propagates any database/query errors thrown by the underlying client.
- *
- * @example
- * // Select all users, returning only the "id" and "email" columns:
- * const users = await select<UserRow, 'id' | 'email'>('users', ['id', 'email']);
- *
- * @example
- * // Select users with a specific status, returning only the "name" column:
- * const activeUsers = await select<UserRow, 'name'>('users', ['name'], { where: { status: 'active' } });
+ * @template TTable - Table name in the schema.
+ * @template TSelection - Column keys to return from the table.
+ * @param table - Target table name.
+ * @param selection - Readonly array of columns to return.
+ * @param options - Optional query settings (where filter, client override).
+ * @returns Rows containing only the requested columns.
  */
 export async function select<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
+    TTable extends keyof DB,
+    TSelection extends keyof SelectableRow<DB[TTable]>,
+    TWhereKeys extends keyof DB[TTable] = keyof DB[TTable],
 >(
-    tableName: string,
-    selection: TSelection[],
+    table: TTable,
+    selection: readonly TSelection[],
     options?: {
-        where?: Partial<TRow>;
-        client?: PoolClient;
+        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys> | undefined;
+        client?: PoolClient | undefined;
     },
-): Promise<Pick<TRow, TSelection>[]> {
-    const { where, client } = options || {};
-    const { values: whereValues } = where ? createWhereClause(where) : {};
-    const query = makeSelectQuery<TRow>(tableName, selection, options) + ';';
+) {
+    const { query: partial, values } = createSelectQuery(
+        table,
+        selection,
+        options,
+    );
+    const query = partial + ';';
 
-    const db = client ? client : pool;
-    const { rows } = await db.query<Pick<TRow, TSelection>>(query, whereValues);
+    const executor = options?.client ?? pool;
+    const { rows } = await executor.query<
+        Pick<SelectableRow<DB[TTable]>, TSelection>
+    >(query, values);
     return rows;
 }
 
 /**
- * Retrieve a single row from a database table selecting only the specified columns.
+ * Build a typed multi-row selector for a table.
  *
- * @template TRow - The full row type returned by the query (must extend QueryResultRow).
- * @template TSelection - Keys of TRow that should be selected (columns to include in the result).
+ * @template TTable - Table name in the schema.
+ * @template TSelection - Column keys to return from the table.
+ * @template TWhere - Shape allowed in the WHERE clause (defaults to partial row).
+ * @param table - Target table name.
+ * @param selection - Readonly array of columns to return.
+ * @returns Function that runs the select with optional where/client.
+ */
+export function makeSelect<
+    TTable extends keyof DB,
+    TSelection extends keyof SelectableRow<DB[TTable]>,
+    TWhereKey extends keyof SelectableRow<DB[TTable]> = keyof SelectableRow<
+        DB[TTable]
+    >,
+>(
+    table: TTable,
+    selection: readonly TSelection[],
+    allowedKeys?: readonly TWhereKey[],
+) {
+    return async (options?: {
+        where?: Pick<SelectableRow<DB[TTable]>, TWhereKey>;
+        client?: PoolClient | undefined;
+    }) => {
+        const allowed: Pick<SelectableRow<DB[TTable]>, TWhereKey> | undefined =
+            options?.where && allowedKeys
+                ? (Object.fromEntries(
+                      Object.entries(options.where).filter(([k]) =>
+                          allowedKeys.includes(k as TWhereKey),
+                      ),
+                  ) as Pick<SelectableRow<DB[TTable]>, TWhereKey>)
+                : options?.where;
+        return select(table, selection, { ...options, where: allowed });
+    };
+}
+
+const s = makeSelect('ship_instances', ['data_hash'], ['id']);
+s({ where: { id: 1 } });
+
+/**
+ * Select a single row with a typed column list.
  *
- * @param tableName - The name of the database table to query.
- * @param selection - An array of keys from TRow indicating which columns to return.
- * @param options - Optional settings for the query.
- * @param options.where - Partial object used to build the WHERE clause; only rows matching these column/value pairs are considered.
- * @param options.client - Optional database client to execute the query (useful for transactions).
- *
- * @returns A promise that resolves to a single row with only the selected columns (Pick<TRow, TSelection>) or undefined if no matching row is found.
- *
- * @throws Propagates any database/query errors thrown by the underlying client.
- *
- * @example
- * // Select a single user by id, returning only the "id" and "email" columns:
- * const user = await selectOne<UserRow, 'id' | 'email'>('users', ['id', 'email'], { where: { id: 1 } });
+ * @template TTable - Table name in the schema.
+ * @template TSelection - Column keys to return from the table.
+ * @param table - Target table name.
+ * @param selection - Readonly array of columns to return.
+ * @param options - Optional query settings (where filter, client override).
+ * @returns The matching row or undefined.
  */
 export async function selectOne<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
+    TTable extends keyof DB,
+    TSelection extends keyof SelectableRow<DB[TTable]>,
+    TWhereKeys extends keyof SelectableRow<DB[TTable]> = SelectableRow<
+        keyof DB[TTable]
+    >,
 >(
-    tableName: string,
-    selection: TSelection[],
+    table: TTable,
+    selection: readonly TSelection[],
     options?: {
-        where?: Partial<TRow>;
+        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys>;
         client?: PoolClient;
     },
-): Promise<Pick<TRow, TSelection> | undefined> {
-    const { where, client } = options || {};
-    const { values: whereValues } = where ? createWhereClause(where) : {};
-    const query =
-        makeSelectQuery<TRow>(tableName, selection, options) + 'LIMIT 1;';
+) {
+    const { query: partial, values } = createSelectQuery(
+        table,
+        selection,
+        options,
+    );
+    const query = partial + 'LIMIT 1;';
 
-    const db = client ? client : pool;
-    const { rows } = await db.query<Pick<TRow, TSelection>>(query, whereValues);
+    const executor = options?.client ?? pool;
+    const { rows } = await executor.query<
+        Pick<SelectableRow<DB[TTable]>, TSelection>
+    >(query, values);
     return rows[0];
 }
 
-function makeSelectQuery<T extends QueryResultRow>(
-    tableName: string,
-    selection: (keyof T)[],
+/**
+ * Build a typed single-row selector for a table.
+ *
+ * @template TTable - Table name in the schema.
+ * @template TSelection - Column keys to return from the table.
+ * @template TWhereKeys - Keys permitted in the WHERE clause (defaults to all keys).
+ * @param table - Target table name.
+ * @param selection - Readonly array of columns to return.
+ * @returns Function that runs the select with optional where/client.
+ */
+export function makeSelectOne<
+    TTable extends keyof DB,
+    TSelection extends keyof SelectableRow<DB[TTable]>,
+    TWhereKeys extends keyof SelectableRow<DB[TTable]> = keyof SelectableRow<
+        DB[TTable]
+    >,
+>(table: TTable, selection: readonly TSelection[]) {
+    return async (options?: {
+        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys>;
+        client?: PoolClient;
+    }) => selectOne(table, selection, options);
+}
+
+export async function selectExists<TTable extends keyof DB>(
+    table: TTable,
     options?: {
-        where?: Partial<T>;
+        where?: Partial<DB[TTable]>;
         client?: PoolClient;
     },
-): string {
-    const { where } = options || {};
+): Promise<boolean> {
+    const fromClause = createFromClause(table);
+    const { clause: whereClause, values } = createWhereClause(options?.where);
+
+    const query = `
+        SELECT EXISTS (
+            SELECT 1
+            ${fromClause}
+            ${whereClause}
+        );
+    `;
+    const result = await pool.query(query, values);
+    return result.rows[0]?.exists ?? false;
+}
+
+export function makeSelectExists<TTable extends keyof DB>(table: TTable) {
+    return async (options?: {
+        where?: Partial<DB[TTable]>;
+        client?: PoolClient;
+    }) => selectExists(table, options);
+}
+
+/**
+ * Run a full select with optional filter/order/pagination.
+ *
+ * @template TFilter - Shape of the filter input.
+ * @template TTable - Table name in the schema.
+ * @template TRow - Row type (defaults to DB[TTable]).
+ * @param table - Target table name.
+ * @param selection - Readonly array of columns to return.
+ * @param options - Optional filter/order/limit/offset/client settings.
+ * @returns Rows containing only the requested columns.
+ */
+export async function selectFull<
+    TFilter extends Filter,
+    TTable extends keyof DB,
+    TRow = DB[TTable],
+>(
+    table: TTable,
+    selection: readonly (keyof TRow)[],
+    options?: {
+        filter?: TFilter;
+        order?: ColumnOrder<TRow>;
+        limit?: number;
+        offset?: number;
+        client?: PoolClient;
+    },
+): Promise<Pick<TRow, (typeof selection)[number]>[]> {
     const selectClause = createSelectClause(selection);
-    const { fragment: whereFragment } = where ? createWhereClause(where) : {};
-    const whereClause = whereFragment ? `WHERE ${whereFragment}` : '';
+    const fromClause = createFromClause(table);
+
+    const { clause: filterFragment, params } = createFilterFragment(
+        options?.filter,
+    );
+    const filterClause = filterFragment ? `WHERE ${filterFragment}` : '';
+
+    const orderClause = createOrderClause(options?.order);
+
+    const limitClause = createLimitClause(options?.limit);
+    const offsetClause = createOffsetClause(options?.offset);
+
     const query = `
         ${selectClause}
-        FROM ${tableName}
-        ${whereClause}
+        ${fromClause}
+        ${filterClause}
+        ${orderClause}
+        ${limitClause}
+        ${offsetClause};
     `;
-    return query;
+
+    const executor = options?.client ? options.client : pool;
+    const result = await executor.query<Pick<TRow, (typeof selection)[number]>>(
+        query,
+        params,
+    );
+    return result.rows;
 }
 
-export function makeSelect<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
->(
-    table: string,
-    selection: TSelection[],
-): (options?: { client?: PoolClient }) => Promise<Pick<TRow, TSelection>[]>;
-
-export function makeSelect<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
-    TWhere extends Partial<TRow>,
->(
-    table: string,
-    selection: TSelection[],
-): (options: {
-    where: TWhere;
-    client?: PoolClient;
-}) => Promise<Pick<TRow, TSelection>[]>;
+/**
+ * Build a reusable full-select function with optional filter/order/pagination.
+ *
+ * @template TFilter - Shape of the filter input.
+ * @template TTable - Table name in the schema.
+ * @template TRow - Row type (defaults to DB[TTable]).
+ * @param table - Target table name.
+ * @param selection - Readonly array of columns to return.
+ * @returns Function that executes selectFull with optional settings.
+ */
+export async function makeSelectFull<
+    TFilter extends Filter,
+    TTable extends keyof DB,
+    TRow = DB[TTable],
+>(table: TTable, selection: readonly (keyof TRow)[]) {
+    return async (options?: {
+        filter?: TFilter;
+        order?: ColumnOrder<TRow>;
+        limit?: number;
+        offset?: number;
+        client?: PoolClient;
+    }) => selectFull(table, selection, options);
+}
 
 /**
- * Factory that creates a typed selector for retrieving multiple rows from a table.
+ * Higher-order helper that builds filtered select functions.
  *
- * @template TRow - The full row type returned by the query (must extend QueryResultRow).
- * @template TSelection - Keys of TRow that should be selected (columns to include in the result).
- * @template TWhere - Partial shape used for the WHERE clause; defaults to an empty partial of TRow.
- *
- * @param table - The name of the database table to query.
- * @param selection - An array of keys from TRow indicating which columns to return.
- *
- * @returns A function that accepts an options object:
- *  - where?: TWhere — an optional partial filter used to build the WHERE clause,
- *  - client?: PoolClient — an optional database client to execute the query (useful for transactions).
- * The returned function resolves to an array of Pick<TRow, TSelection> containing the selected columns.
- *
- * @throws Any errors thrown by the underlying select implementation are propagated.
+ * @template TFilter - Shape of the filter input.
+ * @returns Factory that accepts table and columns, producing a filtered select function.
  */
-export function makeSelect<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    TWhere extends Partial<TRow> = {},
->(table: string, selection: TSelection[]) {
-    return async (options?: {
-        where?: TWhere;
-        client?: PoolClient;
-    }): Promise<Pick<TRow, TSelection>[]> => {
-        return select<TRow, TSelection>(table, selection, options);
+export function makeSelectFullWithFilter<TFilter extends Filter>() {
+    return function <TTable extends keyof DB, TRow = DB[TTable]>(
+        table: TTable,
+        selection: readonly (keyof TRow)[],
+    ) {
+        return async (options?: {
+            filter?: TFilter;
+            order?: ColumnOrder<TRow>;
+            limit?: number;
+            offset?: number;
+            client?: PoolClient;
+        }) => {
+            return selectFull(table, selection, options);
+        };
     };
 }
 
-export function makeSelectOne<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
->(
-    table: string,
-    selection: TSelection[],
-): (options?: {
-    client?: PoolClient;
-}) => Promise<Pick<TRow, TSelection> | undefined>;
-
-export function makeSelectOne<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
-    TWhere extends Partial<TRow>,
->(
-    table: string,
-    selection: TSelection[],
-): (options: {
-    where: TWhere;
-    client?: PoolClient;
-}) => Promise<Pick<TRow, TSelection> | undefined>;
+type TableWithIdCode = {
+    [K in keyof DB]: DB[K] extends { id: Generated<number>; code: string }
+        ? K
+        : never;
+}[keyof DB];
 
 /**
- * Factory that creates a typed selector for retrieving a single row from a table.
+ * Select rows with id/code and map codes to ids.
  *
- * @template TRow - The full row type returned by the query (must extend QueryResultRow).
- * @template TSelection - Keys of TRow that should be selected (columns to include in the result).
- * @template TWhere - Partial shape used for the WHERE clause; defaults to an empty partial of TRow.
- *
- * @param table - The name of the database table to query.
- * @param selection - An array of keys from TRow indicating which columns to return.
- *
- * @returns A function that accepts an options object:
- *  - where?: TWhere — an optional partial filter used to build the WHERE clause,
- *  - client?: PoolClient — an optional database client to execute the query (useful for transactions).
- * The returned function resolves to a Pick<TRow, TSelection> containing the selected columns, or undefined if no matching row is found.
- *
- * @remarks
- * The produced function delegates to selectOne<TRow, TSelection>(...) internally and will surface any errors thrown by the underlying query execution.
+ * @template TTable - Table that has numeric id and string code columns.
+ * @param table - Target table name.
+ * @param client - Optional database client override.
+ * @returns Mapping of code to id.
  */
-export function makeSelectOne<
-    TRow extends QueryResultRow,
-    TSelection extends keyof TRow,
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    TWhere extends Partial<TRow> = {},
->(table: string, selection: TSelection[]) {
-    return async (options?: {
-        where?: TWhere;
-        client?: PoolClient;
-    }): Promise<Pick<TRow, TSelection> | undefined> => {
-        return selectOne<TRow, TSelection>(table, selection, options);
-    };
-}
-
-export async function selectCodeIdRecord(
-    tableName: string,
+export async function selectCodeIdRecord<TTable extends TableWithIdCode>(
+    table: TTable,
     client?: PoolClient,
 ) {
+    const selection = ['id', 'code'] as const;
     const options = client ? { client } : {};
-    const rows = await select(tableName, ['id', 'code'], options);
+    const rows = await select(table, selection, options);
     return rows.reduce((acc, row) => {
         acc[row.code] = row.id;
         return acc;
     }, {} as Record<string, number>);
 }
 
-export function makeSelectCodeIdRecord(tableName: string) {
-    return async (client?: PoolClient) => selectCodeIdRecord(tableName, client);
+/**
+ * Build a helper that returns the code→id map for a table.
+ *
+ * @template TTable - Table that has numeric id and string code columns.
+ * @param table - Target table name.
+ * @returns Function that executes selectCodeIdRecord with optional client.
+ */
+export function makeSelectCodeIdRecord<TTable extends TableWithIdCode>(
+    table: TTable,
+) {
+    return async (client?: PoolClient) => selectCodeIdRecord(table, client);
 }
 
-function createSelectClause<K>(values: K[]): string {
-    const fragment = `SELECT ${values.join(', ')}`;
-    return fragment;
-}
-
-function createWhereClause<T extends object>(
-    where: T,
-): { fragment: string; values: unknown[] } {
-    let i = 1;
-    const fragment = Object.keys(where)
-        .map((k) => `${k} = $${i++}`)
-        .join(' AND ');
-    const values = Object.values(where);
-    return { fragment, values };
+function createSelectQuery<
+    TTable extends keyof DB,
+    TSelection extends keyof SelectableRow<DB[TTable]>,
+    TWhereKeys extends keyof SelectableRow<DB[TTable]> = keyof SelectableRow<
+        DB[TTable]
+    >,
+>(
+    table: TTable,
+    selection: readonly TSelection[],
+    options?: {
+        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys> | undefined;
+        order?: ColumnOrder<DB[TTable]>;
+        limit?: number;
+        offset?: number;
+    },
+) {
+    const selectClause = createSelectClause(selection);
+    const fromClause = createFromClause(table);
+    const { clause: whereClause, values } = createWhereClause(options?.where);
+    const query = `
+        ${selectClause}
+        ${fromClause}
+        ${whereClause}
+    `;
+    return { query, values };
 }

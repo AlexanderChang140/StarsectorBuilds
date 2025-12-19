@@ -1,31 +1,16 @@
-import type {
-    ValidHullmodInstance,
-    InsertedHullmod,
-    Hullmod,
-    InsertedHullmodInstance,
-    HullmodInstance,
-    InsertedHullmodVersion,
-    HullmodVersion,
-    InsertedHullmodData,
-    HullmodData,
-    InsertedHullmodTagJunction,
-    HullmodTagJunction,
-    InsertedHullmodUiTagJunction,
-    HullmodUiTagJunction,
-} from './types.ts';
+import type { ValidHullmodInstance } from './types.ts';
 import { pool } from '../../db/client.ts';
 import {
-    createFilterWithAliases,
+    createFilterFragmentWithAliases,
     type Filter,
 } from '../../db/helpers/filter.ts';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import { makeSelectOne } from '../../db/helpers/select.ts';
-import type { Code, CodeTable } from '../../types/generic.ts';
 
 export async function getHullmodVersions(
     filter: Filter = {},
 ): Promise<ValidHullmodInstance[] | null> {
-    const { clause, params } = createFilterWithAliases({
+    const { clause, params } = createFilterFragmentWithAliases({
         hv: { mod_version_id: filter.mod_version_id },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         h: (({ mod_version_id, ...rest }) => rest)(filter),
@@ -57,47 +42,36 @@ export async function getHullmodVersions(
     return result.rows;
 }
 
-export const getHullmodId = makeSelectOne<Hullmod, 'id', Pick<Hullmod, 'code'>>(
+export const getHullmodId = makeSelectOne<'hullmods', 'id', 'code'>(
     'hullmods',
     ['id'],
 );
 
-export const insertHullmod = makeInsertReturn<InsertedHullmod, Hullmod>(
-    'hullmods',
-    ['mod_id', 'code'],
+export const insertHullmod = makeInsertReturn('hullmods', ['mod_id', 'code']);
+
+export const insertHullmodInstance = makeInsertReturn('hullmod_instances', [
+    'data_hash',
+]);
+
+export const insertHullmodVersion = makeInsertReturn('hullmod_versions', [
+    'mod_version_id',
+    'hullmod_id',
+]);
+
+export const insertHullmodData = makeInsertReturn('hullmod_data', [
+    'hullmod_instance_id',
+]);
+
+export const insertHullmodTag = makeInsertReturn('hullmod_tags', ['code']);
+
+export const insertHullmodTagJunction = makeInsertReturn(
+    'hullmod_tag_junction',
+    ['hullmod_instance_id', 'tag_id'],
 );
 
-export const insertHullmodInstance = makeInsertReturn<
-    InsertedHullmodInstance,
-    HullmodInstance
->('hullmod_instances', ['data_hash']);
+export const insertHullmodUiTag = makeInsertReturn('hullmod_ui_tags', ['code']);
 
-export const insertHullmodVersion = makeInsertReturn<
-    InsertedHullmodVersion,
-    HullmodVersion
->('hullmod_versions', ['mod_version_id', 'hullmod_id']);
-
-export const insertHullmodData = makeInsertReturn<
-    InsertedHullmodData,
-    HullmodData
->('hullmod_data', ['hullmod_instance_id']);
-
-export const insertHullmodTag = makeInsertReturn<Code, CodeTable>(
-    'hullmod_tags',
-    ['code'],
+export const insertHullmodUiTagJunction = makeInsertReturn(
+    'hullmod_ui_tag_junction',
+    ['hullmod_instance_id', 'tag_id'],
 );
-
-export const insertHullmodTagJunction = makeInsertReturn<
-    InsertedHullmodTagJunction,
-    HullmodTagJunction
->('hullmod_tag_junction', ['hullmod_instance_id', 'tag_id']);
-
-export const insertHullmodUiTag = makeInsertReturn<Code, CodeTable>(
-    'hullmod_ui_tags',
-    ['code'],
-);
-
-export const insertHullmodUiTagJunction = makeInsertReturn<
-    InsertedHullmodUiTagJunction,
-    HullmodUiTagJunction
->('hullmod_ui_junction', ['hullmod_instance_id', 'tag_id']);
