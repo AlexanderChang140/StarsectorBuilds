@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS ship_system_data
     PRIMARY KEY (ship_system_instance_id)
 );
 
-CREATE TABLE IF NOT EXISTS ship_system_desc
+CREATE TABLE IF NOT EXISTS ship_system_descs
 (
     ship_system_instance_id integer NOT NULL,
     text1 text,

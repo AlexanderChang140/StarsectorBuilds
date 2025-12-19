@@ -58,7 +58,7 @@ DROP TABLE IF EXISTS mount_types CASCADE;
 --
 
 -- Ship Systems
-DROP TABLE IF EXISTS ship_system_desc CASCADE;
+DROP TABLE IF EXISTS ship_system_descs CASCADE;
 DROP TABLE IF EXISTS ship_system_data CASCADE;
 DROP TABLE IF EXISTS ship_system_versions CASCADE;
 DROP TABLE IF EXISTS ship_system_instances CASCADE;

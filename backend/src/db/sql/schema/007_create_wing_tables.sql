@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS wing_instances
     data_hash varchar(256) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (data_hash),
-    FOREIGN KEY (ship_id) REFERENCES ships(id)
+    FOREIGN KEY (ship_id) REFERENCES ships(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS wing_versions
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS wing_weapons
     PRIMARY KEY (id),
     UNIQUE (wing_weapon_group_id, weapon_slot_code),
     FOREIGN KEY (wing_weapon_group_id) REFERENCES wing_weapon_groups(id) ON DELETE CASCADE,
-    FOREIGN KEY (weapon_id) REFERENCES weapons(id)
+    FOREIGN KEY (weapon_id) REFERENCES weapons(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS wing_tags

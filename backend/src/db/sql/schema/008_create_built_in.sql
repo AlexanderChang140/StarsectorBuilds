@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS built_in_weapons
     slot_code text NOT NULL,
     PRIMARY KEY (ship_instance_id, slot_code),
     FOREIGN KEY (ship_instance_id, slot_code) REFERENCES ship_weapon_slots(ship_instance_id, code) ON DELETE CASCADE,
-    FOREIGN KEY (weapon_id) REFERENCES weapons(id)
+    FOREIGN KEY (weapon_id) REFERENCES weapons(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS built_in_hullmods
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS built_in_hullmods
     hullmod_id integer NOT NULL,
     PRIMARY KEY (ship_instance_id, hullmod_id),
     FOREIGN KEY (ship_instance_id) REFERENCES ship_instances(id) ON DELETE CASCADE,
-    FOREIGN KEY (hullmod_id) REFERENCES hullmods(id)
+    FOREIGN KEY (hullmod_id) REFERENCES hullmods(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS built_in_wings
@@ -24,5 +24,5 @@ CREATE TABLE IF NOT EXISTS built_in_wings
     num_wings integer NOT NULL,
     PRIMARY KEY (ship_instance_id, ship_id),
     FOREIGN KEY (ship_instance_id) REFERENCES ship_instances(id) ON DELETE CASCADE,
-    FOREIGN KEY (ship_id) REFERENCES ships(id)
+    FOREIGN KEY (ship_id) REFERENCES ships(id) ON DELETE CASCADE
 );
