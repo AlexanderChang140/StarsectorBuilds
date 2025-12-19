@@ -1,4 +1,4 @@
-import type { WithWeaponInstanceId } from "./core.ts";
+import type { WithWeaponInstanceId } from "./types.ts";
 
 export type WeaponText = InsertedWeaponText;
 export type InsertedWeaponText = WithWeaponInstanceId<PreparedWeaponText>;

@@ -1,7 +1,6 @@
-import type { WeaponId, WeaponInstanceId } from './core.ts';
 import type { WeaponDesc, WeaponText } from './desc.ts';
 import type { AmmoWeapon, BeamWeapon, ProjWeapon } from './projectile.ts';
-import type { WeaponStats } from './stats.ts';
+import type { WeaponId, WeaponInstanceId, WeaponStats } from './types.ts';
 import type { Prettify } from '../../../types/generic.ts';
 
 export type FullWeaponVersion = Prettify<
