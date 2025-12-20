@@ -1,7 +1,10 @@
+import type { PoolClient } from 'pg';
 import type QueryString from 'qs';
 import type { ParsedQs } from 'qs';
 
 import type { ArrayType, Generated, Numeric } from '../db/db.js';
+import type { ColumnOrder } from '../db/fragments/order.ts';
+import type { Filter } from '../db/helpers/filter.ts';
 
 export type RenameKeys<T, M extends Record<string, string>> = {
     [K in keyof T as K extends keyof M ? M[K] : K]: T[K];
@@ -9,19 +12,9 @@ export type RenameKeys<T, M extends Record<string, string>> = {
 
 export type WithId<T> = T & { id: number };
 
-export type Id = {
-    id: number;
-};
-
 export type Inserted = {
     inserted: boolean;
 };
-
-export type Code = {
-    code: string;
-};
-
-export type CodeTable = Code & Id;
 
 export type Order = 'ASC' | 'DESC';
 
@@ -55,4 +48,12 @@ export type InsertableRow<T> = {
     [K in keyof T as T[K] extends { __insert__: never }
         ? never
         : K]?: InsertableValue<T[K]>;
+};
+
+export type Options<T> = {
+    filter?: Filter<T>;
+    order?: ColumnOrder<T>;
+    limit?: number;
+    offset?: number;
+    client?: PoolClient;
 };

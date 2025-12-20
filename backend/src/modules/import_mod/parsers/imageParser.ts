@@ -3,7 +3,9 @@ import path from 'path';
 
 import dotenv from 'dotenv';
 
-import type { InsertedImage, PreparedImage } from '../../images/types.ts';
+import type { DB } from '../../../db/db.js';
+import type { InsertableRow } from '../../../types/generic.ts';
+import type { PreparedImage } from '../../images/types.ts';
 import { hashImage } from '../util/hash.ts';
 
 dotenv.config();
@@ -26,7 +28,7 @@ export function buildImage(
     modCode: string,
     category: ImageCategories,
     preparedImage: PreparedImage | null,
-): InsertedImage | null {
+): InsertableRow<DB['images']> | null {
     if (!preparedImage) return null;
     const filePath = [modCode, category, preparedImage.file_hash].join('/') + '.png';
     copyImage(preparedImage.copy_path, filePath);

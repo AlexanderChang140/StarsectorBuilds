@@ -27,7 +27,7 @@ import {
     insertShipVersion,
     insertShipWeaponSlot,
 } from '../../ships/service.ts';
-import type { PreparedFullShip } from '../../ships/types/types.ts';
+import type { PreparedFullShip } from '../../ships/types.ts';
 import { getWeaponSizes, getWeaponTypes } from '../../weapons/service.ts';
 import { buildImage } from '../parsers/imageParser.ts';
 

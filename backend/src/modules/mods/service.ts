@@ -1,8 +1,8 @@
 import type { PoolClient } from 'pg';
 
-import { pool } from '../db/client.ts';
-import { makeInsertReturn } from '../db/helpers/insert.ts';
-import type { ModVersion } from '../types/mod.ts';
+import type { pool } from '../../db/client.ts';
+import type { DB } from '../../db/db.js';
+import type { makeInsertReturn } from '../../db/helpers/insert.ts';
 
 export async function getMod() {}
 
@@ -11,7 +11,7 @@ export async function getModVersion(
     major: number,
     minor: number,
     patch: string,
-): Promise<ModVersion | null> {
+): Promise<DB['mod_versions'] | null> {
     const query = `
         SELECT 
             id
@@ -27,7 +27,7 @@ export async function getModVersion(
             AND patch = $4
         LIMIT 1;
     `;
-    const result = await pool.query<ModVersion>(query, [
+    const result = await pool.query<DB['mod_versions']>(query, [
         code,
         major,
         minor,

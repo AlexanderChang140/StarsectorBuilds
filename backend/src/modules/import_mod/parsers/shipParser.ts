@@ -20,7 +20,7 @@ import type {
     PreparedShipStats,
     PreparedShipText,
     PreparedShipWeaponSlot,
-} from '../../ships/types/types.ts';
+} from '../../ships/types.ts';
 import { isShieldType, isShipSize } from '../../ships/utils/validate.ts';
 import {
     convertString,

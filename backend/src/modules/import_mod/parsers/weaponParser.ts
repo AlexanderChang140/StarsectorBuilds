@@ -9,19 +9,15 @@ import { prepareImage } from './imageParser.ts';
 import { allValuesNull } from '../../../utils/helpers.ts';
 import type { PreparedImage } from '../../images/types.ts';
 import type {
-    PreparedWeaponDesc,
-    PreparedWeaponText,
-} from '../../weapons/types/desc.ts';
-import type {
-    PreparedProjWeapon,
     PreparedAmmoWeapon,
     PreparedBeamWeapon,
-} from '../../weapons/types/projectile.ts';
-import type {
     PreparedFullWeapon,
+    PreparedProjWeapon,
+    PreparedWeaponDesc,
     PreparedWeaponSpecs,
     PreparedWeaponStats,
-} from '../../weapons/types/types.ts';
+    PreparedWeaponText,
+} from '../../weapons/types.ts';
 import {
     isDamageType,
     isWeaponSize,

@@ -4,8 +4,8 @@ import path from 'path';
 import { parse } from 'csv';
 
 import type { PreparedShipSystemDesc } from '../../ship_systems/types.ts';
-import type { PreparedShipDesc } from '../../ships/types/types.ts';
-import type { PreparedWeaponDesc } from '../../weapons/types/desc.ts';
+import type { PreparedShipDesc } from '../../ships/types.ts';
+import type { PreparedWeaponDesc } from '../../weapons/types.ts';
 import { convertString } from '../util/convert.ts';
 
 type DescriptionRecord = {

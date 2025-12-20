@@ -9,7 +9,7 @@ import {
     insertBuiltInWeapon,
     insertBuiltInWing,
 } from '../../ships/service.ts';
-import type { PreparedBuiltIn } from '../../ships/types/types.ts';
+import type { PreparedBuiltIn } from '../../ships/types.ts';
 import { getWeaponId } from '../../weapons/service.ts';
 
 export async function importBuiltIn(
