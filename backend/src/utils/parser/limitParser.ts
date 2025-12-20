@@ -1,9 +1,9 @@
 import type { ReqQuery } from '../../types/generic.ts';
 
-export function parseLimit(query: ReqQuery, maxLimit: number) {
+export function parseLimit(query: ReqQuery) {
     const rawLimit = query['limit'];
 
-    if (!rawLimit) return maxLimit;
+    if (!rawLimit) return 0;
     const limit = parseInt(String(rawLimit), 10);
-    return Math.max(0, Math.min(maxLimit, limit));
+    return isNaN(limit) ? 0 : limit;
 }

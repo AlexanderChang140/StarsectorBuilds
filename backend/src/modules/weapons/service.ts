@@ -1,11 +1,59 @@
-import type { WeaponFilter } from './types/filter.ts';
-import type { WeaponVersionsFull } from '../../db/db.js';
+import type { DB, WeaponVersionsFull } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
     makeSelectCodeIdRecord,
-    makeSelectFullWithFilter,
+    makeSelectFull,
     makeSelectOne,
 } from '../../db/helpers/select.ts';
+import type { Options } from '../../types/generic.ts';
+import {
+    sanitizeFilter,
+    sanitizeOrder,
+    sanitizeLimit,
+    sanitizeOffset,
+} from '../../utils/sanitize.ts';
+
+export const TABLE_WEAPON_FILTER_KEYS = [
+    'mod_version_id',
+    'weapon_size',
+    'weapon_type',
+    'damage_type',
+] as const satisfies (keyof DB['weapon_versions_full'])[];
+
+export async function fetchTableWeapons(
+    options: Options<DB['weapon_versions_full']>,
+) {
+    const safeOptions = {
+        filter: sanitizeFilter(options.filter, TABLE_WEAPON_FILTER_KEYS),
+        order: sanitizeOrder(options.order),
+        limit: sanitizeLimit(options.limit, 20),
+        offset: sanitizeOffset(options.offset),
+        client: options.client,
+    };
+
+    const result = await getWeaponVersionsFull(safeOptions);
+    const mapped = result?.map((row) => ({
+        ...row,
+        manufacturer: row.manufacturer ?? 'Common',
+    }));
+
+    return mapped;
+}
+
+export async function fetchWeaponVersionsById(weaponId: number) {
+    const filter = { weapon_id: [weaponId] };
+    const limit = 20;
+
+    const options = { filter, limit };
+    const result = await getWeaponVersionsFull(options);
+
+    const mapped = result?.map((row) => ({
+        ...row,
+        manufacturer: row.manufacturer ?? 'Common',
+    }));
+
+    return mapped[0] ?? null;
+}
 
 const WEAPON_VERSIONS_FULL_COLUMNS = [
     'weapon_version_id',
@@ -72,7 +120,7 @@ const WEAPON_VERSIONS_FULL_COLUMNS = [
     'groups',
 ] as const satisfies (keyof WeaponVersionsFull)[];
 
-export const getFullWeaponVersions = makeSelectFullWithFilter<WeaponFilter>()(
+export const getWeaponVersionsFull = makeSelectFull(
     'weapon_versions_full',
     WEAPON_VERSIONS_FULL_COLUMNS,
 );

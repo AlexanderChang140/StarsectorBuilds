@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 
-import { getFullWeaponVersions } from './service.ts';
-import { parseWeaponTableFilter } from './utils/weaponFilterParser.ts';
-import { parseWeaponTableSort } from './utils/weaponSortParser.ts';
+import { fetchTableWeapons, fetchWeaponVersionsById } from './service.ts';
+import { parseTableWeaponsFilter } from './utils/filterParser.ts';
+import { parseWeaponTableSort } from './utils/sortParser.ts';
 import { parseLimit } from '../../utils/parser/limitParser.ts';
 import { parseOffset } from '../../utils/parser/offsetParser.ts';
 
@@ -12,44 +12,35 @@ export async function getTableWeapons(
 ): Promise<void> {
     try {
         const query = req.query;
-        const filter = parseWeaponTableFilter(query);
+        const filter = parseTableWeaponsFilter(query);
         const order = parseWeaponTableSort(query);
-        const limit = parseLimit(query, 20);
+        const limit = parseLimit(query);
         const offset = parseOffset(query);
 
         const options = { filter, order, limit, offset };
-        const result = await getFullWeaponVersions(options);
+        const result = await fetchTableWeapons(options);
 
-        const mapped = result?.map((row) => ({
-            ...row,
-            manufacturer: row.manufacturer ?? 'Common',
-        }));
-
-        res.json(mapped);
+        res.json(result);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
     }
 }
 
-export async function getDisplayWeapon(
+export async function getWeaponVersions(
     req: Request,
     res: Response,
 ): Promise<void> {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const weaponId = parseInt(req.params.weaponId ?? '', 10);
+
+        if (isNaN(weaponId)) {
             res.status(400).json({ error: 'Invalid weapon ID' });
             return;
         }
 
-        const filter = { weapon_id: [id] };
-        const result = await getFullWeaponVersions({ filter });
-        const mapped = result?.map((row) => ({
-            ...row,
-            manufacturer: row.manufacturer ?? 'Common',
-        }));
-        res.json(mapped);
+        const result = await fetchWeaponVersionsById(weaponId);
+        res.json(result);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });

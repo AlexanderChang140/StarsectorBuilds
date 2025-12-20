@@ -1,19 +1,29 @@
+import type { Filter } from '../../db/helpers/filter.ts';
 import type { ReqQuery } from '../../types/generic.ts';
+import { remapKeys, removeNull, removeUndefined } from '../helpers.ts';
 
 export function parseFilter<T>(
     query: ReqQuery,
-    filterKeys: (keyof T)[],
-    mapping: (key: keyof T, values: unknown[]) => T[keyof T],
-): T {
-    const filter: Partial<T> = {};
+    keyMap: Record<string, keyof T>,
+    valMap: (values: unknown[]) => (string | number)[],
+): Filter<T> {
+    const validated: Record<string, unknown> = removeNull(
+        removeUndefined(remapKeys(query, keyMap)),
+    );
 
-    for (const key of filterKeys) {
-        const value = query[key as string];
-        if (!value) continue;
+    const filter = Object.fromEntries(
+        Object.entries(validated).map(([k, v]) => {
+            const value = valMap(Array.isArray(v) ? v : [v]);
+            return [k, value];
+        }),
+    ) as Filter<T>;
 
-        const values = Array.isArray(value) ? value : [value];
-        filter[key] = mapping(key, values);
-    }
+    return filter;
+}
 
-    return filter as T;
+export function parseIntArray(values: unknown[]): number[] {
+    return values
+        .filter((v) => typeof v === 'string')
+        .map((v) => parseInt(v, 10))
+        .filter(Number.isFinite);
 }

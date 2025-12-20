@@ -1,7 +1,7 @@
+import type { WeaponVersionsFull } from '../../../db/db.js';
 import type { ColumnOrder } from '../../../db/fragments/order.ts';
 import type { ReqQuery } from '../../../types/generic.ts';
 import { parseSort } from '../../../utils/parser/sortParser.ts';
-import type { FullWeaponVersion } from '../types/view.ts';
 
 export const WEAPON_TABLE_KEYS = [
     'display_name',
@@ -33,10 +33,10 @@ export const WEAPON_TABLE_KEYS = [
     'spread_per_shot',
     'spread_decay_per_second',
     'base_value',
-] as const satisfies (keyof FullWeaponVersion)[];
+] as const satisfies (keyof WeaponVersionsFull)[];
 
 export function parseWeaponTableSort(
     query: ReqQuery,
-): ColumnOrder<FullWeaponVersion> {
-    return parseSort<FullWeaponVersion>(query, WEAPON_TABLE_KEYS);
+): ColumnOrder<WeaponVersionsFull> {
+    return parseSort<WeaponVersionsFull>(query, WEAPON_TABLE_KEYS);
 }
