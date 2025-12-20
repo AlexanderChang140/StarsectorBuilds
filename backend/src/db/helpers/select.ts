@@ -189,7 +189,7 @@ export function makeSelectExists<TTable extends keyof DB>(table: TTable) {
  * @returns Rows containing only the requested columns.
  */
 export async function selectFull<
-    TFilter extends Filter,
+    TFilter extends Filter<TRow>,
     TTable extends keyof DB,
     TRow = DB[TTable],
 >(
@@ -244,7 +244,7 @@ export async function selectFull<
  * @returns Function that executes selectFull with optional settings.
  */
 export function makeSelectFull<
-    TFilter extends Filter,
+    TFilter extends Filter<TRow>,
     TTable extends keyof DB,
     TRow = DB[TTable],
 >(table: TTable, selection: readonly (keyof TRow)[]) {
@@ -257,13 +257,15 @@ export function makeSelectFull<
     }) => selectFull(table, selection, options);
 }
 
+
 /**
  * Higher-order helper that builds filtered select functions.
  *
  * @template TFilter - Shape of the filter input.
  * @returns Factory that accepts table and columns, producing a filtered select function.
  */
-export function makeSelectFullWithFilter<TFilter extends Filter>() {
+/*
+export function makeSelectFullWithFilter<TFilter extends Filter<TRow>, TRow>() {
     return function <TTable extends keyof DB, TRow = DB[TTable]>(
         table: TTable,
         selection: readonly (keyof TRow)[],
@@ -279,6 +281,7 @@ export function makeSelectFullWithFilter<TFilter extends Filter>() {
         };
     };
 }
+*/
 
 type TableWithIdCode = {
     [K in keyof DB]: DB[K] extends { id: Generated<number>; code: string }
