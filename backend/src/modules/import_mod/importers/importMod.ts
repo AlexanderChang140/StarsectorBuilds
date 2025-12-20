@@ -7,11 +7,7 @@ import { importShipSystem } from './importShipSystem.ts';
 import { importWeapons } from './importWeapons.ts';
 import { importWings } from './importWings.ts';
 import { pool } from '../../../db/client.ts';
-import {
-    insertMod,
-    insertModVersion,
-    setDataChanged,
-} from '../../../services/modService.ts';
+import { insertMod, insertModVersion, setDataChanged } from '../../mods/service.ts';
 import {
     parseDescriptions,
     type Descriptions,
