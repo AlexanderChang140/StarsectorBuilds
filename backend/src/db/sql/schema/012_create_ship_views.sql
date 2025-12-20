@@ -96,9 +96,5 @@ LEFT JOIN ship_positions spo ON si.id = spo.ship_instance_id
 LEFT JOIN shield_stats sst ON si.id = sst.ship_instance_id
 LEFT JOIN phase_stats ps ON si.id = ps.ship_instance_id
 LEFT JOIN ship_meta sm ON si.id = sm.ship_instance_id
-LEFT JOIN ship_weapon_slots sws ON si.id = sws.ship_instance_id
-LEFT JOIN weapon_sizes ws ON sws.weapon_size_id = ws.id
-LEFT JOIN weapon_types wt ON sws.weapon_type_id = wt.id
-LEFT JOIN mount_types mt ON sws.mount_type_id = mt.id
 WHERE NOT ssi.code = 'FIGHTER'
 AND NOT (coalesce(sm.hints, '{}') && ARRAY['HIDE_IN_CODEX', 'MODULE', 'STATION'])

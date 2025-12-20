@@ -16,6 +16,7 @@ WITH weapon_meta AS (
 )
 SELECT
     wv.id AS weapon_version_id,
+    w.code as weapon_code,
     ti.file_path AS turret_image_file_path,
     tgi.file_path AS turret_gun_image_file_path,
 
@@ -85,6 +86,7 @@ SELECT
     wm.tags,
     wm.groups
 FROM weapon_versions wv
+LEFT JOIN weapons w ON wv.weapon_id = w.id
 LEFT JOIN images ti ON wv.turret_image_id = ti.id
 LEFT JOIN images tgi ON wv.turret_gun_image_id = tgi.id
 LEFT JOIN mod_versions mv ON wv.mod_version_id = mv.id

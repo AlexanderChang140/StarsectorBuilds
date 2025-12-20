@@ -623,6 +623,7 @@ export interface WeaponVersionsFull {
   turn_rate_str: string | null;
   turret_gun_image_file_path: string | null;
   turret_image_file_path: string | null;
+  weapon_code: string | null;
   weapon_id: number | null;
   weapon_instance_id: number | null;
   weapon_range: number | null;
