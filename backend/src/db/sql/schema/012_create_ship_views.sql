@@ -13,6 +13,7 @@ WITH ship_meta AS (
 )
 SELECT
     sv.id AS ship_version_id,
+    s.code AS ship_code,
     i.file_path AS ship_image_file_path,
 
     mv.id as mod_version_id,
@@ -76,8 +77,9 @@ SELECT
     ps.upkeep AS phase_upkeep,
 
     sm.hints,
-    sm.tags,
+    sm.tags
 FROM ship_versions sv
+LEFT JOIN ships s ON sv.ship_id = s.id
 LEFT JOIN images i ON sv.ship_image_id = i.id
 LEFT JOIN mod_versions mv ON sv.mod_version_id = mv.id
 LEFT JOIN mods m ON mv.mod_id = m.id
@@ -94,12 +96,9 @@ LEFT JOIN ship_positions spo ON si.id = spo.ship_instance_id
 LEFT JOIN shield_stats sst ON si.id = sst.ship_instance_id
 LEFT JOIN phase_stats ps ON si.id = ps.ship_instance_id
 LEFT JOIN ship_meta sm ON si.id = sm.ship_instance_id
-LEFT JOIN ship_weapon_slots sws ON si.id = sws.ship_id
-LEFT JOIN weapon_size ws ON sws.weapon_size_id = ws.id
-LEFT JOIN weapon_type wt ON sws.weapon_type_id = wt.id
-LEFT JOIN mount_type mt ON sws.mount_type_id = mt.id
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM wing_versions wv
-  WHERE si.id = wv.ship_id
-) AND NOT ('HIDE_IN_CODEX' = ANY(sm.hints));
+LEFT JOIN ship_weapon_slots sws ON si.id = sws.ship_instance_id
+LEFT JOIN weapon_sizes ws ON sws.weapon_size_id = ws.id
+LEFT JOIN weapon_types wt ON sws.weapon_type_id = wt.id
+LEFT JOIN mount_types mt ON sws.mount_type_id = mt.id
+WHERE NOT ssi.code = 'FIGHTER'
+AND NOT (coalesce(sm.hints, '{}') && ARRAY['HIDE_IN_CODEX', 'MODULE', 'STATION'])

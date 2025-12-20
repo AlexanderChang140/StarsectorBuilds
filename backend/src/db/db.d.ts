@@ -418,6 +418,7 @@ export interface ShipVersionsFull {
   shield_type: string | null;
   shield_type_id: number | null;
   shield_upkeep: Numeric | null;
+  ship_code: string | null;
   ship_id: number | null;
   ship_image_file_path: string | null;
   ship_instance_id: number | null;
