@@ -22,7 +22,6 @@ async function main() {
             console.log('Imported mod');
             pool.end();
             break;
-
         case 'vanilla':
             if (
                 args.length != 4 ||
@@ -49,6 +48,7 @@ async function main() {
         default:
             console.log('Unknown command:', command);
             console.log('Available commands: mod, vanilla');
+            pool.end()
     }
 }
 
