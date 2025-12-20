@@ -200,7 +200,7 @@ export async function selectFull<
         order?: ColumnOrder<TRow>;
         limit?: number;
         offset?: number;
-        client?: PoolClient;
+        client?: PoolClient | undefined;
     },
 ): Promise<Pick<TRow, (typeof selection)[number]>[]> {
     const selectClause = createSelectClause(selection);
@@ -243,7 +243,7 @@ export async function selectFull<
  * @param selection - Readonly array of columns to return.
  * @returns Function that executes selectFull with optional settings.
  */
-export async function makeSelectFull<
+export function makeSelectFull<
     TFilter extends Filter,
     TTable extends keyof DB,
     TRow = DB[TTable],
@@ -253,7 +253,7 @@ export async function makeSelectFull<
         order?: ColumnOrder<TRow>;
         limit?: number;
         offset?: number;
-        client?: PoolClient;
+        client?: PoolClient | undefined;
     }) => selectFull(table, selection, options);
 }
 
