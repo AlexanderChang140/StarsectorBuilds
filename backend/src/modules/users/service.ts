@@ -1,56 +1,10 @@
-import crypto from 'crypto';
+import { makeInsertReturn } from '../../db/helpers/insert.ts';
+import { makeSelectExists } from '../../db/helpers/select.ts';
 
-import argon2 from 'argon2';
+export const usernameExists = makeSelectExists('users');
 
-import { pool } from '../../db/client.ts';
+export const insertUser = makeInsertReturn('users');
 
-export const users = new Map<string, string>();
-export const sessions = new Map<string, string>();
+export const insertBuild = makeInsertReturn('builds');
 
-export async function signup(username: string, password: string) {
-    const hash = await argon2.hash(password, {
-        type: argon2.argon2id,
-        memoryCost: 2 ** 16,
-        timeCost: 3,
-        parallelism: 1,
-        hashLength: 16,
-    });
-    if (users.has(username)) {
-        return null;
-    }
-    users.set(username, hash);
-    return createToken(username);
-}
-
-export async function login(username: string, password: string) {
-    const hash = users.get(username);
-    if (hash && (await argon2.verify(hash, password))) {
-        return createToken(username);
-    }
-}
-
-export async function logout(token: string) {
-    sessions.delete(token);
-}
-
-export async function validateSession(token: string) {
-    return sessions.get(token);
-}
-
-function createToken(username: string) {
-    const token = crypto.randomBytes(32).toString('hex');
-    sessions.set(token, username);
-    return token;
-}
-
-export async function usernameExists(username: string) {
-    const query = `
-        SELECT EXISTS (
-            SELECT 1
-            FROM users
-            WHERE username = $1
-        );
-    `;
-    const result = await pool.query(query, [username]);
-    return result.rows[0]?.exists ?? false;
-}
+export const insertBuildComment = makeInsertReturn('build_comments')

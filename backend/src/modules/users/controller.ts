@@ -6,7 +6,7 @@ import {
     login as Slogin,
     logout as Slogout,
     validateSession,
-} from './service.ts';
+} from './auth.ts';
 
 dotenv.config();
 
