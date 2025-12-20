@@ -1,12 +1,106 @@
-import type { ShipFilter } from './types/filter.ts';
 import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
     makeSelect,
     makeSelectCodeIdRecord,
-    makeSelectFullWithFilter,
+    makeSelectFull,
     makeSelectOne,
 } from '../../db/helpers/select.ts';
+import type { Options } from '../../types/generic.ts';
+import {
+    sanitizeFilter,
+    sanitizeLimit,
+    sanitizeOffset,
+    sanitizeOrder,
+} from '../../utils/sanitize.ts';
+
+export const TABLE_SHIP_FILTER_KEYS = [
+    'mod_version_id',
+    'ship_size',
+] as const satisfies readonly (keyof DB['ship_versions_full'])[];
+
+export async function fetchTableShips(
+    options: Options<DB['ship_versions_full']>,
+) {
+    const safeOptions = {
+        filter: sanitizeFilter(options.filter, TABLE_SHIP_FILTER_KEYS),
+        order: sanitizeOrder(options.order),
+        limit: sanitizeLimit(options.limit, 20),
+        offset: sanitizeOffset(options.offset),
+        client: options.client,
+    };
+
+    const result = await getShipVersionsFull(safeOptions);
+    const mapped = result?.map((row) => ({
+        ...row,
+        manufacturer: row.manufacturer ?? 'Common',
+    }));
+
+    return mapped;
+}
+
+export async function fetchShipVersions(shipId: number) {
+    const filter = { ship_id: [shipId] };
+    const limit = 20;
+
+    const options = { filter, limit };
+    const result = await getShipVersionsFull(options);
+
+    const mapped = result?.map((row) => ({
+        ...row,
+        manufacturer: row.manufacturer ?? 'Common',
+    }));
+
+    return mapped;
+}
+
+export async function fetchShipVersion(shipVersionId: number) {
+    const filter = { ship_version_id: [shipVersionId] };
+    const limit = 1;
+
+    const options = { filter, limit };
+    const result = await getShipVersionsFull(options);
+
+    const mapped = result?.map((row) => ({
+        ...row,
+        manufacturer: row.manufacturer ?? 'Common',
+    }));
+
+    return mapped[0] ?? null;
+}
+
+export async function fetchShipInstanceId(shipVersionId: number) {
+    const result = await getShipInstanceId({ where: { id: shipVersionId } });
+    return result[0]?.ship_instance_id ?? null;
+}
+
+export async function fetchShipWeaponSlots(shipInstanceId: number) {
+    return getShipWeaponSlots({ where: { ship_instance_id: shipInstanceId } });
+}
+
+export const getShipInstanceId = makeSelect(
+    'ship_versions',
+    ['ship_instance_id'],
+    ['id'],
+);
+
+const SHIP_WEAPON_SLOT_COLUMNS = [
+    'angle',
+    'arc',
+    'code',
+    'id',
+    'mount_type_id',
+    'position',
+    'ship_instance_id',
+    'weapon_size_id',
+    'weapon_type_id',
+] as const satisfies (keyof DB['ship_weapon_slots'])[];
+
+export const getShipWeaponSlots = makeSelect(
+    'ship_weapon_slots',
+    SHIP_WEAPON_SLOT_COLUMNS,
+    ['ship_instance_id'],
+);
 
 const SHIP_VERSIONS_FULL_COLUMNS = [
     'ship_version_id',
@@ -76,7 +170,7 @@ const SHIP_VERSIONS_FULL_COLUMNS = [
     'tags',
 ] as const satisfies (keyof DB['ship_versions_full'])[];
 
-export const getShipVersionsFull = makeSelectFullWithFilter<ShipFilter>()(
+export const getShipVersionsFull = makeSelectFull(
     'ship_versions_full',
     SHIP_VERSIONS_FULL_COLUMNS,
 );
@@ -84,24 +178,6 @@ export const getShipVersionsFull = makeSelectFullWithFilter<ShipFilter>()(
 export const getShipId = makeSelectOne<'ships', 'id', 'mod_id' | 'code'>(
     'ships',
     ['id'],
-);
-
-const SHIP_WEAPON_SLOT_COLUMNS = [
-    'angle',
-    'arc',
-    'code',
-    'id',
-    'mount_type_id',
-    'position',
-    'ship_instance_id',
-    'weapon_size_id',
-    'weapon_type_id',
-] as const satisfies (keyof DB['ship_weapon_slots'])[];
-
-export const getShipWeaponSlots = makeSelect(
-    'ship_weapon_slots',
-    SHIP_WEAPON_SLOT_COLUMNS,
-    ['ship_instance_id'],
 );
 
 export const getMountTypes = makeSelectCodeIdRecord('mount_types');
