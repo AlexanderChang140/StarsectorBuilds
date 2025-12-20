@@ -1,8 +1,8 @@
 import type { PoolClient } from 'pg';
 
-import type { pool } from '../../db/client.ts';
+import { pool } from '../../db/client.ts';
 import type { DB } from '../../db/db.js';
-import type { makeInsertReturn } from '../../db/helpers/insert.ts';
+import { makeInsertReturn } from '../../db/helpers/insert.ts';
 
 export async function getMod() {}
 
