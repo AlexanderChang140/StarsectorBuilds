@@ -96,6 +96,29 @@ export async function insert<TTable extends keyof DB>(
  * @template TTable - Target table name.
  * @param table - Table to insert into.
  * @param conflictKeys - Columns that trigger conflict handling.
+ * @returns Function that runs the insert with optional client.
+ */
+export function makeInsert<TTable extends keyof DB>(
+    table: TTable,
+    conflictKeys?: (keyof InsertableRow<DB[TTable]>)[] | undefined,
+) {
+    return async (args: {
+        record: InsertableRow<DB[TTable]>;
+        client?: PoolClient | undefined;
+    }): Promise<SelectableRow<DB[TTable]> & Inserted> => {
+        return insert(table, {
+            ...args,
+            conflictKeys,
+        });
+    };
+}
+
+/**
+ * Build a typed insert helper with conflict handling.
+ *
+ * @template TTable - Target table name.
+ * @param table - Table to insert into.
+ * @param conflictKeys - Columns that trigger conflict handling.
  * @returns Function that runs the insert with optional return keys/client.
  */
 export function makeInsertReturn<TTable extends keyof DB>(
