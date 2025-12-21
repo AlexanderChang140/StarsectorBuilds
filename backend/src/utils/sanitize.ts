@@ -5,8 +5,18 @@ import type { Order } from '../types/generic.ts';
 export function sanitizeFilter<T>(
     filter: Partial<T> | undefined,
     keys: readonly (keyof T)[],
-) {
-    return filterKeys(filter ?? {}, keys);
+): Partial<T> {
+    const filtered = filterKeys(filter ?? {}, keys);
+    const sanitized = Object.fromEntries(
+        Object.entries(filtered).filter(
+            ([, v]) =>
+                v !== undefined &&
+                v !== null &&
+                (!Array.isArray(v) || v.length !== 0),
+        ),
+    ) as Partial<T>;
+
+    return sanitized;
 }
 
 export function sanitizeOrder(order: Record<string, Order> | undefined) {

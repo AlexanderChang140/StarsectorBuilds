@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 
-import { fetchTableWeapons, fetchWeaponVersionsById } from './service.ts';
+import { fetchTableWeapons, fetchWeaponVersions } from './service.ts';
 import { parseTableWeaponsFilter } from './utils/filterParser.ts';
 import { parseWeaponTableSort } from './utils/sortParser.ts';
 import { parseLimit } from '../../utils/parser/limitParser.ts';
@@ -19,7 +19,7 @@ export async function getTableWeapons(
 
         const options = { filter, order, limit, offset };
         const result = await fetchTableWeapons(options);
-
+        console.log('CONTROLLER', options)
         res.json(result);
     } catch (err) {
         console.error(err);
@@ -39,7 +39,7 @@ export async function getWeaponVersions(
             return;
         }
 
-        const result = await fetchWeaponVersionsById(weaponId);
+        const result = await fetchWeaponVersions(weaponId);
         res.json(result);
     } catch (err) {
         console.error(err);

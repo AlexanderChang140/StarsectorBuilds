@@ -1,14 +1,13 @@
 import type { Filter } from '../../db/helpers/filter.ts';
 import type { ReqQuery } from '../../types/generic.ts';
-import { remapKeys, removeNull, removeUndefined } from '../helpers.ts';
+import { removeNull, removeUndefined } from '../helpers.ts';
 
 export function parseFilter<T>(
     query: ReqQuery,
-    keyMap: Record<string, keyof T>,
     valMap: (values: unknown[]) => (string | number)[],
 ): Filter<T> {
     const validated: Record<string, unknown> = removeNull(
-        removeUndefined(remapKeys(query, keyMap)),
+        removeUndefined(query),
     );
 
     const filter = Object.fromEntries(

@@ -8,7 +8,7 @@ router.get('/table', (req, res) => {
     getTableWeapons(req, res);
 });
 
-router.get('/:weaponId', (req, res) => {
+router.get('/:weaponId/versions', (req, res) => {
     getWeaponVersions(req, res);
 });
 

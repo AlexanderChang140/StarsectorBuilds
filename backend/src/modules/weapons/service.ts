@@ -15,9 +15,9 @@ import {
 
 export const TABLE_WEAPON_FILTER_KEYS = [
     'mod_version_id',
-    'weapon_size',
-    'weapon_type',
-    'damage_type',
+    'weapon_size_id',
+    'weapon_type_id',
+    'damage_type_id',
 ] as const satisfies (keyof DB['weapon_versions_full'])[];
 
 export async function fetchTableWeapons(
@@ -30,7 +30,7 @@ export async function fetchTableWeapons(
         offset: sanitizeOffset(options.offset),
         client: options.client,
     };
-
+    console.log('SERVICE', safeOptions);
     const result = await getWeaponVersionsFull(safeOptions);
     const mapped = result?.map((row) => ({
         ...row,
@@ -40,7 +40,7 @@ export async function fetchTableWeapons(
     return mapped;
 }
 
-export async function fetchWeaponVersionsById(weaponId: number) {
+export async function fetchWeaponVersions(weaponId: number) {
     const filter = { weapon_id: [weaponId] };
     const limit = 20;
 
@@ -52,7 +52,7 @@ export async function fetchWeaponVersionsById(weaponId: number) {
         manufacturer: row.manufacturer ?? 'Common',
     }));
 
-    return mapped[0] ?? null;
+    return mapped;
 }
 
 const WEAPON_VERSIONS_FULL_COLUMNS = [
