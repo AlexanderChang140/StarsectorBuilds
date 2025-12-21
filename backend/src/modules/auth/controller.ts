@@ -1,23 +1,18 @@
 import dotenv from 'dotenv';
 import type { Request, Response } from 'express';
 
-import {
-    signup as Ssignup,
-    login as Slogin,
-    logout as Slogout,
-    validateSession,
-} from './auth.ts';
+import { signup, login, logout, validateSession } from './auth.ts';
 
 dotenv.config();
 
-export async function signup(req: Request, res: Response) {
-    const { username, password } = parseBody(req);
+export async function postSignup(req: Request, res: Response) {
+    const { username, password } = parseUser(req);
 
     if (!username || !password) {
         return res.status(400).json({ error: 'Missing username or password' });
     }
 
-    const token = await Ssignup(username, password);
+    const token = await signup(username, password);
 
     if (token) {
         res.cookie('token', token, {
@@ -32,8 +27,8 @@ export async function signup(req: Request, res: Response) {
     }
 }
 
-export async function login(req: Request, res: Response) {
-    const { username, password } = parseBody(req);
+export async function postLogin(req: Request, res: Response) {
+    const { username, password } = parseUser(req);
 
     if (!username || !password) {
         return res
@@ -41,7 +36,7 @@ export async function login(req: Request, res: Response) {
             .json({ username, error: 'Missing username or password' });
     }
 
-    const token = await Slogin(username, password);
+    const token = await login(username, password);
 
     if (token) {
         res.cookie('token', token, {
@@ -56,13 +51,13 @@ export async function login(req: Request, res: Response) {
     }
 }
 
-export async function logout(req: Request, res: Response) {
-    Slogout(req.cookies.token);
+export async function postLogout(req: Request, res: Response) {
+    logout(req.cookies.token);
     res.clearCookie('token');
     return res.status(200).json({ message: 'Logged out' });
 }
 
-export async function validate(req: Request, res: Response) {
+export async function getValidate(req: Request, res: Response) {
     const username = await validateSession(req.cookies.token);
     if (username !== undefined) {
         return res.status(200).json({ username, message: 'Valid session' });
@@ -71,8 +66,11 @@ export async function validate(req: Request, res: Response) {
     }
 }
 
-function parseBody(req: Request) {
+function parseUser(req: Request) {
+    const usernamePattern = /^[a-zA-Z0-9_]{3,20}$/;
+
     const username = req.body.username?.toString();
     const password = req.body.password?.toString();
-    return { username, password };
+
+    return usernamePattern.test(username) ? { username, password } : {};
 }

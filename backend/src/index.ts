@@ -3,9 +3,9 @@ import path from 'path';
 import dotenv from 'dotenv';
 import express from 'express';
 
+import authRouter from './modules/auth/routes.ts';
 import hullmodsRouter from './modules/hullmods/routes.ts';
 import shipsRouter from './modules/ships/routes.ts';
-import authRouter from './modules/users/routes.ts';
 import weaponsRouter from './modules/weapons/routes.ts';
 import router from './routes/routes.ts';
 
