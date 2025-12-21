@@ -63,15 +63,21 @@ export interface BuildComments {
 
 export interface BuildHullmods {
   build_id: number;
-  hullmod_id: number;
+  hullmod_instance_id: number;
+  mod_version_id: number;
+}
+
+export interface BuildModVersions {
+  build_id: number;
+  mod_id: number;
+  mod_version_id: number;
 }
 
 export interface Builds {
   content: string | null;
   created_at: Generated<Timestamp>;
-  entity_id: number;
   id: Generated<number>;
-  mod_version_id: number;
+  ship_version_id: number;
   title: string;
   updated_at: Generated<Timestamp>;
   user_id: number;
@@ -85,14 +91,20 @@ export interface BuildStats {
 
 export interface BuildWeapons {
   build_id: number;
+  mod_version_id: number;
+  ship_instance_id: number;
+  ship_version_id: number;
   ship_weapon_slot_id: number;
-  weapon_id: number;
+  weapon_instance_id: number;
 }
 
 export interface BuildWings {
   build_id: number;
-  ship_id: number;
+  mod_version_id: number;
+  ship_instance_id: number;
+  ship_version_id: number;
   ship_weapon_slot_id: number;
+  wing_instance_id: number;
 }
 
 export interface BuiltInHullmods {
@@ -113,20 +125,6 @@ export interface BuiltInWings {
 }
 
 export interface DamageTypes {
-  code: string;
-  id: Generated<number>;
-}
-
-export interface EntityComments {
-  content: string;
-  created_at: Generated<Timestamp>;
-  entity_code: string;
-  entity_type_id: number;
-  id: Generated<number>;
-  user_id: number;
-}
-
-export interface EntityTypes {
   code: string;
   id: Generated<number>;
 }
@@ -705,6 +703,7 @@ export interface DB {
   beam_weapons: BeamWeapons;
   build_comments: BuildComments;
   build_hullmods: BuildHullmods;
+  build_mod_versions: BuildModVersions;
   build_stats: BuildStats;
   build_weapons: BuildWeapons;
   build_wings: BuildWings;
@@ -713,8 +712,6 @@ export interface DB {
   built_in_weapons: BuiltInWeapons;
   built_in_wings: BuiltInWings;
   damage_types: DamageTypes;
-  entity_comments: EntityComments;
-  entity_types: EntityTypes;
   hullmod_data: HullmodData;
   hullmod_instances: HullmodInstances;
   hullmod_tag_junction: HullmodTagJunction;

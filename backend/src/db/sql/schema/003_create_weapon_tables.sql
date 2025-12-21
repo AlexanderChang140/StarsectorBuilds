@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS weapon_versions
     hardpoint_gun_image_id integer,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, weapon_id),
+    UNIQUE (weapon_instance_id, mod_version_id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (weapon_id) REFERENCES weapons(id) ON DELETE CASCADE,
     FOREIGN KEY (weapon_instance_id) REFERENCES weapon_instances(id) ON DELETE CASCADE,

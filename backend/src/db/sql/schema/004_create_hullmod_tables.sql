@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS hullmod_versions
     hullmod_image_id integer,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, hullmod_id),
+    UNIQUE (hullmod_instance_id, mod_version_id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (hullmod_id) REFERENCES hullmods(id) ON DELETE CASCADE,
     FOREIGN KEY (hullmod_instance_id) REFERENCES hullmod_instances(id) ON DELETE CASCADE,

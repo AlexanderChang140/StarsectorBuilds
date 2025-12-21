@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS wing_versions
     wing_instance_id integer NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, ship_id),
+    UNIQUE (wing_instance_id, mod_version_id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_id) REFERENCES ships(id) ON DELETE CASCADE,
     FOREIGN KEY (wing_instance_id) REFERENCES wing_instances(id) ON DELETE CASCADE

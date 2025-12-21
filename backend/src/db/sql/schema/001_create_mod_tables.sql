@@ -17,5 +17,6 @@ CREATE TABLE IF NOT EXISTS mod_versions
     data_changed boolean NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id),
     UNIQUE (mod_id, major, minor, patch),
+    UNIQUE (mod_id, id),
     FOREIGN KEY (mod_id) REFERENCES mods(id) ON DELETE CASCADE
 );

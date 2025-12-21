@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS ships
     mod_id integer NOT NULL,
     code text NOT NULL,
     PRIMARY KEY (id),
+    UNIQUE (id, mod_id),
     UNIQUE (mod_id, code),
     FOREIGN KEY (mod_id) REFERENCES mods(id) ON DELETE CASCADE
 );
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS ship_versions
     ship_image_id integer,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, ship_id),
+    UNIQUE (ship_instance_id, mod_version_id, id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_id) REFERENCES ships(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_instance_id) REFERENCES ship_instances(id) ON DELETE CASCADE,
@@ -144,6 +146,7 @@ CREATE TABLE IF NOT EXISTS ship_weapon_slots
     arc numeric NOT NULL,
     position numeric[2] NOT NULL,
     PRIMARY KEY (id),
+    UNIQUE (id, ship_instance_id),
     UNIQUE (ship_instance_id, code),
     FOREIGN KEY (ship_instance_id) REFERENCES ship_instances(id) ON DELETE CASCADE,
     FOREIGN KEY (weapon_size_id) REFERENCES weapon_sizes(id),
