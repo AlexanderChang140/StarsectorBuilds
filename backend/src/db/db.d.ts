@@ -21,24 +21,6 @@ export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export interface AllHullmodInstances {
-  base_value: number | null;
-  cost_capital: number | null;
-  cost_cruiser: number | null;
-  cost_destroyer: number | null;
-  cost_frigate: number | null;
-  data_hash: string | null;
-  display_name: string | null;
-  hide: boolean | null;
-  hide_everywhere: boolean | null;
-  hullmod_desc: string | null;
-  hullmod_id: number | null;
-  hullmod_instance_id: number | null;
-  manufacturer: string | null;
-  tags: string[] | null;
-  ui_tags: string[] | null;
-}
-
 export interface AmmoWeapons {
   ammo_per_second: Numeric | null;
   max_ammo: number;
@@ -181,6 +163,33 @@ export interface HullmodVersions {
   hullmod_instance_id: number;
   id: Generated<number>;
   mod_version_id: number;
+}
+
+export interface HullmodVersionsFull {
+  base_value: number | null;
+  cost_capital: number | null;
+  cost_cruiser: number | null;
+  cost_destroyer: number | null;
+  cost_frigate: number | null;
+  data_hash: string | null;
+  display_name: string | null;
+  hide: boolean | null;
+  hide_everywhere: boolean | null;
+  hullmod_code: string | null;
+  hullmod_desc: string | null;
+  hullmod_id: number | null;
+  hullmod_image_file_path: string | null;
+  hullmod_instance_id: number | null;
+  hullmod_version_id: number | null;
+  major: number | null;
+  manufacturer: string | null;
+  minor: number | null;
+  mod_id: number | null;
+  mod_name: string | null;
+  mod_version_id: number | null;
+  patch: string | null;
+  tags: string[] | null;
+  ui_tags: string[] | null;
 }
 
 export interface Images {
@@ -698,7 +707,6 @@ export interface WingWeapons {
 }
 
 export interface DB {
-  all_hullmod_instances: AllHullmodInstances;
   ammo_weapons: AmmoWeapons;
   beam_weapons: BeamWeapons;
   build_comments: BuildComments;
@@ -719,6 +727,7 @@ export interface DB {
   hullmod_ui_tag_junction: HullmodUiTagJunction;
   hullmod_ui_tags: HullmodUiTags;
   hullmod_versions: HullmodVersions;
+  hullmod_versions_full: HullmodVersionsFull;
   hullmods: Hullmods;
   images: Images;
   mod_versions: ModVersions;
