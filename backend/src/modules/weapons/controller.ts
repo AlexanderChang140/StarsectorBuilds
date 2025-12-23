@@ -19,7 +19,6 @@ export async function getTableWeapons(
 
         const options = { filter, order, limit, offset };
         const result = await fetchTableWeapons(options);
-        console.log('CONTROLLER', options)
         res.json(result);
     } catch (err) {
         console.error(err);
