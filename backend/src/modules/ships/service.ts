@@ -175,7 +175,7 @@ export const getShipVersionsFull = makeSelectFull(
     SHIP_VERSIONS_FULL_COLUMNS,
 );
 
-export const getShipId = makeSelectOne<'ships', 'id', 'mod_id' | 'code'>(
+export const getShipId = makeSelectOne<'ships', ['id'], 'mod_id' | 'code'>(
     'ships',
     ['id'],
 );

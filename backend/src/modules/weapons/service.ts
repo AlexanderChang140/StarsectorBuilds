@@ -125,7 +125,7 @@ export const getWeaponVersionsFull = makeSelectFull(
     WEAPON_VERSIONS_FULL_COLUMNS,
 );
 
-export const getWeaponId = makeSelectOne<'weapons', 'id', 'code'>('weapons', [
+export const getWeaponId = makeSelectOne<'weapons', ['id'], 'code'>('weapons', [
     'id',
 ]);
 

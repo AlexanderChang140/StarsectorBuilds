@@ -42,7 +42,7 @@ export async function getHullmodVersions(
     return result.rows;
 }
 
-export const getHullmodId = makeSelectOne<'hullmods', 'id', 'code'>(
+export const getHullmodId = makeSelectOne<'hullmods', ['id'], 'code'>(
     'hullmods',
     ['id'],
 );

@@ -1,14 +1,10 @@
 import type { PoolClient } from 'pg';
 
-import type {
-    InsertableRow,
-    Inserted,
-    SelectableRow,
-} from '../../types/generic.ts';
 import { pool } from '../client.ts';
 import type { DB } from '../db.js';
 import { createFromClause } from '../fragments/from.ts';
 import { createWhereClause } from '../fragments/where.ts';
+import type { InsertableRow, SelectableRow, Inserted } from '../types.ts';
 
 /**
  * Insert a row with conflict handling (returns existing on conflict).

@@ -1,6 +1,6 @@
 import { filterKeys, filterValues } from './helpers.ts';
 import { clamp } from './math.ts';
-import type { Order } from '../types/generic.ts';
+import type { Order } from 'src/db/types.ts';
 
 export function sanitizeFilter<T>(
     filter: Partial<T> | undefined,

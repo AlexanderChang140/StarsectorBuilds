@@ -1,7 +1,7 @@
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import { makeSelectOne } from '../../db/helpers/select.ts';
 
-export const getShipSystemId = makeSelectOne<'ship_systems', 'id', 'code'>(
+export const getShipSystemId = makeSelectOne<'ship_systems', ['id'], 'code'>(
     'ship_systems',
     ['id'],
 );

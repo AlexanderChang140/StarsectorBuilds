@@ -3,13 +3,18 @@ import type { PoolClient } from 'pg';
 import { pool } from '../client.ts';
 import type { DB, Generated } from '../db.js';
 import { type Filter, createFilterFragment } from './filter.ts';
-import type { SelectableRow } from '../../types/generic.ts';
 import { createFromClause } from '../fragments/from.ts';
 import { createLimitClause } from '../fragments/limit.ts';
 import { createOffsetClause } from '../fragments/offset.ts';
 import { createOrderClause, type ColumnOrder } from '../fragments/order.ts';
 import { createSelectClause } from '../fragments/select.ts';
 import { createWhereClause } from '../fragments/where.ts';
+import type {
+    AllowedKey,
+    AllowedKeys,
+    SelectableRow,
+    Selection,
+} from '../types.ts';
 
 /**
  * Select multiple rows with a typed column list.
@@ -23,13 +28,16 @@ import { createWhereClause } from '../fragments/where.ts';
  */
 export async function select<
     TTable extends keyof DB,
-    TSelection extends keyof SelectableRow<DB[TTable]>,
-    TWhereKeys extends keyof DB[TTable] = keyof DB[TTable],
+    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
+    TAllowedKey extends keyof SelectableRow<DB[TTable]> = AllowedKey<
+        TAllowedKeys,
+        SelectableRow<DB[TTable]>
+    >,
 >(
     table: TTable,
-    selection: readonly TSelection[],
+    selection: Selection<DB[TTable]>,
     options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys> | undefined;
+        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey> | undefined;
         client?: PoolClient | undefined;
     },
 ) {
@@ -42,7 +50,7 @@ export async function select<
 
     const executor = options?.client ?? pool;
     const { rows } = await executor.query<
-        Pick<SelectableRow<DB[TTable]>, TSelection>
+        Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>
     >(query, values);
     return rows;
 }
@@ -52,7 +60,7 @@ export async function select<
  *
  * @template TTable - Table name in the schema.
  * @template TSelection - Column keys to return from the table.
- * @template TWhereKey - Keys permitted in the WHERE clause.
+ * @template TAllowedKeys - Keys permitted in the WHERE clause.
  * @param table - Target table name.
  * @param selection - Readonly array of columns to return.
  * @param allowedKeys - Optional whitelist for WHERE keys.
@@ -60,33 +68,29 @@ export async function select<
  */
 export function makeSelect<
     TTable extends keyof DB,
-    TSelection extends keyof SelectableRow<DB[TTable]>,
-    TWhereKey extends keyof SelectableRow<DB[TTable]> = keyof SelectableRow<
-        DB[TTable]
-    >,
->(
-    table: TTable,
-    selection: readonly TSelection[],
-    allowedKeys?: readonly TWhereKey[],
-) {
+    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
+    TAllowedKey extends AllowedKey<TAllowedKeys, SelectableRow<DB[TTable]>>,
+>(table: TTable, selection: Selection<DB[TTable]>, allowedKeys?: TAllowedKeys) {
     return async (options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TWhereKey>;
+        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey>;
         client?: PoolClient | undefined;
     }) => {
-        const allowed: Pick<SelectableRow<DB[TTable]>, TWhereKey> | undefined =
+        const allowed:
+            | Pick<SelectableRow<DB[TTable]>, TAllowedKey>
+            | undefined =
             options?.where && allowedKeys
                 ? (Object.fromEntries(
                       Object.entries(options.where).filter(([k]) =>
-                          allowedKeys.includes(k as TWhereKey),
+                          (allowedKeys as readonly TAllowedKey[]).includes(
+                              k as TAllowedKey,
+                          ),
                       ),
-                  ) as Pick<SelectableRow<DB[TTable]>, TWhereKey>)
+                  ) as Pick<SelectableRow<DB[TTable]>, TAllowedKey>)
                 : options?.where;
+
         return select(table, selection, { ...options, where: allowed });
     };
 }
-
-const s = makeSelect('ship_instances', ['data_hash'], ['id']);
-s({ where: { id: 1 } });
 
 /**
  * Select a single row with a typed column list.
@@ -100,15 +104,13 @@ s({ where: { id: 1 } });
  */
 export async function selectOne<
     TTable extends keyof DB,
-    TSelection extends keyof SelectableRow<DB[TTable]>,
-    TWhereKeys extends keyof SelectableRow<DB[TTable]> = SelectableRow<
-        keyof DB[TTable]
-    >,
+    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
+    TAllowedKey extends AllowedKey<TAllowedKeys, SelectableRow<DB[TTable]>>,
 >(
     table: TTable,
-    selection: readonly TSelection[],
+    selection: Selection<DB[TTable]>,
     options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys>;
+        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey>;
         client?: PoolClient;
     },
 ) {
@@ -121,7 +123,7 @@ export async function selectOne<
 
     const executor = options?.client ?? pool;
     const { rows } = await executor.query<
-        Pick<SelectableRow<DB[TTable]>, TSelection>
+        Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>
     >(query, values);
     return rows[0];
 }
@@ -138,11 +140,11 @@ export async function selectOne<
  */
 export function makeSelectOne<
     TTable extends keyof DB,
-    TSelection extends keyof SelectableRow<DB[TTable]>,
+    TSelection extends readonly (keyof SelectableRow<DB[TTable]>)[],
     TWhereKeys extends keyof SelectableRow<DB[TTable]> = keyof SelectableRow<
         DB[TTable]
     >,
->(table: TTable, selection: readonly TSelection[]) {
+>(table: TTable, selection: TSelection) {
     return async (options?: {
         where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys>;
         client?: PoolClient;
@@ -166,7 +168,8 @@ export async function selectExists<TTable extends keyof DB>(
             ${whereClause}
         );
     `;
-    const result = await pool.query(query, values);
+    const executor = options?.client ?? pool;
+    const result = await executor.query(query, values);
     return result.rows[0]?.exists ?? false;
 }
 
@@ -189,20 +192,19 @@ export function makeSelectExists<TTable extends keyof DB>(table: TTable) {
  * @returns Rows containing only the requested columns.
  */
 export async function selectFull<
-    TFilter extends Filter<TRow>,
+    TFilter extends Filter<SelectableRow<DB[TTable]>>,
     TTable extends keyof DB,
-    TRow = DB[TTable],
 >(
     table: TTable,
-    selection: readonly (keyof TRow)[],
+    selection: Selection<DB[TTable]>,
     options?: {
         filter?: TFilter;
-        order?: ColumnOrder<TRow>;
+        order?: ColumnOrder<SelectableRow<DB[TTable]>>;
         limit?: number;
         offset?: number;
         client?: PoolClient | undefined;
     },
-): Promise<Pick<TRow, (typeof selection)[number]>[]> {
+): Promise<Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>[]> {
     const selectClause = createSelectClause(selection);
     const fromClause = createFromClause(table);
 
@@ -226,10 +228,9 @@ export async function selectFull<
     `;
 
     const executor = options?.client ? options.client : pool;
-    const result = await executor.query<Pick<TRow, (typeof selection)[number]>>(
-        query,
-        params,
-    );
+    const result = await executor.query<
+        Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>
+    >(query, params);
     return result.rows;
 }
 
@@ -244,19 +245,17 @@ export async function selectFull<
  * @returns Function that executes selectFull with optional settings.
  */
 export function makeSelectFull<
-    TFilter extends Filter<TRow>,
+    TFilter extends Filter<SelectableRow<DB[TTable]>>,
     TTable extends keyof DB,
-    TRow = DB[TTable],
->(table: TTable, selection: readonly (keyof TRow)[]) {
+>(table: TTable, selection: Selection<DB[TTable]>) {
     return async (options?: {
         filter?: TFilter;
-        order?: ColumnOrder<TRow>;
+        order?: ColumnOrder<SelectableRow<DB[TTable]>>;
         limit?: number;
         offset?: number;
         client?: PoolClient | undefined;
     }) => selectFull(table, selection, options);
 }
-
 
 /**
  * Higher-order helper that builds filtered select functions.
@@ -301,9 +300,8 @@ export async function selectCodeIdRecord<TTable extends TableWithIdCode>(
     table: TTable,
     client?: PoolClient,
 ) {
-    const selection = ['id', 'code'] as const;
     const options = client ? { client } : {};
-    const rows = await select(table, selection, options);
+    const rows = await select(table, ['id', 'code'], options);
     return rows.reduce((acc, row) => {
         acc[row.code] = row.id;
         return acc;
@@ -325,15 +323,13 @@ export function makeSelectCodeIdRecord<TTable extends TableWithIdCode>(
 
 function createSelectQuery<
     TTable extends keyof DB,
-    TSelection extends keyof SelectableRow<DB[TTable]>,
-    TWhereKeys extends keyof SelectableRow<DB[TTable]> = keyof SelectableRow<
-        DB[TTable]
-    >,
+    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
+    TAllowedKey extends AllowedKey<TAllowedKeys, SelectableRow<DB[TTable]>>,
 >(
     table: TTable,
-    selection: readonly TSelection[],
+    selection: Selection<DB[TTable]>,
     options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys> | undefined;
+        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey> | undefined;
         order?: ColumnOrder<DB[TTable]>;
         limit?: number;
         offset?: number;
