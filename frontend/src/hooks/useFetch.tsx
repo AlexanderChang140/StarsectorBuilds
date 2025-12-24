@@ -26,7 +26,7 @@ export default function useFetch<T>(url: string, options?: RequestInit) {
             .finally(() => setLoading(false));
 
         return () => controller.abort();
-    }, [url]);
+    }, [url, options]);
 
     return { data, loading, error };
 }
