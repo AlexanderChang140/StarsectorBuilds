@@ -30,7 +30,7 @@ export async function fetchTableWeapons(
         offset: sanitizeOffset(options.offset),
         client: options.client,
     };
-    console.log('SERVICE', safeOptions);
+    
     const result = await getWeaponVersionsFull(safeOptions);
     const mapped = result?.map((row) => ({
         ...row,
