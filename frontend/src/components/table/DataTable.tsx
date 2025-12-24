@@ -1,8 +1,8 @@
-import type { ApiEndpoint } from 'src/types/api';
+import Table from './Table';
 import useFetch from '../../hooks/useFetch';
 import useTableQuery, { buildQueryString } from '../../hooks/useTableQuery';
+import type { ApiEndpoint } from '../../types/api';
 import type { SortOrder } from '../../types/generic';
-import Table from './Table';
 
 interface DataTableProps<T extends object> {
     endpoint: ApiEndpoint;
