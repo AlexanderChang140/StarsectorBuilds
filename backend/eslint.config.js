@@ -1,8 +1,8 @@
-import { defineConfig } from 'eslint/config';
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import importPlugin from 'eslint-plugin-import';
 import baseConfig from '@eslint/js';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import { defineConfig } from 'eslint/config';
+import importPlugin from 'eslint-plugin-import';
 
 export default defineConfig({
     ...baseConfig.configs.recommended,

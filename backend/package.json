@@ -1,8 +1,8 @@
 {
     "name": "backend",
-    "version": "1.0.0",
-    "description": "",
+    "private": true,
     "main": "index.js",
+    "type": "module",
     "scripts": {
         "build": "tsc",
         "start": "node dist/index.js",
@@ -10,9 +10,6 @@
         "seed": "node dist/db/seed.js",
         "gen:db": "npx kysely-codegen --out-file ./src/db/db.d.ts"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
     "dependencies": {
         "argon2": "^0.44.0",
         "cookie-parser": "^1.4.7",
@@ -26,14 +23,13 @@
         "pg-copy-streams": "^7.0.0",
         "sharp": "^0.34.4"
     },
-    "type": "module",
     "devDependencies": {
         "@eslint/js": "^9.38.0",
         "@types/cookie-parser": "^1.4.10",
         "@types/express": "^5.0.3",
         "@types/node": "^24.7.0",
         "@types/pg": "^8.15.5",
-        "eslint": "^9.38.0",
+        "eslint": "^9.39.2",
         "eslint-import-resolver-typescript": "^4.4.4",
         "eslint-plugin-import": "^2.32.0",
         "jsonc-parser": "^3.3.1",
