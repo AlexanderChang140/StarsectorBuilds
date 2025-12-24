@@ -1,4 +1,3 @@
-import js from '@eslint/js';
 import tselint from 'typescript-eslint';
 import tsParser from '@typescript-eslint/parser';
 import globals from 'globals';
@@ -9,22 +8,23 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
     globalIgnores(['dist']),
-    js.configs.recommended,
     tselint.configs.recommended,
     reactHooks.configs['recommended-latest'],
     reactRefresh.configs.vite,
     {
-        files: ['**/*.{ts,tsx}'],
+        files: ['./src/**/*.{ts,tsx}'],
         languageOptions: {
             parser: tsParser,
             ecmaVersion: 2020,
             globals: globals.browser,
+            parserOptions: {
+                projectService: true,
+            },
         },
         plugins: {
             import: importPlugin,
         },
         rules: {
-            ...tselint.configs.recommended.rules,
             '@typescript-eslint/no-unused-vars': 'warn',
             'import/order': [
                 'warn',

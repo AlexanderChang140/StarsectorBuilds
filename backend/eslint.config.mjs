@@ -1,18 +1,16 @@
-import baseConfig from '@eslint/js';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
 import importPlugin from 'eslint-plugin-import';
 
 export default defineConfig({
-    ...baseConfig.configs.recommended,
-    files: ['**/*.{ts,tsx,js,jsx}'],
+    files: ['./src/**/*.{ts,tsx}'],
     languageOptions: {
         parser: tsParser,
         parserOptions: {
             ecmaVersion: 'latest',
             sourceType: 'module',
-            project: './tsconfig.json',
+            projectService: true,
         },
     },
     plugins: {
