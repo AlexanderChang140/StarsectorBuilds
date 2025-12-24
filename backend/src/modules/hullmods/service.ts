@@ -1,4 +1,4 @@
-import type { HullmodVersionDTO } from '@shared/types.ts';
+import type { HullmodVersionDTO } from '@shared/hullmods/types.ts';
 
 import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';

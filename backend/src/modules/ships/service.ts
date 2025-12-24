@@ -1,4 +1,4 @@
-import type { ShipVersionDTO } from '@shared/types.ts';
+import type { ShipVersionDTO } from '@shared/ships/types.ts';
 
 import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';

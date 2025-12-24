@@ -1,4 +1,4 @@
-import type { WeaponVersionDTO } from '@shared/types.ts';
+import type { WeaponVersionDTO } from '@shared/weapons/types.ts';
 
 import type { DB, WeaponVersionsFull } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
