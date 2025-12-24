@@ -1,7 +1,9 @@
 import { useLocation } from 'react-router';
-import type { Entries, SortOrder } from '../types/generic';
 
-type TableQuery<T> = {
+import type { SortOrder } from '../types/generic';
+import { parseIntOrNaN } from '../utils/parse';
+
+export type TableQuery<T> = {
     filter?: Partial<Record<keyof T, string[]>>;
     sort?: keyof T;
     order?: SortOrder;
@@ -9,8 +11,24 @@ type TableQuery<T> = {
     offset?: number;
 };
 
+export function buildQueryString<T extends object | undefined>(query?: T) {
+    if (!query) return '';
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+            value.forEach((v) => params.append(key, String(v)));
+        } else if (value != null) {
+            params.set(key, String(value));
+        }
+    });
+    return params.toString();
+}
+
 export default function useTableQuery<T>(
-    validSortKeys: (keyof T)[],
+    validSortKeys: readonly (keyof T)[],
+    defaults?: {
+        limit?: number;
+    },
 ): TableQuery<T> {
     const { search } = useLocation();
     const query = new URLSearchParams(search);
@@ -33,39 +51,12 @@ export default function useTableQuery<T>(
         rawOrder === 'ASC' || rawOrder === 'DESC' ? rawOrder : undefined;
 
     const rawLimit = query.get('limit');
-    const limit =
-        rawLimit && !isNaN(Number(rawLimit)) ? Number(rawLimit) : undefined;
+    const parsedLimit = parseIntOrNaN(rawLimit);
+    const limit = !Number.isNaN(parsedLimit) ? parsedLimit : defaults?.limit;
 
     const rawOffset = query.get('offset');
-    const offset =
-        rawOffset && !isNaN(Number(rawOffset)) ? Number(rawOffset) : undefined;
+    const parsedOffset = parseIntOrNaN(rawOffset);
+    const offset = !Number.isNaN(parsedOffset) ? parsedOffset : undefined;
+
     return { filter, sort, order, limit, offset };
-}
-
-export function buildTableQuery<T>(params: {
-    filter?: Partial<Record<keyof T, string[]>>;
-    sort?: keyof T;
-    order?: SortOrder;
-    limit?: number;
-    offset?: number;
-}) {
-    const query = new URLSearchParams();
-
-    if (params.filter) {
-        for (const [key, values] of Object.entries(params.filter) as Entries<
-            Partial<Record<keyof T, string[]>>
-        >) {
-            if (!values) continue;
-            for (const v of values) {
-                query.append(String(key), v);
-            }
-        }
-    }
-
-    if (params.sort) query.set('sort', params.sort as string);
-    if (params.order) query.set('order', params.order);
-    if (params.limit != null) query.set('limit', params.limit.toString());
-    if (params.offset != null) query.set('offset', params.offset.toString());
-
-    return query.toString();
 }

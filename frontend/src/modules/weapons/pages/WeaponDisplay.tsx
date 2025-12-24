@@ -1,23 +1,20 @@
+import type { WeaponVersionDTO } from '@shared/weapons/types';
 import { useParams } from 'react-router';
 
-import type { DisplayWeapon } from '../types';
 import useFetch from '../../../hooks/useFetch';
 import '../../../components/Display.css';
+import { parseIntOrNaN } from '../../../utils/parse';
 
 export default function WeaponDisplay() {
     const { id } = useParams<{ id: string }>();
-    const { data, loading, error } = useFetch<DisplayWeapon[]>(
-        `/api/weapons/${id}`,
+    const parsedId = parseIntOrNaN(id);
+    const { data, loading, error } = useFetch<WeaponVersionDTO[]>(
+        `/api/weapons/${parsedId}/versions`,
     );
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
-    if (!data || data.length === 0) return <div>No data found</div>;
-
-    console.log(
-        `${import.meta.env.VITE_API_URL}/api/images/${
-            data[0].turret_image_file_path
-        }`,
-    );
+    if (data === undefined || data === null || data.length === 0)
+        return <div>No data found</div>;
 
     return (
         <div>
@@ -37,13 +34,13 @@ export default function WeaponDisplay() {
                     <div className="image-container">
                         <img
                             className="base"
-                            src={`${import.meta.env.VITE_API_URL}/api/images/${
+                            src={`${import.meta.env.VITE_API_URL}/images/${
                                 data[0].turret_image_file_path
                             }`}
                         ></img>
                         <img
                             className="overlay"
-                            src={`${import.meta.env.VITE_API_URL}/api/images/${
+                            src={`${import.meta.env.VITE_API_URL}/images/${
                                 data[0].turret_gun_image_file_path
                             }`}
                         ></img>

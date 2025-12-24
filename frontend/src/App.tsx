@@ -7,6 +7,7 @@ import WeaponDisplay from './modules/weapons/pages/WeaponDisplay.tsx';
 import WeaponTable from './modules/weapons/pages/WeaponTable.tsx';
 import Auth from './modules/auth/pages/Auth.tsx';
 import { AuthProvider } from './modules/auth/AuthProvider.tsx';
+import ShipTable from './modules/ships/pages/ShipTable.tsx';
 
 const TODO = <div>TODO</div>;
 
@@ -25,6 +26,9 @@ function App() {
                         />
                         <Route path="/hullmods" element={<HullmodTable />} />
                         <Route path="/hullmods/:id" element={TODO} />
+
+                        <Route path="/ships" element={<ShipTable />} />
+
                         <Route path="/user/:id" element={TODO} />
                         <Route path="/settings" element={TODO} />
                         <Route path="/about" element={TODO} />

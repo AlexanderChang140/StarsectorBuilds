@@ -1,9 +1,11 @@
+import type { HullmodVersionDTO } from '@shared/hullmods/types';
+
 import { DataTable } from '../../../components/table/DataTable';
-import type { TableHullmod } from '../types';
+import { humanizeKeys } from '../../../utils/humanizeKeys';
 
 export default function HullmodTable() {
     return DataTable({
-        endpoint: '/api/hullmods',
+        endpoint: '/api/hullmods/table',
         displayMap,
         keyOrder,
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
@@ -15,17 +17,7 @@ export default function HullmodTable() {
     });
 }
 
-const displayMap: Partial<Record<keyof TableHullmod, string>> = {
-    display_name: 'Name',
-    manufacturer: 'Manufacturer',
-    base_value: 'Base Value',
-    cost_frigate: 'Frigate Cost',
-    cost_destroyer: 'Destroyer Cost',
-    cost_cruiser: 'Cruiser Cost',
-    cost_capital: 'Capital Cost',
-};
-
-const keyOrder: (keyof typeof displayMap)[] = [
+const keyOrder: (keyof HullmodVersionDTO)[] = [
     'display_name',
     'manufacturer',
     'base_value',
@@ -34,3 +26,5 @@ const keyOrder: (keyof typeof displayMap)[] = [
     'cost_cruiser',
     'cost_capital',
 ];
+
+const displayMap = humanizeKeys(keyOrder);

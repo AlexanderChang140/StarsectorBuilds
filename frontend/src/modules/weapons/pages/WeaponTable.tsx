@@ -1,55 +1,24 @@
+import type { WeaponVersionDTO } from '@shared/weapons/types';
+
 import { DataTable } from '../../../components/table/DataTable';
-import type { TableWeapon } from '../types';
+import { humanizeKeys } from '../../../utils/humanizeKeys';
+
 
 export default function WeaponTable() {
     return DataTable({
-        endpoint: '/api/weapons',
+        endpoint: '/api/weapons/table',
         displayMap,
         keyOrder,
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
-            linkFn: (row) => `/weapons/${row.weapon_id}`,
+            linkFn: (row) => `/api/weapons/${Number(row.weapon_id)}/versions`,
         },
         title: 'Weapons',
     });
 }
 
-const displayMap: Partial<Record<keyof TableWeapon, string>> = {
-    display_name: 'Name',
-    manufacturer: 'Manufacturer',
-    weapon_type: 'Weapon Type',
-    weapon_size: 'Weapon Size',
-    damage_type: 'Damage Type',
-    op_cost: 'OP Cost',
-    damage_per_shot: 'Damage',
-    flux_per_shot: 'Flux Cost',
-    damage_per_second: 'Beam Damage',
-    flux_per_second: 'Beam Flux Cost',
-    emp: 'EMP',
-    impact: 'Impact',
-    max_ammo: 'Max Ammo',
-    ammo_per_second: 'Ammo Regen',
-    reload_size: 'Reload Size',
-    weapon_range: 'Range',
-    turn_rate: 'Turn Rate',
-    speed: 'Projectile Speed',
-    launch_speed: 'Projectile Launch Speed',
-    flight_time: 'Projectile Flight Time',
-    hitpoints: 'Projectile Hitpoints',
-    beam_speed: 'Beam Speed',
-    chargeup: 'Chargeup',
-    chargedown: 'Chargedown',
-    burst_size: 'Burst Size',
-    burst_delay: 'Burst Delay',
-    min_spread: 'Min Spread',
-    max_spread: 'Max Spread',
-    spread_per_shot: 'Spread',
-    spread_decay_per_second: 'Spread Decay',
-    base_value: 'Base Value',
-};
-
-const keyOrder: (keyof typeof displayMap)[] = [
+const keyOrder: (keyof WeaponVersionDTO)[] = [
     'display_name',
     'manufacturer',
     'weapon_type',
@@ -82,3 +51,5 @@ const keyOrder: (keyof typeof displayMap)[] = [
     'spread_decay_per_second',
     'base_value',
 ];
+
+const displayMap = humanizeKeys(keyOrder);
