@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import './Auth.css';
 import { useNavigate } from 'react-router';
-import { useAuth } from '../AuthProvider';
+
+import useAuth from '../../../hooks/useAuth';
 
 type Auth = 'login' | 'signup';
 
