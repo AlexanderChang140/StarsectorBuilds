@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import TableBody from './TableBody';
 import TableHead from './TableHead';
 import type { SortOrder } from '../../types/generic';
