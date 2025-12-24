@@ -1,3 +1,5 @@
+import type { WeaponVersionDTO } from '@shared/types.ts';
+
 import type { DB, WeaponVersionsFull } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
@@ -22,7 +24,7 @@ export const TABLE_WEAPON_FILTER_KEYS = [
 
 export async function fetchTableWeapons(
     options: Options<DB['weapon_versions_full']>,
-) {
+): Promise<WeaponVersionDTO[]> {
     const safeOptions = {
         filter: sanitizeFilter(options.filter, TABLE_WEAPON_FILTER_KEYS),
         order: sanitizeOrder(options.order),
@@ -30,7 +32,7 @@ export async function fetchTableWeapons(
         offset: sanitizeOffset(options.offset),
         client: options.client,
     };
-    
+
     const result = await getWeaponVersionsFull(safeOptions);
     const mapped = result?.map((row) => ({
         ...row,
@@ -40,7 +42,9 @@ export async function fetchTableWeapons(
     return mapped;
 }
 
-export async function fetchWeaponVersions(weaponId: number) {
+export async function fetchWeaponVersions(
+    weaponId: number,
+): Promise<WeaponVersionDTO[]> {
     const filter = { weapon_id: [weaponId] };
     const limit = 20;
 

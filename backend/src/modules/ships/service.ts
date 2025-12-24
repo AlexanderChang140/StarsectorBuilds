@@ -1,3 +1,5 @@
+import type { ShipVersionDTO } from '@shared/types.ts';
+
 import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
@@ -21,7 +23,7 @@ export const TABLE_SHIP_FILTER_KEYS = [
 
 export async function fetchTableShips(
     options: Options<DB['ship_versions_full']>,
-) {
+): Promise<ShipVersionDTO[]> {
     const safeOptions = {
         filter: sanitizeFilter(options.filter, TABLE_SHIP_FILTER_KEYS),
         order: sanitizeOrder(options.order),
@@ -39,7 +41,7 @@ export async function fetchTableShips(
     return mapped;
 }
 
-export async function fetchShipVersions(shipId: number) {
+export async function fetchShipVersions(shipId: number): Promise<ShipVersionDTO[]> {
     const filter = { ship_id: [shipId] };
     const limit = 20;
 
@@ -54,7 +56,7 @@ export async function fetchShipVersions(shipId: number) {
     return mapped;
 }
 
-export async function fetchShipVersion(shipVersionId: number) {
+export async function fetchShipVersion(shipVersionId: number): Promise<ShipVersionDTO | null> {
     const filter = { ship_version_id: [shipVersionId] };
     const limit = 1;
 
