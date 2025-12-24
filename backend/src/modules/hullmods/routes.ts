@@ -4,8 +4,10 @@ import { getTableHullmods } from './controller.ts';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/table', (req, res) => {
     getTableHullmods(req, res);
 });
+
+
 
 export default router;
