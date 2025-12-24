@@ -94,7 +94,7 @@ const SHIP_WEAPON_SLOT_COLUMNS = [
     'ship_instance_id',
     'weapon_size_id',
     'weapon_type_id',
-] as const satisfies (keyof DB['ship_weapon_slots'])[];
+] as const satisfies readonly (keyof DB['ship_weapon_slots'])[];
 
 export const getShipWeaponSlots = makeSelect(
     'ship_weapon_slots',
@@ -168,7 +168,7 @@ const SHIP_VERSIONS_FULL_COLUMNS = [
 
     'hints',
     'tags',
-] as const satisfies (keyof DB['ship_versions_full'])[];
+] as const satisfies readonly (keyof DB['ship_versions_full'])[];
 
 export const getShipVersionsFull = makeSelectFull(
     'ship_versions_full',

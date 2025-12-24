@@ -18,7 +18,7 @@ export const TABLE_WEAPON_FILTER_KEYS = [
     'weapon_size_id',
     'weapon_type_id',
     'damage_type_id',
-] as const satisfies (keyof DB['weapon_versions_full'])[];
+] as const satisfies readonly (keyof DB['weapon_versions_full'])[];
 
 export async function fetchTableWeapons(
     options: Options<DB['weapon_versions_full']>,
@@ -118,7 +118,7 @@ const WEAPON_VERSIONS_FULL_COLUMNS = [
     'hints',
     'tags',
     'groups',
-] as const satisfies (keyof WeaponVersionsFull)[];
+] as const satisfies readonly (keyof WeaponVersionsFull)[];
 
 export const getWeaponVersionsFull = makeSelectFull(
     'weapon_versions_full',
