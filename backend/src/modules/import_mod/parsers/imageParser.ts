@@ -2,6 +2,7 @@ import fsp from 'fs/promises';
 import path from 'path';
 
 import dotenv from 'dotenv';
+
 import type { InsertableRow } from 'src/db/types.ts';
 
 import type { DB } from '../../../db/db.js';

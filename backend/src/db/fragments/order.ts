@@ -1,6 +1,6 @@
 import type { Entries } from '../../types/generic.ts';
-import type { Order } from '../types.ts';
 import type { DB } from '../db.js';
+import type { Order } from '../types.ts';
 
 export type ColumnOrder<T> = Partial<Record<keyof T, Order>>;
 
