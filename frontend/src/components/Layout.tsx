@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router';
+
 import './Layout.css';
-import { useAuth } from '../hooks/useAuth';
+import useAuth from '../hooks/useAuth';
 
 function Layout() {
     const { user, logout } = useAuth();
