@@ -5,3 +5,7 @@
     max-width: 100%;
     margin: 0 auto;
 }
+
+.data-table-container a {
+    color: var(--lotus-blue-color);
+}
