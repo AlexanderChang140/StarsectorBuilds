@@ -3,16 +3,15 @@ import type { WeaponVersionDTO } from '@shared/weapons/types';
 import { DataTable } from '../../../components/table/DataTable';
 import { humanizeKeys } from '../../../utils/humanizeKeys';
 
-
 export default function WeaponTable() {
-    return DataTable({
+    return DataTable<WeaponVersionDTO, typeof keyOrder>({
         endpoint: '/api/weapons/table',
         displayMap,
         keyOrder,
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
-            linkFn: (row) => `/api/weapons/${Number(row.weapon_id)}/versions`,
+            linkFn: (row) => `/weapons/${Number(row.weapon_id)}`,
         },
         title: 'Weapons',
     });

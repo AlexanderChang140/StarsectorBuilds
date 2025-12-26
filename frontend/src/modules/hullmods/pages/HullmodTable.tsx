@@ -4,7 +4,7 @@ import { DataTable } from '../../../components/table/DataTable';
 import { humanizeKeys } from '../../../utils/humanizeKeys';
 
 export default function HullmodTable() {
-    return DataTable({
+    return DataTable<HullmodVersionDTO, typeof keyOrder>({
         endpoint: '/api/hullmods/table',
         displayMap,
         keyOrder,

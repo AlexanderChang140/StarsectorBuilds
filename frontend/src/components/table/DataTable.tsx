@@ -9,17 +9,23 @@ import type { SortOrder } from '../../types/generic';
 
 import './DataTable.css';
 
-interface DataTableProps<T extends object> {
+interface DataTableProps<
+    T extends object,
+    TSortKeys extends readonly (keyof T)[],
+> {
     endpoint: ApiEndpoint;
-    displayMap: Partial<Record<keyof T, string>>;
-    keyOrder: readonly (keyof T)[];
-    initialSort?: { sortField: keyof T; sortOrder: SortOrder };
-    link?: { linkField: keyof T; linkFn: (row: T) => ApiEndpoint };
+    displayMap: Partial<Record<TSortKeys[number], string>>;
+    keyOrder: TSortKeys;
+    initialSort?: { sortField: TSortKeys[number]; sortOrder: SortOrder };
+    link?: { linkField: TSortKeys[number]; linkFn: (row: T) => string };
     title?: string;
     defaultLimit?: number;
 }
 
-export function DataTable<T extends object>({
+export function DataTable<
+    T extends object,
+    TSortKeys extends readonly (keyof T)[],
+>({
     endpoint,
     displayMap,
     keyOrder,
@@ -27,7 +33,7 @@ export function DataTable<T extends object>({
     link,
     title,
     defaultLimit = 20,
-}: DataTableProps<T>) {
+}: DataTableProps<T, TSortKeys>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const page = Number(searchParams.get('page') ?? 1);
 
@@ -35,7 +41,12 @@ export function DataTable<T extends object>({
         setSearchParams({ page: (pageIndex + 1).toString() });
     };
 
-    const query = useTableQuery(keyOrder, { limit: defaultLimit });
+    const query = useTableQuery<T, TSortKeys>(keyOrder, {
+        limit: defaultLimit,
+        sort: initialSort?.sortField,
+        order: initialSort?.sortOrder,
+    });
+    
     const queryString = buildQueryString(query);
     const { data, loading, error } = useFetch<T[]>(
         `${endpoint}?${queryString}`,
@@ -69,12 +80,7 @@ export function DataTable<T extends object>({
         <div className="data-table-container">
             {title && <h1>{title}</h1>}
             {data.length} records found
-            <Table
-                columns={columns}
-                initialData={data}
-                initialSort={initialSort}
-                links={links}
-            />
+            <Table columns={columns} initialData={data} links={links} />
             <PaginationControls
                 totalPages={5}
                 currPageIndex={page - 1}

@@ -4,14 +4,14 @@ import { DataTable } from '../../../components/table/DataTable';
 import { humanizeKeys } from '../../../utils/humanizeKeys';
 
 export default function ShipTable() {
-    return DataTable({
+    return DataTable<ShipVersionDTO, typeof keyOrder>({
         endpoint: '/api/ships/table',
         displayMap,
         keyOrder,
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
-            linkFn: (row) => `/api/ships/${Number(row.ship_id)}/versions`,
+            linkFn: (row) => `/ships/${Number(row.ship_id)}`,
         },
         title: 'Ships',
     });

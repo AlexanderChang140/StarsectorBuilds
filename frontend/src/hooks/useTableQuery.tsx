@@ -33,10 +33,15 @@ export function buildQueryString<T extends object | undefined>(query?: T) {
     return params.toString();
 }
 
-export default function useTableQuery<T>(
-    validSortKeys: readonly (keyof T)[],
+export default function useTableQuery<
+    T,
+    TSortKeys extends readonly (keyof T)[],
+>(
+    validSortKeys: TSortKeys,
     defaults?: {
         limit?: number;
+        sort?: TSortKeys[number];
+        order?: SortOrder;
     },
 ): TableQuery<T> {
     const { search } = useLocation();
@@ -53,11 +58,11 @@ export default function useTableQuery<T>(
     const sort =
         rawSort && validSortKeys.includes(rawSort as keyof T)
             ? (rawSort as keyof T)
-            : undefined;
+            : defaults?.sort;
 
     const rawOrder = query.get('order');
     const order =
-        rawOrder === 'ASC' || rawOrder === 'DESC' ? rawOrder : undefined;
+        rawOrder === 'ASC' || rawOrder === 'DESC' ? rawOrder : defaults?.order;
 
     const rawLimit = query.get('limit');
     const parsedLimit = parseIntOrNaN(rawLimit);
@@ -65,7 +70,7 @@ export default function useTableQuery<T>(
 
     const rawPage = query.get('page');
     const parsedOffset = (parseIntOrNaN(rawPage) - 1) * (limit ?? 0);
-    const offset = !Number.isNaN(parsedOffset) ? parsedOffset : undefined;
+    const offset = !Number.isNaN(parsedOffset) ? parsedOffset : 0;
 
     return { filter, sort, order, limit, offset };
 }
