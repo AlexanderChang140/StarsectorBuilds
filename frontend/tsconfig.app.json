@@ -24,7 +24,8 @@
     "noUncheckedSideEffectImports": true,
 
     "paths": {
-      "@shared/*": ["../shared/src/*"]
+      "@shared/*": ["../shared/src/*"],
+      "@styles/*": ["./src/styles/*"]
     }
   },
   "include": ["src"]
