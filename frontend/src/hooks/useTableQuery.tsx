@@ -54,8 +54,8 @@ export default function useTableQuery<T>(
     const parsedLimit = parseIntOrNaN(rawLimit);
     const limit = !Number.isNaN(parsedLimit) ? parsedLimit : defaults?.limit;
 
-    const rawOffset = query.get('offset');
-    const parsedOffset = parseIntOrNaN(rawOffset);
+    const rawPage = query.get('page');
+    const parsedOffset = (parseIntOrNaN(rawPage) - 1) * (limit ?? 0);
     const offset = !Number.isNaN(parsedOffset) ? parsedOffset : undefined;
 
     return { filter, sort, order, limit, offset };

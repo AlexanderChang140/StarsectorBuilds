@@ -1,0 +1,20 @@
+.controls {
+    display: flex;
+    gap: 1rem;
+    align-self: center;
+}
+
+.current-page-index {
+    font-weight: bold;
+}
+
+.go-to-page {
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    justify-content: center;
+}
+
+.go-to-page input {
+    width: 2rem;
+}

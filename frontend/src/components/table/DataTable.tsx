@@ -1,8 +1,13 @@
+import { useSearchParams } from 'react-router';
+
+import PaginationControls from './pagination/PaginationControls';
 import Table from './Table';
 import useFetch from '../../hooks/useFetch';
 import useTableQuery, { buildQueryString } from '../../hooks/useTableQuery';
 import type { ApiEndpoint } from '../../types/api';
 import type { SortOrder } from '../../types/generic';
+
+import './DataTable.css';
 
 interface DataTableProps<T extends object> {
     endpoint: ApiEndpoint;
@@ -23,12 +28,19 @@ export function DataTable<T extends object>({
     title,
     defaultLimit = 20,
 }: DataTableProps<T>) {
-    const query = useTableQuery(keyOrder, { limit: defaultLimit });
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = Number(searchParams.get('page') ?? 1);
 
+    const onPageChange = (pageIndex: number) => {
+        setSearchParams({ page: (pageIndex + 1).toString() });
+    };
+
+    const query = useTableQuery(keyOrder, { limit: defaultLimit });
     const queryString = buildQueryString(query);
     const { data, loading, error } = useFetch<T[]>(
         `${endpoint}?${queryString}`,
     );
+
     if (error) return <div>Error: {error.message}</div>;
     if (loading || data === undefined) return <div>Loading...</div>;
     if (!data?.length) return <div>No data found</div>;
@@ -54,7 +66,7 @@ export function DataTable<T extends object>({
             : undefined;
 
     return (
-        <div>
+        <div className="data-table-container">
             {title && <h1>{title}</h1>}
             {data.length} records found
             <Table
@@ -62,6 +74,11 @@ export function DataTable<T extends object>({
                 initialData={data}
                 initialSort={initialSort}
                 links={links}
+            />
+            <PaginationControls
+                totalPages={5}
+                currPageIndex={page - 1}
+                onPageChange={onPageChange}
             />
         </div>
     );
