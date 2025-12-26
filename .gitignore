@@ -2,4 +2,4 @@
 node_modules
 temp
 output.txt
-test.ts
+test.temp.ts
