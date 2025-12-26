@@ -17,7 +17,7 @@ export default function HullmodTable() {
     });
 }
 
-const keyOrder: (keyof HullmodVersionDTO)[] = [
+const keyOrder = [
     'display_name',
     'manufacturer',
     'base_value',
@@ -25,6 +25,6 @@ const keyOrder: (keyof HullmodVersionDTO)[] = [
     'cost_destroyer',
     'cost_cruiser',
     'cost_capital',
-];
+] as const satisfies (keyof HullmodVersionDTO)[];
 
 const displayMap = humanizeKeys(keyOrder);

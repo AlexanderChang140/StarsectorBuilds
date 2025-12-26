@@ -17,7 +17,7 @@ export default function ShipTable() {
     });
 }
 
-const keyOrder: (keyof ShipVersionDTO)[] = [
+const keyOrder = [
     'display_name',
     'manufacturer',
     'designation',
@@ -56,6 +56,6 @@ const keyOrder: (keyof ShipVersionDTO)[] = [
 
     'phase_cost',
     'phase_upkeep',
-] as const;
+] as const satisfies readonly (keyof ShipVersionDTO)[];
 
 const displayMap = humanizeKeys(keyOrder);

@@ -17,7 +17,7 @@ export default function WeaponTable() {
     });
 }
 
-const keyOrder: (keyof WeaponVersionDTO)[] = [
+const keyOrder = [
     'display_name',
     'manufacturer',
     'weapon_type',
@@ -49,6 +49,6 @@ const keyOrder: (keyof WeaponVersionDTO)[] = [
     'spread_per_shot',
     'spread_decay_per_second',
     'base_value',
-];
+] as const satisfies readonly (keyof WeaponVersionDTO)[];
 
 const displayMap = humanizeKeys(keyOrder);
