@@ -5,11 +5,14 @@ export function parseSort<T>(
     query: ReqQuery,
     validKeys: readonly (keyof T)[],
 ): ColumnOrder<T> {
-    for (const key of validKeys) {
-        const value = String(query[key as string])?.toUpperCase();
-        if (value === 'ASC' || value === 'DESC') {
-            return { [key]: value } as ColumnOrder<T>;
-        }
+    const sort = String(query.sort);
+    const order = String(query.order);
+
+    if (
+        validKeys.includes(sort as keyof T) &&
+        ['ASC', 'DESC'].includes(order)
+    ) {
+        return { [sort]: order } as ColumnOrder<T>;
     }
     return {};
 }
