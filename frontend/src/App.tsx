@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 
-import Layout from './components/Layout.tsx';
+import Layout from './components/layout/Layout.tsx';
 import { AuthProvider } from './modules/auth/AuthProvider.tsx';
 import Auth from './modules/auth/pages/Auth.tsx';
 import HullmodTable from './modules/hullmods/pages/HullmodTable.tsx';

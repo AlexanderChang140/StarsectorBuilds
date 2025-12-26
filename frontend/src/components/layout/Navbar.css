@@ -1,0 +1,34 @@
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    grid-area: navbar;
+    height: 100%;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    margin: 0 auto;
+}
+
+.nav-items {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.nav-start {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+}
+
+.nav-end {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}

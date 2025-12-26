@@ -1,0 +1,15 @@
+aside {
+    position: fixed;
+    top: var(--navbar-top);
+    z-index: 1;
+    grid-area: sidebar;
+    width: var(--sidebar-width);
+    height: 100%;
+    padding: 1rem;
+    border-right: 1px solid var(--border-color);
+}
+
+.aside-items {
+    display: flex;
+    flex-direction: column;
+}
