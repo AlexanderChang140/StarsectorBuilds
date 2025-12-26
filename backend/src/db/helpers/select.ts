@@ -194,9 +194,10 @@ export function makeSelectExists<TTable extends keyof DB>(table: TTable) {
 export async function selectFull<
     TFilter extends Filter<SelectableRow<DB[TTable]>>,
     TTable extends keyof DB,
+    TSelection extends Selection<DB[TTable]>,
 >(
     table: TTable,
-    selection: Selection<DB[TTable]>,
+    selection: TSelection,
     options?: {
         filter?: TFilter;
         order?: ColumnOrder<SelectableRow<DB[TTable]>>;
@@ -204,7 +205,7 @@ export async function selectFull<
         offset?: number;
         client?: PoolClient | undefined;
     },
-): Promise<Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>[]> {
+): Promise<Pick<SelectableRow<DB[TTable]>, TSelection[number]>[]> {
     const selectClause = createSelectClause(selection);
     const fromClause = createFromClause(table);
 
