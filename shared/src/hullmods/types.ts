@@ -24,5 +24,3 @@ export type HullmodVersionDTO = {
     tags: string[] | null;
     ui_tags: string[] | null;
 };
-
-
