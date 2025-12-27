@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS ship_instances
     data_hash varchar(256) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (data_hash),
+    UNIQUE(ship_id, id),
     FOREIGN KEY (ship_id) REFERENCES ships(id) ON DELETE CASCADE
 );
 
@@ -53,9 +54,9 @@ CREATE TABLE IF NOT EXISTS ship_versions
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, ship_id),
     UNIQUE (ship_instance_id, mod_version_id, id),
+    UNIQUE (ship_id, id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
-    FOREIGN KEY (ship_id) REFERENCES ships(id) ON DELETE CASCADE,
-    FOREIGN KEY (ship_instance_id) REFERENCES ship_instances(id) ON DELETE CASCADE,
+    FOREIGN KEY (ship_id, ship_instance_id) REFERENCES ship_instances(ship_id, id) ON DELETE CASCADE,
     FOREIGN KEY (ship_image_id) REFERENCES images(id)
 );
 

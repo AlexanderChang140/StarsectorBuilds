@@ -59,6 +59,7 @@ export interface Builds {
   content: string | null;
   created_at: Generated<Timestamp>;
   id: Generated<number>;
+  ship_id: number;
   ship_version_id: number;
   title: string;
   updated_at: Generated<Timestamp>;
