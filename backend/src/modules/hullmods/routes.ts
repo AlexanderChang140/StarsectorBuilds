@@ -1,13 +1,11 @@
 import express from 'express';
 
-import { getTableHullmods } from './controller.ts';
+import { getAllHullmodVersions } from './controller.ts';
 
 const router = express.Router();
 
-router.get('/table', (req, res) => {
-    getTableHullmods(req, res);
+router.get('/hullmod-versions', (req, res) => {
+    getAllHullmodVersions(req, res);
 });
-
-
 
 export default router;

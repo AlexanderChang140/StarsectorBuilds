@@ -1,15 +1,14 @@
-export type WeaponRoute = `weapons/${WeaponSubRoute}`;
-export type WeaponSubRoute = 'table' | `${number}/versions`;
+export type WeaponRoute = `${WeaponSubRoute}`;
+export type WeaponSubRoute = 'weapon-versions' | `weapons/${number}/versions`;
 
-export type ShipRoute = `ships/${ShipSubRoute}`;
+export type ShipRoute = `${ShipSubRoute}`;
 export type ShipSubRoute =
-    | 'table'
-    | `${number}/versions`
-    | `ship-versions/${number}`
+    | 'ship-versions'
+    | `ships/${number}/versions`
     | `ship-versions/${number}/slots`;
 
-export type HullmodRoute = `hullmods/${HullmodSubRoute}`;
-export type HullmodSubRoute = `table`;
+export type HullmodRoute = `${HullmodSubRoute}`;
+export type HullmodSubRoute = `hullmod-versions`;
 
 export type ApiEndpoint =
     | `/api/${ShipRoute}`

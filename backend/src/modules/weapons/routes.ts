@@ -1,15 +1,15 @@
 import express from 'express';
 
-import { getTableWeapons, getWeaponVersions } from './controller.ts';
+import { getAllWeaponVersions, getWeaponVersions } from './controller.ts';
 
 const router = express.Router();
 
-router.get('/table', (req, res) => {
-    getTableWeapons(req, res);
+router.get('/weapons/:weaponId/versions', (req, res) => {
+    getWeaponVersions(req, res);
 });
 
-router.get('/:weaponId/versions', (req, res) => {
-    getWeaponVersions(req, res);
+router.get('/weapon-versions', (req, res) => {
+    getAllWeaponVersions(req, res);
 });
 
 export default router;

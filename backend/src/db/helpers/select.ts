@@ -1,3 +1,4 @@
+import type { Projection } from '@shared/types.ts';
 import type { PoolClient } from 'pg';
 
 import { pool } from '../client.ts';
@@ -205,10 +206,9 @@ export async function selectFull<
         offset?: number;
         client?: PoolClient | undefined;
     },
-): Promise<Pick<SelectableRow<DB[TTable]>, TSelection[number]>[]> {
+): Promise<Projection<SelectableRow<DB[TTable]>, TSelection>[]> {
     const selectClause = createSelectClause(selection);
     const fromClause = createFromClause(table);
-
     const { clause: filterFragment, params } = createFilterFragment(
         options?.filter,
     );

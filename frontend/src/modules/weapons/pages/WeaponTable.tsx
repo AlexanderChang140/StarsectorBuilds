@@ -1,13 +1,17 @@
-import type { WeaponVersionDTO } from '@shared/weapons/types';
-
 import { DataTable } from '../../../components/table/DataTable';
 import { humanizeKeys } from '../../../utils/humanizeKeys';
+import { WEAPON_TABLE_ROW_KEYS, type WeaponTableRows } from '../types';
 
 export default function WeaponTable() {
-    return DataTable<WeaponVersionDTO, typeof keyOrder>({
-        endpoint: '/api/weapons/table',
+    return DataTable<
+        WeaponTableRows,
+        typeof WEAPON_TABLE_ROW_KEYS,
+        typeof KEY_ORDER
+    >({
+        endpoint: '/api/weapon-versions',
+        tableKeys: WEAPON_TABLE_ROW_KEYS,
+        keyOrder: KEY_ORDER,
         displayMap,
-        keyOrder,
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
@@ -17,7 +21,7 @@ export default function WeaponTable() {
     });
 }
 
-const keyOrder = [
+const KEY_ORDER = [
     'display_name',
     'manufacturer',
     'weapon_type',
@@ -49,6 +53,6 @@ const keyOrder = [
     'spread_per_shot',
     'spread_decay_per_second',
     'base_value',
-] as const satisfies readonly (keyof WeaponVersionDTO)[];
+] as const satisfies readonly (keyof WeaponTableRows)[];
 
-const displayMap = humanizeKeys(keyOrder);
+const displayMap = humanizeKeys(KEY_ORDER);

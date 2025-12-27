@@ -1,0 +1,51 @@
+import type { ShipVersionDTO } from '@shared/ships/types';
+import type { Projection } from '@shared/types';
+
+export const SHIP_TABLE_ROW_KEYS = [
+    'acceleration',
+    'armor_rating',
+    'base_value',
+    'cr_deployment_cost',
+    'cr_loss_per_sec',
+    'cr_recovery',
+    'deceleration',
+    'designation',
+    'display_name',
+    'fighter_bays',
+    'flux_dissipation',
+    'fuel_per_ly',
+    'hitpoints',
+    'manufacturer',
+    'mass',
+    'max_cargo',
+    'max_crew',
+    'max_flux',
+    'max_fuel',
+    'max_speed',
+    'max_turn_rate',
+    'min_crew',
+    'mod_id',
+    'mod_name',
+    'mod_version_id',
+    'op_cost',
+    'peak_cr_sec',
+    'phase_cost',
+    'phase_upkeep',
+    'shield_arc',
+    'shield_efficiency',
+    'shield_type',
+    'shield_upkeep',
+    'ship_code',
+    'ship_id',
+    'ship_image_file_path',
+    'ship_instance_id',
+    'ship_size',
+    'ship_system',
+    'ship_version_id',
+    'turn_acceleration',
+] as const satisfies readonly (keyof ShipVersionDTO)[];
+
+export type ShipTableRows = Projection<
+    ShipVersionDTO,
+    typeof SHIP_TABLE_ROW_KEYS
+>;

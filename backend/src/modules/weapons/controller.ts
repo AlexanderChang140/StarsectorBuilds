@@ -1,24 +1,34 @@
 import type { Request, Response } from 'express';
 
-import { fetchTableWeapons, fetchWeaponVersions } from './service.ts';
-import { parseTableWeaponsFilter } from './utils/filterParser.ts';
-import { parseWeaponTableSort } from './utils/sortParser.ts';
+import { fetchWeaponVersions } from './service.ts';
+import { parseWeaponVersionFields } from './utils/fieldParser.ts';
+import { parseWeaponsVersionsFilter } from './utils/filterParser.ts';
+import { parseWeaponVersionsSort } from './utils/sortParser.ts';
 import { parseLimit } from '../../utils/parser/limitParser.ts';
 import { parseOffset } from '../../utils/parser/offsetParser.ts';
 
-export async function getTableWeapons(
+export async function getWeaponVersions(
     req: Request,
     res: Response,
 ): Promise<void> {
     try {
         const query = req.query;
-        const filter = parseTableWeaponsFilter(query);
-        const order = parseWeaponTableSort(query);
+
+        const weaponId = Number(req.params.weaponId);
+
+        if (isNaN(weaponId)) {
+            res.status(400).json({ error: 'Invalid weapon ID' });
+            return;
+        }
+
+        const fields = parseWeaponVersionFields(query);
+        const filter = parseWeaponsVersionsFilter(query, ['weapon_id']);
+        const order = parseWeaponVersionsSort(query);
         const limit = parseLimit(query);
         const offset = parseOffset(query);
 
         const options = { filter, order, limit, offset };
-        const result = await fetchTableWeapons(options);
+        const result = await fetchWeaponVersions(fields, options);
         res.json(result);
     } catch (err) {
         console.error(err);
@@ -26,19 +36,21 @@ export async function getTableWeapons(
     }
 }
 
-export async function getWeaponVersions(
+export async function getAllWeaponVersions(
     req: Request,
     res: Response,
 ): Promise<void> {
     try {
-        const weaponId = parseInt(req.params.weaponId ?? '', 10);
+        const query = req.query;
 
-        if (isNaN(weaponId)) {
-            res.status(400).json({ error: 'Invalid weapon ID' });
-            return;
-        }
+        const fields = parseWeaponVersionFields(query);
+        const filter = parseWeaponsVersionsFilter(query);
+        const order = parseWeaponVersionsSort(query);
+        const limit = parseLimit(query);
+        const offset = parseOffset(query);
 
-        const result = await fetchWeaponVersions(weaponId);
+        const options = { filter, order, limit, offset };
+        const result = await fetchWeaponVersions(fields, options);
         res.json(result);
     } catch (err) {
         console.error(err);

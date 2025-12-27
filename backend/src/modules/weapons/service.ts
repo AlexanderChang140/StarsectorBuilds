@@ -1,11 +1,14 @@
+import type { Projection } from '@shared/types.ts';
 import type { WeaponVersionDTO } from '@shared/weapons/types.ts';
 
-import type { DB, WeaponVersionsFull } from '../../db/db.js';
+import { WEAPON_VERSIONS_FULL_COLUMNS } from './constants.ts';
+import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
     makeSelectCodeIdRecord,
     makeSelectFull,
     makeSelectOne,
+    selectFull,
 } from '../../db/helpers/select.ts';
 import type { Options } from '../../types/generic.ts';
 import {
@@ -15,114 +18,28 @@ import {
     sanitizeOffset,
 } from '../../utils/sanitize.ts';
 
-export const TABLE_WEAPON_FILTER_KEYS = [
-    'mod_version_id',
-    'weapon_size_id',
-    'weapon_type_id',
-    'damage_type_id',
-] as const satisfies readonly (keyof DB['weapon_versions_full'])[];
-
-export async function fetchTableWeapons(
+export async function fetchWeaponVersions<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(
+    selection: TSelection,
     options: Options<DB['weapon_versions_full']>,
-): Promise<WeaponVersionDTO[]> {
+): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
     const safeOptions = {
-        filter: sanitizeFilter(options.filter, TABLE_WEAPON_FILTER_KEYS),
+        filter: sanitizeFilter(options.filter, WEAPON_VERSIONS_FULL_COLUMNS),
         order: sanitizeOrder(options.order),
         limit: sanitizeLimit(options.limit, 20),
         offset: sanitizeOffset(options.offset),
         client: options.client,
     };
 
-    const result = await getWeaponVersionsFull(safeOptions);
-    const mapped = result?.map((row) => ({
-        ...row,
-        manufacturer: row.manufacturer ?? 'Common',
-    }));
+    const result = await selectFull(
+        'weapon_versions_full',
+        selection,
+        safeOptions,
+    );
 
-    return mapped;
+    return result;
 }
-
-export async function fetchWeaponVersions(
-    weaponId: number,
-): Promise<WeaponVersionDTO[]> {
-    const filter = { weapon_id: [weaponId] };
-    const limit = 20;
-
-    const options = { filter, limit };
-    const result = await getWeaponVersionsFull(options);
-
-    const mapped = result?.map((row) => ({
-        ...row,
-        manufacturer: row.manufacturer ?? 'Common',
-    }));
-
-    return mapped;
-}
-
-const WEAPON_VERSIONS_FULL_COLUMNS = [
-    'weapon_version_id',
-    'turret_image_file_path',
-    'turret_gun_image_file_path',
-    'mod_version_id',
-    'major',
-    'minor',
-    'patch',
-    'mod_id',
-    'mod_name',
-    'weapon_instance_id',
-    'weapon_id',
-    'weapon_type_id',
-    'weapon_size_id',
-    'damage_type_id',
-    'weapon_type',
-    'weapon_size',
-    'damage_type',
-    'weapon_range',
-    'damage_per_shot',
-    'emp',
-    'impact',
-    'turn_rate',
-    'op_cost',
-    'flux_per_shot',
-    'chargeup',
-    'chargedown',
-    'burst_size',
-    'burst_delay',
-    'min_spread',
-    'max_spread',
-    'spread_per_shot',
-    'spread_decay_per_second',
-    'autofire_accuracy_bonus',
-    'extra_arc_for_ai',
-    'base_value',
-    'speed',
-    'launch_speed',
-    'flight_time',
-    'hitpoints',
-    'max_ammo',
-    'ammo_per_second',
-    'reload_size',
-    'beam_speed',
-    'damage_per_second',
-    'flux_per_second',
-    'display_name',
-    'manufacturer',
-    'primary_role_str',
-    'proj_speed_str',
-    'tracking_str',
-    'turn_rate_str',
-    'accuracy_str',
-    'custom_primary',
-    'custom_primary_hl',
-    'custom_ancillary',
-    'custom_ancillary_hl',
-    'no_dps_tooltip',
-    'text1',
-    'text2',
-    'hints',
-    'tags',
-    'groups',
-] as const satisfies readonly (keyof WeaponVersionsFull)[];
 
 export const getWeaponVersionsFull = makeSelectFull(
     'weapon_versions_full',

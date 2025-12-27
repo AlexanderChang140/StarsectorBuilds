@@ -1,13 +1,17 @@
-import type { ShipVersionDTO } from '@shared/ships/types';
-
 import { DataTable } from '../../../components/table/DataTable';
 import { humanizeKeys } from '../../../utils/humanizeKeys';
+import { SHIP_TABLE_ROW_KEYS, type ShipTableRows } from '../types';
 
 export default function ShipTable() {
-    return DataTable<ShipVersionDTO, typeof keyOrder>({
-        endpoint: '/api/ships/table',
+    return DataTable<
+        ShipTableRows,
+        typeof SHIP_TABLE_ROW_KEYS,
+        typeof KEY_ORDER
+    >({
+        endpoint: '/api/ship-versions',
         displayMap,
-        keyOrder,
+        tableKeys: SHIP_TABLE_ROW_KEYS,
+        keyOrder: KEY_ORDER,
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
@@ -17,7 +21,7 @@ export default function ShipTable() {
     });
 }
 
-const keyOrder = [
+const KEY_ORDER = [
     'display_name',
     'manufacturer',
     'designation',
@@ -56,6 +60,6 @@ const keyOrder = [
 
     'phase_cost',
     'phase_upkeep',
-] as const satisfies readonly (keyof ShipVersionDTO)[];
+] as const satisfies readonly (keyof ShipTableRows)[];
 
-const displayMap = humanizeKeys(keyOrder);
+const displayMap = humanizeKeys(KEY_ORDER);

@@ -2,12 +2,18 @@ import type { HullmodVersionDTO } from '@shared/hullmods/types';
 
 import { DataTable } from '../../../components/table/DataTable';
 import { humanizeKeys } from '../../../utils/humanizeKeys';
+import { HULLMOD_TABLE_ROW_KEYS, type HullmodTableRows } from '../types';
 
 export default function HullmodTable() {
-    return DataTable<HullmodVersionDTO, typeof keyOrder>({
-        endpoint: '/api/hullmods/table',
+    return DataTable<
+        HullmodTableRows,
+        typeof HULLMOD_TABLE_ROW_KEYS,
+        typeof KEY_ORDER
+    >({
+        endpoint: '/api/hullmod-versions',
+        tableKeys: HULLMOD_TABLE_ROW_KEYS,
+        keyOrder: KEY_ORDER,
         displayMap,
-        keyOrder,
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
@@ -17,7 +23,7 @@ export default function HullmodTable() {
     });
 }
 
-const keyOrder = [
+const KEY_ORDER = [
     'display_name',
     'manufacturer',
     'base_value',
@@ -27,4 +33,4 @@ const keyOrder = [
     'cost_capital',
 ] as const satisfies (keyof HullmodVersionDTO)[];
 
-const displayMap = humanizeKeys(keyOrder);
+const displayMap = humanizeKeys(KEY_ORDER);

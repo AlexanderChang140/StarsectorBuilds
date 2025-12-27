@@ -10,30 +10,34 @@ import type { SortOrder } from '../../types/generic';
 import './DataTable.css';
 
 interface DataTableProps<
-    T extends object,
-    TSortKeys extends readonly (keyof T)[],
+    TData extends object,
+    TTableKeys extends readonly (keyof TData)[],
+    TKeyOrder extends readonly (keyof TData)[],
 > {
     endpoint: ApiEndpoint;
-    displayMap: Partial<Record<TSortKeys[number], string>>;
-    keyOrder: TSortKeys;
-    initialSort?: { sortField: TSortKeys[number]; sortOrder: SortOrder };
-    link?: { linkField: TSortKeys[number]; linkFn: (row: T) => string };
+    tableKeys: TTableKeys;
+    keyOrder: TKeyOrder;
+    displayMap: Partial<Record<TKeyOrder[number], string>>;
+    initialSort?: { sortField: TKeyOrder[number]; sortOrder: SortOrder };
+    link?: { linkField: TKeyOrder[number]; linkFn: (row: TData) => string };
     title?: string;
     defaultLimit?: number;
 }
 
 export function DataTable<
-    T extends object,
-    TSortKeys extends readonly (keyof T)[],
+    TData extends object,
+    TTableKeys extends readonly (keyof TData)[],
+    TKeyOrder extends readonly (keyof TData)[],
 >({
     endpoint,
-    displayMap,
+    tableKeys,
     keyOrder,
+    displayMap,
     initialSort,
     link,
     title,
     defaultLimit = 20,
-}: DataTableProps<T, TSortKeys>) {
+}: DataTableProps<TData, TTableKeys, TKeyOrder>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const page = Number(searchParams.get('page') ?? 1);
 
@@ -41,14 +45,17 @@ export function DataTable<
         setSearchParams({ page: (pageIndex + 1).toString() });
     };
 
-    const query = useTableQuery<T, TSortKeys>(keyOrder, {
+    const query = useTableQuery<TData, TTableKeys>(tableKeys, {
         limit: defaultLimit,
         sort: initialSort?.sortField,
         order: initialSort?.sortOrder,
     });
-    
-    const queryString = buildQueryString(query);
-    const { data, loading, error } = useFetch<T[]>(
+
+    const queryString = buildQueryString({
+        ...query,
+        fields: tableKeys.join(','),
+    });
+    const { data, loading, error } = useFetch<TData[]>(
         `${endpoint}?${queryString}`,
     );
 
@@ -56,9 +63,9 @@ export function DataTable<
     if (loading || data === undefined) return <div>Loading...</div>;
     if (!data?.length) return <div>No data found</div>;
 
-    const keys = Object.keys(data[0]) as (keyof T)[];
+    const keys = Object.keys(data[0]) as (keyof TData)[];
     const columns = keyOrder
-        .filter((key: keyof T) => keys.includes(key))
+        .filter((key: keyof TData) => keys.includes(key))
         .map((key) => {
             const sortByOrder: SortOrder = '';
             return {
@@ -71,9 +78,9 @@ export function DataTable<
 
     const links =
         link?.linkField && link.linkFn
-            ? ({ [link.linkField]: (row: T) => link.linkFn(row) } as Partial<
-                  Record<keyof T, (row: T) => string>
-              >)
+            ? ({
+                  [link.linkField]: (row: TData) => link.linkFn(row),
+              } as Partial<Record<keyof TData, (row: TData) => string>>)
             : undefined;
 
     return (

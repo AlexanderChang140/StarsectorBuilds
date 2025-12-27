@@ -1,8 +1,10 @@
 import type { HullmodVersionDTO } from '@shared/hullmods/types.ts';
+import type { Projection } from '@shared/types.ts';
 
+import { HULLMOD_VERSIONS_FULL_COLUMNS } from './constants.ts';
 import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
-import { makeSelectFull, makeSelectOne } from '../../db/helpers/select.ts';
+import { makeSelectOne, selectFull } from '../../db/helpers/select.ts';
 import type { Options } from '../../types/generic.ts';
 import {
     sanitizeFilter,
@@ -11,61 +13,28 @@ import {
     sanitizeOrder,
 } from '../../utils/sanitize.ts';
 
-export const TABLE_HULLMOD_FILTER_KEYS = [
-    'mod_version_id',
-] as const satisfies readonly (keyof DB['hullmod_versions_full'])[];
-
-export async function fetchTableHullmods(
+export async function fetchHullmodVersions<
+    TSelection extends readonly (keyof DB['hullmod_versions_full'])[],
+>(
+    selection: TSelection,
     options: Options<DB['hullmod_versions_full']>,
-): Promise<HullmodVersionDTO[]> {
+): Promise<Projection<HullmodVersionDTO, TSelection>[]> {
     const safeOptions = {
-        filter: sanitizeFilter(options.filter, TABLE_HULLMOD_FILTER_KEYS),
+        filter: sanitizeFilter(options.filter, HULLMOD_VERSIONS_FULL_COLUMNS),
         order: sanitizeOrder(options.order),
         limit: sanitizeLimit(options.limit, 20),
         offset: sanitizeOffset(options.offset),
         client: options.client,
     };
 
-    const result = await getHullmodVersionsFull(safeOptions);
-    const mapped = result?.map((row) => ({
-        ...row,
-        manufacturer: row.manufacturer ?? 'Common',
-    }));
+    const result = await selectFull(
+        'hullmod_versions_full',
+        selection,
+        safeOptions,
+    );
 
-    return mapped;
+    return result;
 }
-
-const HULLMOD_VERSIONS_FULL_COLUMNS = [
-    'base_value',
-    'cost_capital',
-    'cost_cruiser',
-    'cost_destroyer',
-    'cost_frigate',
-    'data_hash',
-    'display_name',
-    'hide',
-    'hide_everywhere',
-    'hullmod_code',
-    'hullmod_desc',
-    'hullmod_id',
-    'hullmod_image_file_path',
-    'hullmod_instance_id',
-    'hullmod_version_id',
-    'major',
-    'manufacturer',
-    'minor',
-    'mod_id',
-    'mod_name',
-    'mod_version_id',
-    'patch',
-    'tags',
-    'ui_tags',
-] as const satisfies readonly (keyof DB['hullmod_versions_full'])[];
-
-export const getHullmodVersionsFull = makeSelectFull(
-    'hullmod_versions_full',
-    HULLMOD_VERSIONS_FULL_COLUMNS,
-);
 
 export const getHullmodId = makeSelectOne<'hullmods', ['id'], 'code'>(
     'hullmods',

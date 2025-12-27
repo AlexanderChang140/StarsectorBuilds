@@ -15,10 +15,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use('/', router);
-app.use('/api/', authRouter);
-app.use('/api/weapons', weaponsRouter);
-app.use('/api/hullmods', hullmodsRouter);
-app.use('/api/ships', shipsRouter);
+app.use('/api', authRouter);
+app.use('/api', weaponsRouter);
+app.use('/api', hullmodsRouter);
+app.use('/api', shipsRouter);
 app.use('/images', express.static(path.resolve(process.env.IMAGE_DIR ?? '')));
 
 app.listen(PORT, () => {

@@ -33,10 +33,22 @@ export function remapKeys<T>(
     ) as Partial<Record<keyof T, unknown>>;
 }
 
-export function filterKeys<T>(record: Partial<T>, keys: readonly (keyof T)[]) {
+export function filterKeys<T>(
+    record: Record<string, unknown>,
+    keys: readonly (keyof T)[],
+) {
     return Object.fromEntries(
-        keys.filter((k) => k in record).map((k) => [k, record[k]]),
+        Object.entries(record).filter(([k]) => keys.includes(k as keyof T)),
     ) as Partial<T>;
+}
+
+export function removeArrayKeys<
+    T extends readonly PropertyKey[],
+    R extends readonly T[number][],
+>(keys: T, remove: R): Exclude<T[number], R[number]>[] {
+    return keys.filter(
+        (key): key is Exclude<T[number], R[number]> => !remove.includes(key),
+    ) as Exclude<T[number], R[number]>[];
 }
 
 export function filterValues<T>(

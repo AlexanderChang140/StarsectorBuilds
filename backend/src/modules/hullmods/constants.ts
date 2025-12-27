@@ -1,0 +1,28 @@
+import type { DB } from '../../db/db.js';
+
+export const HULLMOD_VERSIONS_FULL_COLUMNS = [
+    'base_value',
+    'cost_capital',
+    'cost_cruiser',
+    'cost_destroyer',
+    'cost_frigate',
+    'data_hash',
+    'display_name',
+    'hide',
+    'hide_everywhere',
+    'hullmod_code',
+    'hullmod_desc',
+    'hullmod_id',
+    'hullmod_image_file_path',
+    'hullmod_instance_id',
+    'hullmod_version_id',
+    'major',
+    'manufacturer',
+    'minor',
+    'mod_id',
+    'mod_name',
+    'mod_version_id',
+    'patch',
+    'tags',
+    'ui_tags',
+] as const satisfies readonly (keyof DB['hullmod_versions_full'])[];
