@@ -1,7 +1,6 @@
-import type { Order } from 'src/db/types.ts';
-
 import { filterKeys, filterValues } from './helpers.ts';
 import { clamp } from './math.ts';
+import type { Order } from '../db/types.ts';
 
 export function sanitizeFilter<T>(
     filter: Partial<T> | undefined,
@@ -20,7 +19,9 @@ export function sanitizeFilter<T>(
     return sanitized;
 }
 
-export function sanitizeOrder(order: Record<string, Order> | undefined) {
+export function sanitizeOrder<T>(
+    order: Partial<Record<keyof T, Order>> | undefined,
+): Partial<Record<keyof T, Order>> {
     return filterValues(order ?? {}, (val) => val === 'ASC' || val === 'DESC');
 }
 
