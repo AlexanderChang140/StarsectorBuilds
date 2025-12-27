@@ -3,9 +3,10 @@ import path from 'path';
 
 import dotenv from 'dotenv';
 
-import type { InsertableRow } from 'src/db/types.ts';
+
 
 import type { DB } from '../../../db/db.js';
+import type { InsertableRow } from '../../../db/types.ts';
 import type { PreparedImage } from '../../images/types.ts';
 import { hashImage } from '../util/hash.ts';
 
