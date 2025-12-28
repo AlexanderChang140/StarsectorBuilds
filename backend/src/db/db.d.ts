@@ -60,6 +60,7 @@ export interface Builds {
   created_at: Generated<Timestamp>;
   id: Generated<number>;
   ship_id: number;
+  ship_instance_id: number;
   ship_version_id: number;
   title: string;
   updated_at: Generated<Timestamp>;
@@ -76,7 +77,6 @@ export interface BuildWeapons {
   build_id: number;
   mod_version_id: number;
   ship_instance_id: number;
-  ship_version_id: number;
   ship_weapon_slot_id: number;
   weapon_instance_id: number;
 }
@@ -85,7 +85,6 @@ export interface BuildWings {
   build_id: number;
   mod_version_id: number;
   ship_instance_id: number;
-  ship_version_id: number;
   ship_weapon_slot_id: number;
   wing_instance_id: number;
 }

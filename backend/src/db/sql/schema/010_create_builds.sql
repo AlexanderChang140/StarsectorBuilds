@@ -4,15 +4,17 @@ CREATE TABLE IF NOT EXISTS builds
     user_id integer NOT NULL,
     ship_id integer NOT NULL,
     ship_version_id integer NOT NULL,
+    ship_instance_id integer NOT NULL,
     title text NOT NULL,
     content text,
     created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE (ship_version_id, id),
+    UNIQUE (ship_instance_id, id),
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (ship_id, ship_version_id) 
-        REFERENCES ship_versions(ship_id, id)
+    FOREIGN KEY (ship_id, ship_instance_id, ship_version_id) 
+        REFERENCES ship_versions(ship_id, ship_instance_id, id)
 );
 
 CREATE TABLE IF NOT EXISTS build_mod_versions(
@@ -38,7 +40,6 @@ CREATE TABLE IF NOT EXISTS build_weapons
 (
     build_id integer NOT NULL,
     mod_version_id integer NOT NULL,
-    ship_version_id integer NOT NULL,
     ship_instance_id integer NOT NULL,
     ship_weapon_slot_id integer NOT NULL,
     weapon_instance_id integer NOT NULL,
@@ -50,13 +51,9 @@ CREATE TABLE IF NOT EXISTS build_weapons
         REFERENCES build_mod_versions(build_id, mod_version_id)
         ON DELETE CASCADE,
 
-    -- Bind ship_version_id to build_id
-    FOREIGN KEY (ship_version_id, build_id)
-        REFERENCES builds(ship_version_id, id),
-
-    -- Bind ship_instance_id to mod_version_id and ship_version_id 
-    FOREIGN KEY (ship_instance_id, mod_version_id, ship_version_id)
-        REFERENCES ship_versions(ship_instance_id, mod_version_id, id),
+    -- Bind ship_instance_id to build_id 
+    FOREIGN KEY (ship_instance_id, build_id)
+        REFERENCES builds(ship_instance_id, id),
 
     -- Bind ship_weapon_slot_id to ship_instance_id
     FOREIGN KEY (ship_weapon_slot_id, ship_instance_id)
@@ -89,7 +86,6 @@ CREATE TABLE IF NOT EXISTS build_wings
 (
     build_id integer NOT NULL,
     mod_version_id integer NOT NULL,
-    ship_version_id integer NOT NULL,
     ship_instance_id integer NOT NULL,
     ship_weapon_slot_id integer NOT NULL,
     wing_instance_id integer NOT NULL,
@@ -101,13 +97,9 @@ CREATE TABLE IF NOT EXISTS build_wings
         REFERENCES build_mod_versions(build_id, mod_version_id)
         ON DELETE CASCADE,
 
-    -- Bind ship_version_id to build_id
-    FOREIGN KEY (ship_version_id, build_id)
-        REFERENCES builds(ship_version_id, id),
-
-    -- Bind ship_instance_id to mod_version_id and ship_version_id 
-    FOREIGN KEY (ship_instance_id, mod_version_id, ship_version_id)
-        REFERENCES ship_versions(ship_instance_id, mod_version_id, id),
+    -- Bind ship_instance_id to build_id 
+    FOREIGN KEY (ship_instance_id, build_id)
+        REFERENCES builds(ship_instance_id, id),
 
     -- Bind ship_weapon_slot_id to ship_instance_id
     FOREIGN KEY (ship_weapon_slot_id, ship_instance_id)

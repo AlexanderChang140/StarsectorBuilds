@@ -53,8 +53,7 @@ CREATE TABLE IF NOT EXISTS ship_versions
     ship_image_id integer,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, ship_id),
-    UNIQUE (ship_instance_id, mod_version_id, id),
-    UNIQUE (ship_id, id),
+    UNIQUE (ship_id, ship_instance_id, id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (ship_id, ship_instance_id) REFERENCES ship_instances(ship_id, id) ON DELETE CASCADE,
     FOREIGN KEY (ship_image_id) REFERENCES images(id)
