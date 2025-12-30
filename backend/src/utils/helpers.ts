@@ -13,15 +13,6 @@ export function allValuesNull(record: Record<PropertyKey, unknown>): boolean {
     return Object.values(record).every((value) => value === null);
 }
 
-export function assertDefined<T>(
-    value: T,
-    message?: string,
-): asserts value is NonNullable<T> {
-    if (value == null) {
-        throw new Error(message ?? 'Value is null or undefined');
-    }
-}
-
 export function remapKeys<T>(
     record: Record<string, unknown>,
     mapping: Record<string, keyof T>,

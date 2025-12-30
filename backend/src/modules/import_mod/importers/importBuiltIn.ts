@@ -1,7 +1,7 @@
 import type { PoolClient } from 'pg';
 
 import type { ModInfo } from './importMod.ts';
-import { assertDefined } from '../../../utils/helpers.ts';
+import { assertDefined } from "../../../utils/assert.ts";
 import { getHullmodId } from '../../hullmods/service.ts';
 import {
     getShipId,
