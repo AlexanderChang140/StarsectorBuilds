@@ -19,5 +19,5 @@ export type Options<T> = {
     order?: ColumnOrder<T>;
     limit?: number;
     offset?: number;
-    client?: PoolClient;
+    client?: PoolClient | undefined;
 };

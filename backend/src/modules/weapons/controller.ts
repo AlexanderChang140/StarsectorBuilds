@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 
-import { fetchWeaponVersions } from './service.ts';
+import { fetchWeaponVersionById, fetchWeaponVersions } from './service.ts';
 import { parseWeaponVersionFields } from './utils/fieldParser.ts';
 import { parseWeaponsVersionsFilter } from './utils/filterParser.ts';
 import { parseWeaponVersionsSort } from './utils/sortParser.ts';
@@ -22,7 +22,10 @@ export async function getWeaponVersions(
         }
 
         const fields = parseWeaponVersionFields(query);
-        const filter = parseWeaponsVersionsFilter(query, ['weapon_id']);
+        const filter = {
+            ...parseWeaponsVersionsFilter(query, ['weapon_id']),
+            weapon_id: [weaponId],
+        };
         const order = parseWeaponVersionsSort(query);
         const limit = parseLimit(query);
         const offset = parseOffset(query);
@@ -52,6 +55,44 @@ export async function getAllWeaponVersions(
         const options = { filter, order, limit, offset };
         const result = await fetchWeaponVersions(fields, options);
         res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error 500' });
+    }
+}
+
+export async function getWeaponVersion(
+    req: Request,
+    res: Response,
+): Promise<void> {
+    try {
+        const query = req.query;
+
+        const weaponVersionId = Number(req.params.weaponVersionId);
+
+        if (isNaN(weaponVersionId)) {
+            res.status(400).json({ error: 'Invalid weapon version ID' });
+            return;
+        }
+
+        const fields = parseWeaponVersionFields(query);
+        const filter = parseWeaponsVersionsFilter(query, ['weapon_version_id']);
+
+        const order = parseWeaponVersionsSort(query);
+        const limit = 1;
+
+        const options = { filter, order, limit };
+        const result = await fetchWeaponVersionById(
+            weaponVersionId,
+            fields,
+            options,
+        );
+
+        if (result[0] === undefined) {
+            res.status(400).json({ error: 'No weapon version found' });
+            return;
+        }
+        res.json(result[0]);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });

@@ -24,11 +24,64 @@ export async function fetchWeaponVersions<
     selection: TSelection,
     options: Options<DB['weapon_versions_full']>,
 ): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
-    const safeOptions = {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: sanitizeFilter(options.filter, WEAPON_VERSIONS_FULL_COLUMNS),
         order: sanitizeOrder(options.order),
         limit: sanitizeLimit(options.limit, 20),
         offset: sanitizeOffset(options.offset),
+        client: options.client,
+    };
+
+    const result = await selectFull(
+        'weapon_versions_full',
+        selection,
+        safeOptions,
+    );
+
+    return result;
+}
+
+export async function fetchWeaponVersionsById<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(
+    weaponId: number,
+    selection: TSelection,
+    options: Options<DB['weapon_versions_full']>,
+): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
+        filter: {
+            ...sanitizeFilter(options.filter, WEAPON_VERSIONS_FULL_COLUMNS),
+            weapon_id: [weaponId],
+        },
+        order: sanitizeOrder(options.order),
+        limit: sanitizeLimit(options.limit, 20),
+        offset: sanitizeOffset(options.offset),
+        client: options.client,
+    };
+
+    const result = await selectFull(
+        'weapon_versions_full',
+        selection,
+        safeOptions,
+    );
+
+    return result;
+}
+
+export async function fetchWeaponVersionById<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(
+    weaponVersionId: number,
+    selection: TSelection,
+    options: Options<DB['weapon_versions_full']>,
+): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
+        filter: {
+            ...sanitizeFilter(options.filter, WEAPON_VERSIONS_FULL_COLUMNS),
+            weapon_version_id: [weaponVersionId],
+        },
+        order: sanitizeOrder(options.order),
+        limit: 1,
         client: options.client,
     };
 
