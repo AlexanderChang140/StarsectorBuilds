@@ -40,6 +40,32 @@ export async function getWeaponVersions(
     }
 }
 
+export async function getLatestWeaponVersion(
+    req: Request,
+    res: Response,
+): Promise<void> {
+    try {
+        const query = req.query;
+
+        const weaponId = Number(req.params.weaponId);
+
+        if (isNaN(weaponId)) {
+            res.status(400).json({ error: 'Invalid weapon ID' });
+            return;
+        }
+
+        const fields = parseWeaponVersionFields(query);
+        const filter = parseWeaponsVersionsFilter(query, ['weapon_id']);
+
+        const options = { filter };
+        const result = await fetchWeaponVersionsById(weaponId, fields, options);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error 500' });
+    }
+}
+
 export async function getAllWeaponVersions(
     req: Request,
     res: Response,

@@ -41,6 +41,35 @@ export async function fetchWeaponVersions<
     return result;
 }
 
+export async function fetchLatestWeaponVersionById<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(
+    weaponVersionId: number,
+    selection: TSelection,
+    options?: Options<DB['weapon_versions_full']>,
+): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
+        filter: {
+            weapon_version_id: [weaponVersionId],
+        },
+        order: {
+            major: 'DESC',
+            minor: 'DESC',
+            patch: 'DESC',
+        },
+        limit: 1,
+        client: options?.client,
+    };
+
+    const result = await selectFull(
+        'weapon_versions_full',
+        selection,
+        safeOptions,
+    );
+
+    return result;
+}
+
 export async function fetchWeaponVersionsById<
     TSelection extends readonly (keyof DB['weapon_versions_full'])[],
 >(
