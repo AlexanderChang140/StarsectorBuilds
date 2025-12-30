@@ -1,6 +1,10 @@
 import type { Request, Response } from 'express';
 
-import { fetchWeaponVersionById, fetchWeaponVersions } from './service.ts';
+import {
+    fetchWeaponVersionById,
+    fetchWeaponVersions,
+    fetchWeaponVersionsById,
+} from './service.ts';
 import { parseWeaponVersionFields } from './utils/fieldParser.ts';
 import { parseWeaponsVersionsFilter } from './utils/filterParser.ts';
 import { parseWeaponVersionsSort } from './utils/sortParser.ts';
@@ -22,16 +26,13 @@ export async function getWeaponVersions(
         }
 
         const fields = parseWeaponVersionFields(query);
-        const filter = {
-            ...parseWeaponsVersionsFilter(query, ['weapon_id']),
-            weapon_id: [weaponId],
-        };
+        const filter = parseWeaponsVersionsFilter(query, ['weapon_id']);
         const order = parseWeaponVersionsSort(query);
         const limit = parseLimit(query);
         const offset = parseOffset(query);
 
         const options = { filter, order, limit, offset };
-        const result = await fetchWeaponVersions(fields, options);
+        const result = await fetchWeaponVersionsById(weaponId, fields, options);
         res.json(result);
     } catch (err) {
         console.error(err);
@@ -77,11 +78,9 @@ export async function getWeaponVersion(
 
         const fields = parseWeaponVersionFields(query);
         const filter = parseWeaponsVersionsFilter(query, ['weapon_version_id']);
-
         const order = parseWeaponVersionsSort(query);
-        const limit = 1;
 
-        const options = { filter, order, limit };
+        const options = { filter, order };
         const result = await fetchWeaponVersionById(
             weaponVersionId,
             fields,
