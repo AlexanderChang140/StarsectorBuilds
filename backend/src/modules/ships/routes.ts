@@ -16,7 +16,7 @@ router.get('/ship-versions', (req, res) => {
     getAllShipVersions(req, res);
 });
 
-router.get('/ship-versions/shipVersionId/slots', (req, res) => {
+router.get('/ship-versions/:shipVersionId/slots', (req, res) => {
     getShipWeaponSlots(req, res);
 });
 
