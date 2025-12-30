@@ -8,7 +8,7 @@ type TableProps<T> = {
         label: string;
         accessor: keyof T;
         sortable: boolean;
-        sortByOrder: SortOrder;
+        sortByOrder: SortOrder | undefined;
     }[];
     initialData: T[];
     links?: Partial<Record<keyof T, (row: T) => string>>;

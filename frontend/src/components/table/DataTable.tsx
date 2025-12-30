@@ -3,14 +3,15 @@ import { useSearchParams } from 'react-router';
 import PaginationControls from './pagination/PaginationControls';
 import Table from './Table';
 import useFetch from '../../hooks/useFetch';
-import useTableQuery, { buildQueryString } from '../../hooks/useTableQuery';
+import useTableQuery from '../../hooks/useTableQuery';
 import type { ApiEndpoint } from '../../types/api';
 import type { SortOrder } from '../../types/generic';
+import { buildApiRequest } from '../../utils/apiRequestBuilder.ts';
 
 import './DataTable.css';
 
 interface DataTableProps<
-    TData extends object,
+    TData extends Record<string, unknown>,
     TTableKeys extends readonly (keyof TData)[],
     TKeyOrder extends readonly (keyof TData)[],
 > {
@@ -25,7 +26,7 @@ interface DataTableProps<
 }
 
 export function DataTable<
-    TData extends object,
+    TData extends Record<string, unknown>,
     TTableKeys extends readonly (keyof TData)[],
     TKeyOrder extends readonly (keyof TData)[],
 >({
@@ -45,19 +46,27 @@ export function DataTable<
         setSearchParams({ page: (pageIndex + 1).toString() });
     };
 
-    const query = useTableQuery<TData, TTableKeys>(tableKeys, {
+    const { filter, sort, order, limit, offset } = useTableQuery<
+        TData,
+        TTableKeys
+    >(tableKeys, {
         limit: defaultLimit,
         sort: initialSort?.sortField,
         order: initialSort?.sortOrder,
     });
 
-    const queryString = buildQueryString({
-        ...query,
-        fields: tableKeys.join(','),
+    const request = buildApiRequest({
+        endpoint,
+        params: {
+            ...filter,
+            sort,
+            order,
+            limit,
+            offset,
+            fields: tableKeys.join(','),
+        },
     });
-    const { data, loading, error } = useFetch<TData[]>(
-        `${endpoint}?${queryString}`,
-    );
+    const { data, loading, error } = useFetch<TData[]>(request);
 
     if (error) return <div>Error: {error.message}</div>;
     if (loading || data === undefined) return <div>Loading...</div>;
@@ -67,7 +76,7 @@ export function DataTable<
     const columns = keyOrder
         .filter((key: keyof TData) => keys.includes(key))
         .map((key) => {
-            const sortByOrder: SortOrder = '';
+            const sortByOrder: SortOrder | undefined = undefined;
             return {
                 label: displayMap[key] ?? String(key),
                 accessor: key,

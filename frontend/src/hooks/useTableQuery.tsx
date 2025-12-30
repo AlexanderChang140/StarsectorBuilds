@@ -3,35 +3,15 @@ import { useLocation } from 'react-router';
 import type { SortOrder } from '../types/generic';
 import { parseIntOrNaN } from '../utils/parse';
 
+type StringKeys<T> = Extract<keyof T, string>;
+
 export type TableQuery<T> = {
     filter?: Partial<Record<keyof T, string[]>>;
-    sort?: keyof T;
+    sort?: StringKeys<T>;
     order?: SortOrder;
     limit?: number;
     offset?: number;
 };
-
-export function buildQueryString<T extends object | undefined>(query?: T) {
-    if (!query) return '';
-    const params = new URLSearchParams();
-
-    function appendParam(key: string, value: unknown) {
-        if (Array.isArray(value)) {
-            value.forEach((v) => params.append(key, String(v)));
-        } else if (typeof value === 'object' && value !== null) {
-            Object.entries(value).forEach(([k, v]) =>
-                appendParam(k, v),
-            );
-        } else if (value != null) {
-            params.set(key, String(value));
-        }
-    }
-
-    Object.entries(query).forEach(([key, value]) => {
-        appendParam(key, value);
-    });
-    return params.toString();
-}
 
 export default function useTableQuery<
     T,
@@ -57,8 +37,8 @@ export default function useTableQuery<
     const rawSort = query.get('sort');
     const sort =
         rawSort && validSortKeys.includes(rawSort as keyof T)
-            ? (rawSort as keyof T)
-            : defaults?.sort;
+            ? (rawSort as StringKeys<T>)
+            : (defaults?.sort as StringKeys<T>);
 
     const rawOrder = query.get('order');
     const order =
