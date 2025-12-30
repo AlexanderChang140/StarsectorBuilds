@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 
-export default function useFetch<T>(url: string, options?: RequestInit) {
+export default function useFetch<T>(url: string | null, options?: RequestInit) {
     const [data, setData] = useState<T | null | undefined>(undefined);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
+        if (!url) {
+            setData(undefined);
+            setLoading(false);
+            setError(null);
+            return;
+        }
+
         const controller = new AbortController();
 
         setLoading(true);
