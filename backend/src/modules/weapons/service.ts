@@ -46,17 +46,17 @@ export async function fetchWeaponVersionsById<
 >(
     weaponId: number,
     selection: TSelection,
-    options: Options<DB['weapon_versions_full']>,
+    options?: Options<DB['weapon_versions_full']>,
 ): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
     const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: {
-            ...sanitizeFilter(options.filter, WEAPON_VERSIONS_FULL_COLUMNS),
+            ...sanitizeFilter(options?.filter, WEAPON_VERSIONS_FULL_COLUMNS),
             weapon_id: [weaponId],
         },
-        order: sanitizeOrder(options.order),
-        limit: sanitizeLimit(options.limit, 20),
-        offset: sanitizeOffset(options.offset),
-        client: options.client,
+        order: sanitizeOrder(options?.order),
+        limit: sanitizeLimit(options?.limit, 20),
+        offset: sanitizeOffset(options?.offset),
+        client: options?.client,
     };
 
     const result = await selectFull(
@@ -73,16 +73,14 @@ export async function fetchWeaponVersionById<
 >(
     weaponVersionId: number,
     selection: TSelection,
-    options: Options<DB['weapon_versions_full']>,
+    options?: Options<DB['weapon_versions_full']>,
 ): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
     const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: {
-            ...sanitizeFilter(options.filter, WEAPON_VERSIONS_FULL_COLUMNS),
             weapon_version_id: [weaponVersionId],
         },
-        order: sanitizeOrder(options.order),
         limit: 1,
-        client: options.client,
+        client: options?.client,
     };
 
     const result = await selectFull(

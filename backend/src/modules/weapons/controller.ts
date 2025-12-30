@@ -77,15 +77,7 @@ export async function getWeaponVersion(
         }
 
         const fields = parseWeaponVersionFields(query);
-        const filter = parseWeaponsVersionsFilter(query, ['weapon_version_id']);
-        const order = parseWeaponVersionsSort(query);
-
-        const options = { filter, order };
-        const result = await fetchWeaponVersionById(
-            weaponVersionId,
-            fields,
-            options,
-        );
+        const result = await fetchWeaponVersionById(weaponVersionId, fields);
 
         if (result[0] === undefined) {
             res.status(400).json({ error: 'No weapon version found' });
