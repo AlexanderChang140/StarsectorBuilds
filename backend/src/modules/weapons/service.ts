@@ -47,7 +47,7 @@ export async function fetchLatestWeaponVersionById<
     weaponVersionId: number,
     selection: TSelection,
     options?: Options<DB['weapon_versions_full']>,
-): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
+): Promise<Projection<WeaponVersionDTO, TSelection> | null> {
     const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: {
             weapon_version_id: [weaponVersionId],
@@ -67,7 +67,7 @@ export async function fetchLatestWeaponVersionById<
         safeOptions,
     );
 
-    return result;
+    return result[0] ?? null;
 }
 
 export async function fetchWeaponVersionsById<
@@ -103,7 +103,7 @@ export async function fetchWeaponVersionById<
     weaponVersionId: number,
     selection: TSelection,
     options?: Options<DB['weapon_versions_full']>,
-): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
+): Promise<Projection<WeaponVersionDTO, TSelection> | null> {
     const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: {
             weapon_version_id: [weaponVersionId],
@@ -118,7 +118,7 @@ export async function fetchWeaponVersionById<
         safeOptions,
     );
 
-    return result;
+    return result[0] ?? null;
 }
 
 export const getWeaponVersionsFull = makeSelectFull(

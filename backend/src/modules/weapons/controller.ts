@@ -59,6 +59,11 @@ export async function getLatestWeaponVersion(
 
         const options = { filter };
         const result = await fetchWeaponVersionsById(weaponId, fields, options);
+
+        if (result === null) {
+            res.status(400).json({ error: 'No weapon version found' });
+            return;
+        }
         res.json(result);
     } catch (err) {
         console.error(err);
@@ -105,11 +110,11 @@ export async function getWeaponVersion(
         const fields = parseWeaponVersionFields(query);
         const result = await fetchWeaponVersionById(weaponVersionId, fields);
 
-        if (result[0] === undefined) {
+        if (result === null) {
             res.status(400).json({ error: 'No weapon version found' });
             return;
         }
-        res.json(result[0]);
+        res.json(result);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
