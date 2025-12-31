@@ -9,6 +9,7 @@ export default function ShipTable() {
         typeof KEY_ORDER
     >({
         endpoint: '/api/ship-versions',
+        queryKey: 'shipsTable',
         displayMap,
         tableKeys: SHIP_TABLE_ROW_KEYS,
         keyOrder: KEY_ORDER,

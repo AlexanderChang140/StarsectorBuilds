@@ -12,6 +12,7 @@ export default function WeaponTable() {
         typeof KEY_ORDER
     >({
         endpoint: '/api/weapon-versions',
+        queryKey: 'weaponsTable',
         tableKeys: WEAPON_TABLE_ROW_KEYS,
         keyOrder: KEY_ORDER,
         displayMap,

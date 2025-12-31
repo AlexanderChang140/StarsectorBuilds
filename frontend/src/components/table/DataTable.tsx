@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router';
 
 import PaginationControls from '@/components/table/pagination/PaginationControls';
@@ -9,6 +10,7 @@ import type { SortOrder } from '@/types/generic';
 import { buildApiRequest } from '@/utils/apiRequestBuilder.ts';
 
 import './DataTable.css';
+import fetchSafe from '@/utils/fetchSafe';
 
 interface DataTableProps<
     TData extends Record<string, unknown>,
@@ -16,6 +18,7 @@ interface DataTableProps<
     TKeyOrder extends readonly (keyof TData)[],
 > {
     endpoint: ApiEndpoint;
+    queryKey: string;
     tableKeys: TTableKeys;
     keyOrder: TKeyOrder;
     displayMap: Partial<Record<TKeyOrder[number], string>>;
@@ -31,6 +34,7 @@ export function DataTable<
     TKeyOrder extends readonly (keyof TData)[],
 >({
     endpoint,
+    queryKey,
     tableKeys,
     keyOrder,
     displayMap,
@@ -66,10 +70,14 @@ export function DataTable<
             fields: tableKeys.join(','),
         },
     });
-    const { data, loading, error } = useFetch<TData[]>(request);
 
-    if (error) return <div>Error: {error.message}</div>;
-    if (loading || data === undefined) return <div>Loading...</div>;
+    const { data, isPending, isError, error } = useQuery<TData[]>({
+        queryKey: [queryKey, sort, order, limit, offset],
+        queryFn: () => fetchSafe<TData[]>(request),
+    });
+
+    if (isError) return <div>Error: {error.message}</div>;
+    if (isPending) return <div>Loading...</div>;
     if (!data?.length) return <div>No data found</div>;
 
     const keys = Object.keys(data[0]) as (keyof TData)[];

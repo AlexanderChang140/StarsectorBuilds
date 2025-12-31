@@ -15,6 +15,7 @@ export default function HullmodTable() {
         typeof KEY_ORDER
     >({
         endpoint: '/api/hullmod-versions',
+        queryKey: 'hullmodsTable',
         tableKeys: HULLMOD_TABLE_ROW_KEYS,
         keyOrder: KEY_ORDER,
         displayMap,
