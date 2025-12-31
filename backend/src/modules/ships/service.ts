@@ -69,6 +69,31 @@ export async function fetchShipVersionsById<
     return result;
 }
 
+export async function fetchLatestShipVersionById<
+    TSelection extends readonly (keyof DB['ship_versions_full'])[],
+>(
+    shipId: number,
+    selection: TSelection,
+    options?: Options<DB['ship_versions_full']>,
+): Promise<Projection<ShipVersionDTO, TSelection> | null> {
+    const safeOptions = {
+        filter: {
+            ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
+            ship_id: [shipId],
+        },
+        limit: 1,
+        client: options?.client,
+    };
+
+    const result = await selectFull(
+        'ship_versions_full',
+        selection,
+        safeOptions,
+    );
+
+    return result[0] ?? null;
+}
+
 export async function fetchShipInstanceId(shipVersionId: number) {
     const result = await getShipInstanceId({ where: { id: shipVersionId } });
     return result[0]?.ship_instance_id ?? null;

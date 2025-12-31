@@ -34,6 +34,30 @@ export async function getShipVersions(
         const options = { filter, order, limit, offset };
 
         const result = await fetchShipVersionsById(shipId, fields, options);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error 500' });
+    }
+}
+
+export async function getLatestShipVersion(
+    req: Request,
+    res: Response,
+): Promise<void> {
+    try {
+        const query = req.query;
+
+        const shipId = Number(req.params.shipId);
+
+        if (isNaN(shipId)) {
+            res.status(400).json({ error: 'Invalid ship ID' });
+            return;
+        }
+
+        const fields = parseShipVersionFields(query);
+
+        const result = await fetchShipVersionsById(shipId, fields);
 
         if (result == null) {
             res.status(404).json({ error: 'Ship version not found' });
@@ -46,6 +70,7 @@ export async function getShipVersions(
         res.status(500).json({ error: 'Error 500' });
     }
 }
+
 
 export async function getAllShipVersions(req: Request, res: Response) {
     try {
