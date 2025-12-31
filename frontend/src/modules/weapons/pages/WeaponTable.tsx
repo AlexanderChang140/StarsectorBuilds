@@ -15,7 +15,10 @@ export default function WeaponTable() {
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
-            linkFn: (row) => `/weapons/${Number(row.weapon_id)}`,
+            linkFn: (row) =>
+                `/weapons/${Number(row.weapon_id)}/version/${Number(
+                    row.weapon_version_id,
+                )}`,
         },
         title: 'Weapons',
     });

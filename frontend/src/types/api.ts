@@ -1,13 +1,16 @@
 export type WeaponRoute = `${WeaponSubRoute}`;
 export type WeaponSubRoute =
     | `weapons/${number}/versions`
+    | `weapons/${number}/versions/latest`
     | 'weapon-versions'
     | `weapon-versions/${number}`;
 
 export type ShipRoute = `${ShipSubRoute}`;
 export type ShipSubRoute =
-    | 'ship-versions'
     | `ships/${number}/versions`
+    | `ships/${number}/versions/latest`
+    | 'ship-versions'
+    | `ship-versions/${number}`
     | `ship-versions/${number}/slots`;
 
 export type HullmodRoute = `${HullmodSubRoute}`;

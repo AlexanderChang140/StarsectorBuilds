@@ -15,7 +15,8 @@ export default function ShipTable() {
         initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
         link: {
             linkField: 'display_name',
-            linkFn: (row) => `/ships/${Number(row.ship_id)}`,
+            linkFn: (row) =>
+                `/ships/${Number(row.ship_id)}/${Number(row.ship_version_id)}`,
         },
         title: 'Ships',
     });

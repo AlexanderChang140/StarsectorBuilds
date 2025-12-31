@@ -1,52 +1,88 @@
 import type { WeaponVersionDTO } from '@shared/weapons/types';
 import { useParams } from 'react-router';
 
-import useFetch from '../../../hooks/useFetch';
-import '../../../components/Display.css';
-import { parseIntOrNaN } from '../../../utils/parse';
+import UseVersionsQuery from '@/hooks/useVersionsQuery.tsx';
+import { sortVersions } from '@/modules/display/versionSorter.tsx';
+import { parseIntOrNaN } from '@/utils/parse';
+
+import '@/components/Display.css';
 
 export default function WeaponDisplay() {
-    const { id } = useParams<{ id: string }>();
-    const parsedId = parseIntOrNaN(id);
-    const { data, loading, error } = useFetch<WeaponVersionDTO[]>(
-        `/api/weapons/${parsedId}/versions`,
-    );
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error.message}</div>;
-    if (data === undefined || data === null || data.length === 0)
-        return <div>No data found</div>;
+    const { weaponId, versionId } = useParams();
+    const parsedWeaponId = parseIntOrNaN(weaponId);
+    const parsedVersionId = parseIntOrNaN(versionId);
+
+    const versionsKeys = [
+        'weapon_version_id',
+        'major',
+        'minor',
+        'patch',
+    ] as const satisfies readonly (keyof WeaponVersionDTO)[];
+
+    const versionKeys = [
+        'display_name',
+        'text1',
+        'text2',
+        'turret_image_file_path',
+        'turret_gun_image_file_path',
+    ] satisfies readonly (keyof WeaponVersionDTO)[];
+
+    const { versionsQuery, versionQuery } = UseVersionsQuery<
+        WeaponVersionDTO,
+        typeof versionsKeys,
+        typeof versionKeys
+    >({
+        entityId: parsedWeaponId,
+        entityQueryKey: 'weaponVersions',
+        versionsKeys,
+        versionsEndpoint: `/api/weapons/${parsedWeaponId}/versions`,
+        versionId: parsedVersionId,
+        versionQueryKey: 'weaponVersion',
+        versionKeys,
+        versionEndpoint: `/api/weapon-versions/${parsedVersionId}`,
+        latestVersionEndpoint: `/api/weapons/${parsedWeaponId}/versions/latest`,
+    });
+
+    if (versionQuery.isError)
+        return <div>Error: {versionQuery.error.message}</div>;
+    if (versionQuery.isPending) return <div>Loading...</div>;
+    if (!versionQuery.data) return <div>No data found</div>;
+    const versions = sortVersions(versionsQuery.data, 'weapon_version_id');
+
+    const data = versionQuery.data;
 
     return (
-        <div>
-            <div className="display">
-                <div className="title">
-                    <h1>{data[0].display_name}</h1>
-                    <hr></hr>
+        <div className="display">
+            <select name="versions">{versions}</select>
+            <div className="title">
+                <h1>{data.display_name}</h1>
+                <hr></hr>
+            </div>
+            <div className="body">
+                <p>{data.text1}</p>
+                <p>{data.text2}</p>
+            </div>
+            <div className="profile">
+                <div className="name">
+                    <h3>{data.display_name}</h3>
                 </div>
-                <div className="body">
-                    <p>{data[0].text1}</p>
-                    <p>{data[0].text2}</p>
-                </div>
-                <div className="profile">
-                    <div className="name">
-                        <h3>{data[0].display_name}</h3>
-                    </div>
-                    <div className="image-container">
-                        <img
-                            className="base"
-                            src={`${import.meta.env.VITE_API_URL}/images/${
-                                data[0].turret_image_file_path
-                            }`}
-                        ></img>
+                <div className="image-container">
+                    <img
+                        className="base"
+                        src={`${import.meta.env.VITE_API_URL}/images/${
+                            data.turret_image_file_path
+                        }`}
+                    ></img>
+                    {data.turret_gun_image_file_path && (
                         <img
                             className="overlay"
                             src={`${import.meta.env.VITE_API_URL}/images/${
-                                data[0].turret_gun_image_file_path
+                                data.turret_gun_image_file_path
                             }`}
                         ></img>
-                    </div>
-                    <div className="stats">Stats</div>
+                    )}
                 </div>
+                <div className="stats">Stats</div>
             </div>
         </div>
     );

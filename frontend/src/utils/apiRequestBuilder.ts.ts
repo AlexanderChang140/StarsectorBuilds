@@ -28,3 +28,7 @@ export function buildQueryParams<T extends object | undefined>(query?: T) {
     });
     return params.toString();
 }
+
+export function buildFields<TData>(keys: readonly (keyof TData)[]) {
+    return keys.join(',');
+}
