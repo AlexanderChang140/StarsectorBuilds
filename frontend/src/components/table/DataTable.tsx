@@ -3,14 +3,13 @@ import { useSearchParams } from 'react-router';
 
 import PaginationControls from '@/components/table/pagination/PaginationControls';
 import Table from '@/components/table/Table';
-import useFetch from '@/hooks/useFetch';
 import useTableQuery from '@/hooks/useTableQuery';
 import type { ApiEndpoint } from '@/types/api';
 import type { SortOrder } from '@/types/generic';
 import { buildApiRequest } from '@/utils/apiRequestBuilder.ts';
+import fetchSafe from '@/utils/fetchSafe';
 
 import './DataTable.css';
-import fetchSafe from '@/utils/fetchSafe';
 
 interface DataTableProps<
     TData extends Record<string, unknown>,
