@@ -5,14 +5,6 @@
 
 import type { ColumnType } from "kysely";
 
-export type ArrayType<T> = ArrayTypeImpl<T> extends (infer U)[]
-  ? U[]
-  : ArrayTypeImpl<T>;
-
-export type ArrayTypeImpl<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S[], I[], U[]>
-  : T[];
-
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
@@ -280,8 +272,9 @@ export interface ShipLogisticStats {
 }
 
 export interface ShipPositions {
-  center: ArrayType<Numeric> | null;
   ship_instance_id: number;
+  x: Numeric;
+  y: Numeric;
 }
 
 export interface Ships {
@@ -322,13 +315,6 @@ export interface ShipStats {
 export interface ShipSystemData {
   display_name: string | null;
   ship_system_instance_id: number;
-}
-
-export interface ShipSystemDesc {
-  ship_system_instance_id: number;
-  text1: string | null;
-  text2: string | null;
-  text3: string | null;
 }
 
 export interface ShipSystemDescs {
@@ -388,7 +374,6 @@ export interface ShipVersionsFull {
   acceleration: number | null;
   armor_rating: number | null;
   base_value: number | null;
-  center: ArrayType<Numeric> | null;
   cr_deployment_cost: number | null;
   cr_loss_per_sec: Numeric | null;
   cr_recovery: Numeric | null;
@@ -438,6 +423,8 @@ export interface ShipVersionsFull {
   text1: string | null;
   text2: string | null;
   turn_acceleration: number | null;
+  x: Numeric | null;
+  y: Numeric | null;
 }
 
 export interface ShipWeaponSlots {
@@ -446,10 +433,11 @@ export interface ShipWeaponSlots {
   code: string;
   id: Generated<number>;
   mount_type_id: number;
-  position: ArrayType<Numeric>;
   ship_instance_id: number;
   weapon_size_id: number;
   weapon_type_id: number;
+  x: Numeric;
+  y: Numeric;
 }
 
 export interface Users {
@@ -747,7 +735,6 @@ export interface DB {
   ship_specs: ShipSpecs;
   ship_stats: ShipStats;
   ship_system_data: ShipSystemData;
-  ship_system_desc: ShipSystemDesc;
   ship_system_descs: ShipSystemDescs;
   ship_system_instances: ShipSystemInstances;
   ship_system_versions: ShipSystemVersions;

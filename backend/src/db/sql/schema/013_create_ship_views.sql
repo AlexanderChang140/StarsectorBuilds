@@ -57,7 +57,8 @@ SELECT
     sd.text1,
     sd.text2,
 
-    spo.center,
+    spo.x,
+    spo.y,
 
     sls.min_crew,
     sls.max_crew,

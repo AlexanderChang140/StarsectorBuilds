@@ -1,4 +1,4 @@
-import type { DB } from "../../db/db.js";
+import type { DB } from '../../db/db.js';
 
 export const SHIP_VERSIONS_FULL_COLUMNS = [
     'ship_version_id',
@@ -46,7 +46,8 @@ export const SHIP_VERSIONS_FULL_COLUMNS = [
     'text1',
     'text2',
 
-    'center',
+    'x',
+    'y',
 
     'min_crew',
     'max_crew',

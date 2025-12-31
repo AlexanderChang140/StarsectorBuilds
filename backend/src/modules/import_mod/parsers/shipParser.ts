@@ -294,6 +294,7 @@ function buildShipStats(record: ShipRecord): PreparedShipStats {
         acceleration: convertInteger(record['acceleration']),
         deceleration: convertInteger(record['deceleration']),
         max_turn_rate: convertInteger(record['max turn rate']),
+        max_speed: convertInteger(record['max speed']),
         turn_acceleration: convertInteger(record['turn acceleration']),
         mass: convertInteger(record['mass']),
     };
@@ -312,7 +313,8 @@ function buildShipPosition(shipData: ShipData): PreparedShipPosition {
     const [x, y] = shipData.center ?? [];
     const center: [number, number] = !isNaN(+x) && !isNaN(+y) ? [x, y] : [0, 0];
     return {
-        center,
+        x: center[0],
+        y: center[1],
     };
 }
 
@@ -339,7 +341,8 @@ function buildShipWeaponSlots(shipData: ShipData): PreparedShipWeaponSlot[] {
               code: value.id,
               angle: value.angle,
               arc: value.arc,
-              position: value.locations,
+              x: value.locations[0],
+              y: value.locations[1],
           }))
         : [];
 }

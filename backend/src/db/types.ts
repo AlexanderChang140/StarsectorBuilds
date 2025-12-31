@@ -1,15 +1,23 @@
-import type { Numeric, ArrayType, Generated } from './db.js';
+import type { Numeric, Generated } from './db.js';
+
+type IsNullable<T> = null | undefined extends T ? true : false;
 
 export type InsertableRow<T> = {
     [K in keyof T as T[K] extends { __insert__: never }
         ? never
-        : K]?: InsertableValue<T[K]>;
+        : IsNullable<InsertableValue<T[K]>> extends true
+        ? never
+        : K]: InsertableValue<T[K]>;
+} & {
+    [K in keyof T as T[K] extends { __insert__: never }
+        ? never
+        : IsNullable<InsertableValue<T[K]>> extends true
+        ? K
+        : never]?: InsertableValue<T[K]>;
 };
 
 export type InsertableValue<T> = T extends Numeric
     ? number | string
-    : T extends ArrayType<infer U>
-    ? InsertableValue<U>[]
     : T extends { __insert__: infer I }
     ? I | null
     : T;

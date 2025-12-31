@@ -2,7 +2,6 @@ export interface ShipVersionDTO {
     acceleration: number | null;
     armor_rating: number | null;
     base_value: number | null;
-    center: string[] | null;
     cr_deployment_cost: number | null;
     cr_loss_per_sec: string | null;
     cr_recovery: string | null;
@@ -52,4 +51,19 @@ export interface ShipVersionDTO {
     text1: string | null;
     text2: string | null;
     turn_acceleration: number | null;
+    x: string;
+    y: string;
+}
+
+export interface ShipWeaponSlotDTO {
+    angle: string;
+    arc: string;
+    code: string;
+    id: number;
+    mount_type_id: number;
+    ship_instance_id: number;
+    weapon_size_id: number;
+    weapon_type_id: number;
+    x: string;
+    y: string;
 }

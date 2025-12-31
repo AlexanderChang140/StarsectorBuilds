@@ -34,6 +34,7 @@ export type PreparedShipStats = {
     acceleration: number | null;
     deceleration: number | null;
     max_turn_rate: number | null;
+    max_speed: number | null;
     turn_acceleration: number | null;
     mass: number | null;
 };
@@ -51,7 +52,8 @@ export type PreparedShipDesc = {
 };
 
 export type PreparedShipPosition = {
-    center: [number, number] | null;
+    x: number;
+    y: number;
 };
 
 export type PreparedShipLogisticStats = {
@@ -73,7 +75,8 @@ export type PreparedShipWeaponSlot = {
     code: string;
     angle: number;
     arc: number;
-    position: [number, number];
+    x: number;
+    y: number;
 };
 
 export type PreparedShieldStats = {

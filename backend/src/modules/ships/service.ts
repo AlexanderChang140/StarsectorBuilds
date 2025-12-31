@@ -1,4 +1,4 @@
-import type { ShipVersionDTO } from '@shared/ships/types.ts';
+import type { ShipVersionDTO, ShipWeaponSlotDTO } from '@shared/ships/types.ts';
 import type { Projection } from '@shared/types.ts';
 
 import { SHIP_VERSIONS_FULL_COLUMNS } from './constants.ts';
@@ -108,7 +108,9 @@ export async function fetchShipInstanceId(shipVersionId: number) {
     return result[0]?.ship_instance_id ?? null;
 }
 
-export async function fetchShipWeaponSlots(shipInstanceId: number) {
+export async function fetchShipWeaponSlots(
+    shipInstanceId: number,
+): Promise<ShipWeaponSlotDTO[]> {
     return getShipWeaponSlots({ where: { ship_instance_id: shipInstanceId } });
 }
 
@@ -124,10 +126,11 @@ const SHIP_WEAPON_SLOT_COLUMNS = [
     'code',
     'id',
     'mount_type_id',
-    'position',
     'ship_instance_id',
     'weapon_size_id',
     'weapon_type_id',
+    'x',
+    'y',
 ] as const satisfies readonly (keyof DB['ship_weapon_slots'])[];
 
 export const getShipWeaponSlots = makeSelect(
@@ -153,6 +156,8 @@ const REQUIRED_SHIP_VERSION_KEYS = [
     'minor',
     'patch',
     'data_hash',
+    'x',
+    'y',
 ] satisfies readonly (keyof DB['ship_versions_full'])[];
 
 export async function getShipVersionsFull<

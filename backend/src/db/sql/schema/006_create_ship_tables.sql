@@ -113,7 +113,8 @@ CREATE TABLE IF NOT EXISTS ship_descs (
 
 CREATE TABLE IF NOT EXISTS ship_positions (
     ship_instance_id integer NOT NULL,
-    center numeric[2],
+    x numeric NOT NULL,
+    y numeric NOT NULL,
     PRIMARY KEY (ship_instance_id),
     FOREIGN KEY (ship_instance_id) REFERENCES ship_instances(id) ON DELETE CASCADE
 );
@@ -144,7 +145,8 @@ CREATE TABLE IF NOT EXISTS ship_weapon_slots
     mount_type_id integer NOT NULL,
     angle numeric NOT NULL,
     arc numeric NOT NULL,
-    position numeric[2] NOT NULL,
+    x numeric NOT NULL,
+    y numeric NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (id, ship_instance_id),
     UNIQUE (ship_instance_id, code),
