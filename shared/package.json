@@ -1,6 +1,8 @@
 {
   "name": "shared",
-  "scripts": {
-  },
-  "type": "module"
+  "scripts": {},
+  "type": "module",
+  "dependencies": {
+    "zod": "^4.2.1"
+  }
 }

@@ -21,7 +21,8 @@
         "kysely": "^0.28.9",
         "pg": "^8.16.3",
         "pg-copy-streams": "^7.0.0",
-        "sharp": "^0.34.4"
+        "sharp": "^0.34.4",
+        "zod": "^4.2.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.38.0",
