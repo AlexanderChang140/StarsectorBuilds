@@ -1,7 +1,8 @@
-import TableBody from './TableBody';
-import TableHead from './TableHead';
-import type { SortOrder } from '../../types/generic';
-import './Table.css';
+import TableBody from '@/components/table/TableBody';
+import TableHead from '@/components/table/TableHead';
+import type { SortOrder } from '@/types/generic';
+
+import '@/components/table/Table.css';
 
 type TableProps<T> = {
     columns: {

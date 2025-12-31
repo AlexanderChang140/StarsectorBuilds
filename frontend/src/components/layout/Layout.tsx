@@ -1,11 +1,11 @@
 import { Link, Outlet } from 'react-router';
 
-import useAuth from '../../hooks/useAuth';
+import useAuth from '@/hooks/useAuth';
 
 import '@/styles/theme.css';
-import './Layout.css';
-import './Navbar.css';
-import './Sidebar.css';
+import '@/components/layout/Layout.css';
+import '@/components/layout/Navbar.css';
+import '@/components/layout/Sidebar.css';
 
 function Layout() {
     const { user, logout } = useAuth();

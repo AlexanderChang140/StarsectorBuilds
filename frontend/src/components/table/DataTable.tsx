@@ -1,12 +1,12 @@
 import { useSearchParams } from 'react-router';
 
-import PaginationControls from './pagination/PaginationControls';
-import Table from './Table';
-import useFetch from '../../hooks/useFetch';
-import useTableQuery from '../../hooks/useTableQuery';
-import type { ApiEndpoint } from '../../types/api';
-import type { SortOrder } from '../../types/generic';
-import { buildApiRequest } from '../../utils/apiRequestBuilder.ts';
+import PaginationControls from '@/components/table/pagination/PaginationControls';
+import Table from '@/components/table/Table';
+import useFetch from '@/hooks/useFetch';
+import useTableQuery from '@/hooks/useTableQuery';
+import type { ApiEndpoint } from '@/types/api';
+import type { SortOrder } from '@/types/generic';
+import { buildApiRequest } from '@/utils/apiRequestBuilder.ts';
 
 import './DataTable.css';
 

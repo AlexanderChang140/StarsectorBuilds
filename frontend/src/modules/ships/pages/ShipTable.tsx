@@ -1,6 +1,6 @@
-import { DataTable } from '../../../components/table/DataTable';
-import { humanizeKeys } from '../../../utils/humanizeKeys';
-import { SHIP_TABLE_ROW_KEYS, type ShipTableRows } from '../types';
+import { DataTable } from '@/components/table/DataTable';
+import { SHIP_TABLE_ROW_KEYS, type ShipTableRows } from '@/modules/ships/types';
+import { humanizeKeys } from '@/utils/humanizeKeys';
 
 export default function ShipTable() {
     return DataTable<

@@ -1,16 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 
-import Layout from './components/layout/Layout.tsx';
-import { AuthProvider } from './modules/auth/AuthProvider.tsx';
-import Auth from './modules/auth/pages/Auth.tsx';
-import NewBuild from './modules/builds/pages/NewBuild.tsx';
-import HullmodTable from './modules/hullmods/pages/HullmodTable.tsx';
-import ShipDisplay from './modules/ships/pages/ShipDisplay.tsx';
-import ShipTable from './modules/ships/pages/ShipTable.tsx';
-import WeaponDisplay from './modules/weapons/pages/WeaponDisplay.tsx';
-import WeaponTable from './modules/weapons/pages/WeaponTable.tsx';
-import Home from './pages/Home.tsx';
-import NotFound from './pages/NotFound.tsx';
+import Layout from '@/components/layout/Layout.tsx';
+import { AuthProvider } from '@/modules/auth/AuthProvider.tsx';
+import Auth from '@/modules/auth/pages/Auth.tsx';
+import NewBuild from '@/modules/builds/pages/NewBuild.tsx';
+import HullmodTable from '@/modules/hullmods/pages/HullmodTable.tsx';
+import ShipDisplay from '@/modules/ships/pages/ShipDisplay.tsx';
+import ShipTable from '@/modules/ships/pages/ShipTable.tsx';
+import WeaponDisplay from '@/modules/weapons/pages/WeaponDisplay.tsx';
+import WeaponTable from '@/modules/weapons/pages/WeaponTable.tsx';
+import Home from '@/pages/Home.tsx';
+import NotFound from '@/pages/NotFound.tsx';
 
 const TODO = <div>TODO</div>;
 

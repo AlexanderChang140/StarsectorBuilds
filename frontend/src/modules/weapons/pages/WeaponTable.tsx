@@ -1,6 +1,9 @@
-import { DataTable } from '../../../components/table/DataTable';
-import { humanizeKeys } from '../../../utils/humanizeKeys';
-import { WEAPON_TABLE_ROW_KEYS, type WeaponTableRows } from '../types';
+import { DataTable } from '@/components/table/DataTable';
+import {
+    WEAPON_TABLE_ROW_KEYS,
+    type WeaponTableRows,
+} from '@/modules/weapons/types';
+import { humanizeKeys } from '@/utils/humanizeKeys';
 
 export default function WeaponTable() {
     return DataTable<

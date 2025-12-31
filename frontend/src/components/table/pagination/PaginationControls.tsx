@@ -1,6 +1,7 @@
-import './PaginationControls.css';
-import { clamp } from '../../../utils/math';
-import { parseIntOrNaN } from '../../../utils/parse';
+import { clamp } from '@/utils/math';
+import { parseIntOrNaN } from '@/utils/parse';
+
+import '@/components/table/pagination/PaginationControls.css';
 
 interface PaginationControlsProps {
     totalPages: number;

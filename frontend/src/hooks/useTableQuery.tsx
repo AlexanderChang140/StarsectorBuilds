@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router';
 
-import type { SortOrder } from '../types/generic';
-import { parseIntOrNaN } from '../utils/parse';
+import type { SortOrder } from '@/types/generic';
+import { parseIntOrNaN } from '@/utils/parse';
 
 type StringKeys<T> = Extract<keyof T, string>;
 

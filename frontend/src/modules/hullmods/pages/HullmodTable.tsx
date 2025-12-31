@@ -1,8 +1,12 @@
 import type { HullmodVersionDTO } from '@shared/hullmods/types';
 
-import { DataTable } from '../../../components/table/DataTable';
-import { humanizeKeys } from '../../../utils/humanizeKeys';
-import { HULLMOD_TABLE_ROW_KEYS, type HullmodTableRows } from '../types';
+import { DataTable } from '@/components/table/DataTable';
+import {
+    HULLMOD_TABLE_ROW_KEYS,
+    type HullmodTableRows,
+} from '@/modules/hullmods/types';
+import { humanizeKeys } from '@/utils/humanizeKeys';
+
 
 export default function HullmodTable() {
     return DataTable<
