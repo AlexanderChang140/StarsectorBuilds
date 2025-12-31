@@ -6,7 +6,7 @@ import Table from '@/components/table/Table';
 import useTableQuery from '@/hooks/useTableQuery';
 import type { ApiEndpoint } from '@/types/api';
 import type { SortOrder } from '@/types/generic';
-import { buildApiRequest } from '@/utils/apiRequestBuilder.ts';
+import { buildApiRequest } from '@/utils/apiRequestBuilder';
 import fetchSafe from '@/utils/fetchSafe';
 
 import './DataTable.css';

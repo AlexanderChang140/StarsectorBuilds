@@ -2,7 +2,7 @@ import type { Projection } from '@shared/types';
 import { useQuery } from '@tanstack/react-query';
 
 import type { ApiEndpoint } from '@/types/api';
-import { buildApiRequest, buildFields } from '@/utils/apiRequestBuilder.ts';
+import { buildApiRequest, buildFields } from '@/utils/apiRequestBuilder';
 import fetchSafe from '@/utils/fetchSafe';
 
 type VersionsProps<
