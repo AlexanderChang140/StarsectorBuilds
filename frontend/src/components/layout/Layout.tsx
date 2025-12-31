@@ -2,7 +2,7 @@ import { Link, Outlet } from 'react-router';
 
 import useAuth from '../../hooks/useAuth';
 
-import '@styles/theme.css';
+import '@/styles/theme.css';
 import './Layout.css';
 import './Navbar.css';
 import './Sidebar.css';

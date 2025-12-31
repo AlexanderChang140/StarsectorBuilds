@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => {
         resolve: {
             alias: [
                 {
-                    find: '@styles',
-                    replacement: path.resolve(__dirname, 'src', 'styles'),
+                    find: '@',
+                    replacement: path.resolve(__dirname, 'src'),
                 },
             ],
         },
