@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 
 import UseVersionsQuery from '@/hooks/useVersionsQuery.tsx';
 import { sortVersions } from '@/modules/display/versionSorter.tsx';
+import { imageUrl } from '@/utils/assets';
 import { parseIntOrNaN } from '@/utils/parse';
 
 import '@/components/Display.css';
@@ -69,16 +70,12 @@ export default function WeaponDisplay() {
                 <div className="image-container">
                     <img
                         className="base"
-                        src={`${import.meta.env.VITE_API_URL}/images/${
-                            data.turret_image_file_path
-                        }`}
+                        src={imageUrl(data.turret_image_file_path)}
                     ></img>
                     {data.turret_gun_image_file_path && (
                         <img
                             className="overlay"
-                            src={`${import.meta.env.VITE_API_URL}/images/${
-                                data.turret_gun_image_file_path
-                            }`}
+                            src={imageUrl(data.turret_gun_image_file_path)}
                         ></img>
                     )}
                 </div>

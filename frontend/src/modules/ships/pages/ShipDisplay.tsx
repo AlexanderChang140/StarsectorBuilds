@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 
 import UseVersionsQuery from '@/hooks/useVersionsQuery.tsx';
 import { sortVersions } from '@/modules/display/versionSorter';
+import { imageUrl } from '@/utils/assets';
 import { parseIntOrNaN } from '@/utils/parse.ts';
 
 import '@/components/Display.css';
@@ -69,9 +70,7 @@ export default function ShipDisplay() {
                     <div className="image-container">
                         <img
                             className="base"
-                            src={`${import.meta.env.VITE_API_URL}/images/${
-                                data.ship_image_file_path
-                            }`}
+                            src={imageUrl(data.ship_image_file_path)}
                         ></img>
                     </div>
                     <div className="stats">Stats</div>
