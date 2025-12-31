@@ -7,11 +7,11 @@ import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
     makeSelect,
     makeSelectCodeIdRecord,
-    makeSelectFull,
     makeSelectOne,
     selectFull,
 } from '../../db/helpers/select.ts';
 import type { Options } from '../../types/generic.ts';
+import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 import {
     sanitizeFilter,
     sanitizeLimit,
@@ -33,11 +33,7 @@ export async function fetchShipVersions<
         client: options?.client,
     };
 
-    const result = await selectFull(
-        'ship_versions_full',
-        selection,
-        safeOptions,
-    );
+    const result = await getShipVersionsFull(selection, safeOptions);
 
     return result;
 }
@@ -60,13 +56,30 @@ export async function fetchShipVersionsById<
         client: options?.client,
     };
 
-    const result = await selectFull(
-        'ship_versions_full',
-        selection,
-        safeOptions,
-    );
+    const result = await getShipVersionsFull(selection, safeOptions);
 
     return result;
+}
+
+export async function fetchShipVersionById<
+    TSelection extends readonly (keyof DB['ship_versions_full'])[],
+>(
+    shipVersionId: number,
+    selection: TSelection,
+    options?: Options<DB['ship_versions_full']>,
+): Promise<Projection<ShipVersionDTO, TSelection> | null> {
+    const safeOptions = {
+        filter: {
+            ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
+            ship_version_id: [shipVersionId],
+        },
+        limit: 1,
+        client: options?.client,
+    };
+
+    const result = await getShipVersionsFull(selection, safeOptions);
+
+    return result[0] ?? null;
 }
 
 export async function fetchLatestShipVersionById<
@@ -85,11 +98,7 @@ export async function fetchLatestShipVersionById<
         client: options?.client,
     };
 
-    const result = await selectFull(
-        'ship_versions_full',
-        selection,
-        safeOptions,
-    );
+    const result = await getShipVersionsFull(selection, safeOptions);
 
     return result[0] ?? null;
 }
@@ -127,10 +136,32 @@ export const getShipWeaponSlots = makeSelect(
     ['ship_instance_id'],
 );
 
-export const getShipVersionsFull = makeSelectFull(
-    'ship_versions_full',
-    SHIP_VERSIONS_FULL_COLUMNS,
-);
+const REQUIRED_SHIP_VERSION_KEYS = [
+    'mod_id',
+    'mod_version_id',
+    'ship_id',
+    'ship_code',
+    'ship_version_id',
+    'ship_instance_id',
+    'ship_version_id',
+    'ship_size_id',
+    'ship_size',
+    'shield_type_id',
+    'shield_type',
+    'data_hash',
+    'major',
+    'minor',
+    'patch',
+    'data_hash',
+] satisfies readonly (keyof DB['ship_versions_full'])[];
+
+export async function getShipVersionsFull<
+    TSelection extends readonly (keyof DB['ship_versions_full'])[],
+>(selection: TSelection, options?: Options<DB['ship_versions_full']>) {
+    const result = await selectFull('ship_versions_full', selection, options);
+    assertProjectionRowsNonNullableKeys(result, REQUIRED_SHIP_VERSION_KEYS);
+    return result;
+}
 
 export const getShipId = makeSelectOne<'ships', ['id'], 'mod_id' | 'code'>(
     'ships',

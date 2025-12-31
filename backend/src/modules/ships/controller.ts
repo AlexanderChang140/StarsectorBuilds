@@ -5,6 +5,7 @@ import {
     fetchShipWeaponSlots,
     fetchShipInstanceId,
     fetchShipVersionsById,
+    fetchShipVersionById,
 } from './service.ts';
 import { parseShipVersionFields } from './utils/fieldParser.ts';
 import { parseShipVersionsFilter } from './utils/filterParser.ts';
@@ -21,7 +22,7 @@ export async function getShipVersions(
 
         const shipId = Number(req.params.shipId);
 
-        if (isNaN(shipId)) {
+        if (Number.isNaN(shipId)) {
             res.status(400).json({ error: 'Invalid ship ID' });
             return;
         }
@@ -50,7 +51,7 @@ export async function getLatestShipVersion(
 
         const shipId = Number(req.params.shipId);
 
-        if (isNaN(shipId)) {
+        if (Number.isNaN(shipId)) {
             res.status(400).json({ error: 'Invalid ship ID' });
             return;
         }
@@ -71,7 +72,6 @@ export async function getLatestShipVersion(
     }
 }
 
-
 export async function getAllShipVersions(req: Request, res: Response) {
     try {
         const query = req.query;
@@ -91,11 +91,41 @@ export async function getAllShipVersions(req: Request, res: Response) {
     }
 }
 
+export async function getShipVersionById(
+    req: Request,
+    res: Response,
+): Promise<void> {
+    try {
+        const query = req.query;
+
+        const shipVersionId = Number(req.params.shipVersionId);
+
+        if (Number.isNaN(shipVersionId)) {
+            res.status(400).json({ error: 'Invalid ship version ID' });
+            return;
+        }
+
+        const fields = parseShipVersionFields(query);
+
+        const result = await fetchShipVersionById(shipVersionId, fields);
+
+        if (result == null) {
+            res.status(404).json({ error: 'Ship version not found' });
+            return;
+        }
+
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error 500' });
+    }
+}
+
 export async function getShipWeaponSlots(req: Request, res: Response) {
     try {
         const shipVersionId = Number(req.params.shipVersionId);
 
-        if (isNaN(shipVersionId)) {
+        if (Number.isNaN(shipVersionId)) {
             res.status(400).json({ error: 'Invalid ship version ID' });
             return;
         }
