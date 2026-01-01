@@ -1,9 +1,10 @@
 import { filterKeys, filterValues } from './helpers.ts';
 import { clamp } from './math.ts';
+import type { Filter } from '../db/helpers/filter.ts';
 import type { Order } from '../db/types.ts';
 
 export function sanitizeFilter<T>(
-    filter: Partial<T> | undefined,
+    filter: Filter<T> | undefined,
     keys: readonly (keyof T)[],
 ): Partial<T> {
     const filtered = filterKeys(filter ?? {}, keys);

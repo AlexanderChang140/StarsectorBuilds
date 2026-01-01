@@ -20,7 +20,7 @@ export function parseFilter<T>(
     const filter = Object.fromEntries(
         Object.entries(filteredQuery).map(([k, v]) => {
             const value = valMap(Array.isArray(v) ? v : [v]);
-            return [k, value];
+            return [k, { values: value }];
         }),
     ) as Filter<T>;
 

@@ -46,7 +46,7 @@ export async function fetchLatestWeaponVersionById<
 ): Promise<Projection<WeaponVersionDTO, TSelection> | null> {
     const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: {
-            weapon_version_id: [weaponVersionId],
+            weapon_version_id: { values: [weaponVersionId] },
         },
         order: {
             major: 'DESC',
@@ -72,7 +72,7 @@ export async function fetchWeaponVersionsById<
     const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: {
             ...sanitizeFilter(options?.filter, WEAPON_VERSIONS_FULL_COLUMNS),
-            weapon_id: [weaponId],
+            weapon_id: { values: [weaponId] },
         },
         order: sanitizeOrder(options?.order),
         limit: sanitizeLimit(options?.limit, 20),
@@ -94,7 +94,7 @@ export async function fetchWeaponVersionById<
 ): Promise<Projection<WeaponVersionDTO, TSelection> | null> {
     const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: {
-            weapon_version_id: [weaponVersionId],
+            weapon_version_id: { values: [weaponVersionId] },
         },
         limit: 1,
         client: options?.client,

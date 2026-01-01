@@ -7,6 +7,7 @@ import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
     makeSelect,
     makeSelectCodeIdRecord,
+    makeSelectFull,
     makeSelectOne,
     selectFull,
 } from '../../db/helpers/select.ts';
@@ -48,7 +49,7 @@ export async function fetchShipVersionsById<
     const safeOptions = {
         filter: {
             ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
-            ship_id: [shipId],
+            ship_id: { values: [shipId] },
         },
         order: sanitizeOrder(options?.order),
         limit: sanitizeLimit(options?.limit, 20),
@@ -71,7 +72,7 @@ export async function fetchShipVersionById<
     const safeOptions = {
         filter: {
             ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
-            ship_version_id: [shipVersionId],
+            ship_version_id: { values: [shipVersionId] },
         },
         limit: 1,
         client: options?.client,
@@ -92,7 +93,7 @@ export async function fetchLatestShipVersionById<
     const safeOptions = {
         filter: {
             ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
-            ship_id: [shipId],
+            ship_id: { values: [shipId] },
         },
         limit: 1,
         client: options?.client,
@@ -111,7 +112,11 @@ export async function fetchShipInstanceId(shipVersionId: number) {
 export async function fetchShipWeaponSlots(
     shipInstanceId: number,
 ): Promise<ShipWeaponSlotDTO[]> {
-    return getShipWeaponSlots({ where: { ship_instance_id: shipInstanceId } });
+    const options = {
+        filter: { ship_instance_id: { values: [shipInstanceId] } },
+    };
+
+    return getShipWeaponSlots(options);
 }
 
 export const getShipInstanceId = makeSelect(
@@ -133,10 +138,9 @@ const SHIP_WEAPON_SLOT_COLUMNS = [
     'y',
 ] as const satisfies readonly (keyof DB['ship_weapon_slots'])[];
 
-export const getShipWeaponSlots = makeSelect(
+export const getShipWeaponSlots = makeSelectFull(
     'ship_weapon_slots',
     SHIP_WEAPON_SLOT_COLUMNS,
-    ['ship_instance_id'],
 );
 
 const REQUIRED_SHIP_VERSION_KEYS = [
