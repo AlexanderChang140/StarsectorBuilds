@@ -16,7 +16,7 @@ export function sortVersions<
             ),
         )
         .map((row) => (
-            <option value={row[idKey] ?? undefined}>
+            <option key={row[idKey]} value={row[idKey] ?? undefined}>
                 {row.major}.{row.minor}.{row.patch}
             </option>
         ));
