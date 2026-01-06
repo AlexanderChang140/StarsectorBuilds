@@ -1,4 +1,4 @@
-import { DataTable } from '@/components/table/DataTable';
+import { DataTable } from '@/pages/DataTable/DataTable';
 import {
     WEAPON_TABLE_ROW_KEYS,
     type WeaponTableRows,

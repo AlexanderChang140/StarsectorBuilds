@@ -1,6 +1,6 @@
 import type { HullmodVersionDTO } from '@shared/hullmods/types';
 
-import { DataTable } from '@/components/table/DataTable';
+import { DataTable } from '@/pages/DataTable/DataTable';
 import {
     HULLMOD_TABLE_ROW_KEYS,
     type HullmodTableRows,

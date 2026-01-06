@@ -1,4 +1,4 @@
-import { DataTable } from '@/components/table/DataTable';
+import { DataTable } from '@/pages/DataTable/DataTable';
 import { SHIP_TABLE_ROW_KEYS, type ShipTableRows } from '@/modules/ships/types';
 import { humanizeKeys } from '@/utils/humanizeKeys';
 
