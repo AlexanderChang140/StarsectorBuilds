@@ -1,7 +1,9 @@
 import { useLocation } from 'react-router';
 
 import type { SortOrder } from '@/types/generic';
-import { parseIntOrNaN } from '@/utils/parse';
+import getFilterParams from '@/utils/query/getFilterParams';
+import getPagination from '@/utils/query/getPaginationParams';
+import getSortParams from '@/utils/query/getSortParams';
 
 type StringKeys<T> = Extract<keyof T, string>;
 
@@ -27,30 +29,14 @@ export default function useTableQuery<
     const { search } = useLocation();
     const query = new URLSearchParams(search);
 
-    const filter: Partial<Record<keyof T, string[]>> = {};
+    const filter = getFilterParams<T, TSortKeys>(query, validSortKeys);
 
-    for (const key of validSortKeys) {
-        const values = query.getAll(String(key));
-        filter[key] = values;
-    }
+    const { sort, order } = getSortParams<T, TSortKeys>(query, validSortKeys, {
+        sort: defaults?.sort,
+        order: defaults?.order,
+    });
 
-    const rawSort = query.get('sort');
-    const sort =
-        rawSort && validSortKeys.includes(rawSort as keyof T)
-            ? (rawSort as StringKeys<T>)
-            : (defaults?.sort as StringKeys<T>);
-
-    const rawOrder = query.get('order');
-    const order =
-        rawOrder === 'ASC' || rawOrder === 'DESC' ? rawOrder : defaults?.order;
-
-    const rawLimit = query.get('limit');
-    const parsedLimit = parseIntOrNaN(rawLimit);
-    const limit = !Number.isNaN(parsedLimit) ? parsedLimit : defaults?.limit;
-
-    const rawPage = query.get('page');
-    const parsedOffset = (parseIntOrNaN(rawPage) - 1) * (limit ?? 0);
-    const offset = !Number.isNaN(parsedOffset) ? parsedOffset : 0;
+    const { limit, offset } = getPagination(query, defaults?.limit);
 
     return { filter, sort, order, limit, offset };
 }
