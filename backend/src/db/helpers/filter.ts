@@ -1,5 +1,7 @@
+import type { Entries } from '../../types/generic.ts';
+
 export type Filter<T> = Partial<
-    Record<keyof T, (string | number)[] | undefined>
+    Record<keyof T, { values: (string | number)[] | undefined; not?: boolean }>
 >;
 
 export function createFilterFragment<T extends object>(
@@ -14,15 +16,16 @@ export function createFilterFragment<T extends object>(
     const clauses = [];
     let i = startIndex;
 
-    for (const [col, values] of Object.entries(conditions) as [
-        keyof T,
-        (string | number)[],
-    ][]) {
+    for (const [col, v] of Object.entries(conditions) as Entries<Filter<T>>) {
+        const values = v?.values;
+        const not = v?.not;
+
         if (values) {
-            const clause = values
+            const inner = values
                 .map(() => `${String(col)} = $${i++}`)
                 .join(' OR ');
-            clauses.push(`(${clause})`);
+            const clause = not ? `NOT (${inner})` : `(${inner})`;
+            clauses.push(clause);
             params.push(...values);
         }
     }
