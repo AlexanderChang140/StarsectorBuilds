@@ -116,7 +116,7 @@ export async function fetchShipWeaponSlots(
         filter: { ship_instance_id: { values: [shipInstanceId] } },
     };
 
-    return getShipWeaponSlots(options);
+    return getShipWeaponSlotsFull(SHIP_WEAPON_SLOT_FULL_COLUMNS, options);
 }
 
 export const getShipInstanceId = makeSelect(
@@ -124,6 +124,34 @@ export const getShipInstanceId = makeSelect(
     ['ship_instance_id'],
     ['id'],
 );
+
+const SHIP_WEAPON_SLOT_FULL_COLUMNS = [
+    'angle',
+    'arc',
+    'weapon_slot_id',
+    'weapon_slot_code',
+    'ship_instance_id',
+    'mount_type',
+    'mount_type_id',
+    'weapon_size',
+    'weapon_size_id',
+    'weapon_type',
+    'weapon_type_id',
+    'x',
+    'y',
+] as const satisfies readonly (keyof DB['ship_weapon_slots_full'])[];
+
+export async function getShipWeaponSlotsFull<
+    TSelection extends readonly (keyof DB['ship_weapon_slots_full'])[],
+>(selection: TSelection, options?: Options<DB['ship_weapon_slots_full']>) {
+    const result = await selectFull(
+        'ship_weapon_slots_full',
+        selection,
+        options,
+    );
+    assertProjectionRowsNonNullableKeys(result, SHIP_WEAPON_SLOT_FULL_COLUMNS);
+    return result;
+}
 
 const SHIP_WEAPON_SLOT_COLUMNS = [
     'angle',

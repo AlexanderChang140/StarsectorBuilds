@@ -440,6 +440,22 @@ export interface ShipWeaponSlots {
   y: Numeric;
 }
 
+export interface ShipWeaponSlotsFull {
+  angle: Numeric | null;
+  arc: Numeric | null;
+  mount_type: string | null;
+  mount_type_id: number | null;
+  ship_instance_id: number | null;
+  weapon_size: string | null;
+  weapon_size_id: number | null;
+  weapon_slot_code: string | null;
+  weapon_slot_id: number | null;
+  weapon_type: string | null;
+  weapon_type_id: number | null;
+  x: Numeric | null;
+  y: Numeric | null;
+}
+
 export interface Users {
   created_at: Generated<Timestamp>;
   email: string;
@@ -745,6 +761,7 @@ export interface DB {
   ship_versions: ShipVersions;
   ship_versions_full: ShipVersionsFull;
   ship_weapon_slots: ShipWeaponSlots;
+  ship_weapon_slots_full: ShipWeaponSlotsFull;
   ships: Ships;
   users: Users;
   weapon_descs: WeaponDescs;
