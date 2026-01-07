@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router';
 
-import PaginationControls from '@/components/table/pagination/PaginationControls';
+import PaginationControls from '@/components/pagination/PaginationControls';
 import Table from '@/components/table/Table';
 import useTableQuery from '@/hooks/useTableQuery';
 import type { ApiEndpoint } from '@/types/api';
