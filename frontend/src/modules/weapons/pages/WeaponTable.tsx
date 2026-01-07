@@ -1,8 +1,8 @@
-import { DataTable } from '@/pages/DataTable/DataTable';
 import {
     WEAPON_TABLE_ROW_KEYS,
     type WeaponTableRows,
 } from '@/modules/weapons/types';
+import { DataTable } from '@/pages/DataTable/DataTable';
 import { humanizeKeys } from '@/utils/humanizeKeys';
 
 export default function WeaponTable() {
@@ -11,12 +11,16 @@ export default function WeaponTable() {
         typeof WEAPON_TABLE_ROW_KEYS,
         typeof KEY_ORDER
     >({
-        endpoint: '/api/weapon-versions',
-        queryKey: 'weaponsTable',
-        tableKeys: WEAPON_TABLE_ROW_KEYS,
-        keyOrder: KEY_ORDER,
-        displayMap,
-        initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        dataConfig: {
+            endpoint: '/api/weapon-versions',
+            queryKey: 'weaponsTable',
+            initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        },
+        tableConfig: {
+            tableKeys: WEAPON_TABLE_ROW_KEYS,
+            keyOrder: KEY_ORDER,
+            displayMap,
+        },
         link: {
             linkField: 'display_name',
             linkFn: (row) =>

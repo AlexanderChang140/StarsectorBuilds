@@ -1,12 +1,11 @@
 import type { HullmodVersionDTO } from '@shared/hullmods/types';
 
-import { DataTable } from '@/pages/DataTable/DataTable';
 import {
     HULLMOD_TABLE_ROW_KEYS,
     type HullmodTableRows,
 } from '@/modules/hullmods/types';
+import { DataTable } from '@/pages/DataTable/DataTable';
 import { humanizeKeys } from '@/utils/humanizeKeys';
-
 
 export default function HullmodTable() {
     return DataTable<
@@ -14,12 +13,16 @@ export default function HullmodTable() {
         typeof HULLMOD_TABLE_ROW_KEYS,
         typeof KEY_ORDER
     >({
-        endpoint: '/api/hullmod-versions',
-        queryKey: 'hullmodsTable',
-        tableKeys: HULLMOD_TABLE_ROW_KEYS,
-        keyOrder: KEY_ORDER,
-        displayMap,
-        initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        dataConfig: {
+            endpoint: '/api/hullmod-versions',
+            queryKey: 'hullmodsTable',
+            initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        },
+        tableConfig: {
+            tableKeys: HULLMOD_TABLE_ROW_KEYS,
+            keyOrder: KEY_ORDER,
+            displayMap,
+        },
         link: {
             linkField: 'display_name',
             linkFn: (row) => `/hullmods/${row.hullmod_id}`,

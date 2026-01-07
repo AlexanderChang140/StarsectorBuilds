@@ -16,15 +16,19 @@ interface DataTableProps<
     TTableKeys extends readonly (keyof TData)[],
     TKeyOrder extends readonly (keyof TData)[],
 > {
+    dataConfig: {
     endpoint: ApiEndpoint;
     queryKey: string;
+        initialSort?: { sortField: TKeyOrder[number]; sortOrder: SortOrder };
+        defaultLimit?: number;
+    };
+    tableConfig: {
     tableKeys: TTableKeys;
     keyOrder: TKeyOrder;
     displayMap: Partial<Record<TKeyOrder[number], string>>;
-    initialSort?: { sortField: TKeyOrder[number]; sortOrder: SortOrder };
+    };
     link?: { linkField: TKeyOrder[number]; linkFn: (row: TData) => string };
     title?: string;
-    defaultLimit?: number;
 }
 
 export function DataTable<
@@ -32,15 +36,10 @@ export function DataTable<
     TTableKeys extends readonly (keyof TData)[],
     TKeyOrder extends readonly (keyof TData)[],
 >({
-    endpoint,
-    queryKey,
-    tableKeys,
-    keyOrder,
-    displayMap,
-    initialSort,
+    dataConfig: { endpoint, queryKey, initialSort, defaultLimit = 20 },
+    tableConfig: { tableKeys, keyOrder, displayMap },
     link,
     title,
-    defaultLimit = 20,
 }: DataTableProps<TData, TTableKeys, TKeyOrder>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const page = Number(searchParams.get('page') ?? 1);

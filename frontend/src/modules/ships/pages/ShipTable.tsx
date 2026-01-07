@@ -1,5 +1,5 @@
-import { DataTable } from '@/pages/DataTable/DataTable';
 import { SHIP_TABLE_ROW_KEYS, type ShipTableRows } from '@/modules/ships/types';
+import { DataTable } from '@/pages/DataTable/DataTable';
 import { humanizeKeys } from '@/utils/humanizeKeys';
 
 export default function ShipTable() {
@@ -8,12 +8,16 @@ export default function ShipTable() {
         typeof SHIP_TABLE_ROW_KEYS,
         typeof KEY_ORDER
     >({
-        endpoint: '/api/ship-versions',
-        queryKey: 'shipsTable',
-        displayMap,
-        tableKeys: SHIP_TABLE_ROW_KEYS,
-        keyOrder: KEY_ORDER,
-        initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        dataConfig: {
+            endpoint: '/api/ship-versions',
+            queryKey: 'shipsTable',
+            initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        },
+        tableConfig: {
+            displayMap,
+            tableKeys: SHIP_TABLE_ROW_KEYS,
+            keyOrder: KEY_ORDER,
+        },
         link: {
             linkField: 'display_name',
             linkFn: (row) =>
