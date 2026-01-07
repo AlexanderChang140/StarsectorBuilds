@@ -8,16 +8,15 @@ body {
 .layout {
     display: grid;
     grid-template:
-        'navbar navbar' var(--navbar-top)
-        'sidebar main' 1fr
-        'sidebar footer' auto
-        / var(--sidebar-width) 90%;
-    min-height: 100vh;
+        'main'
+        'footer';
+    grid-template-rows: 1fr auto;
+    min-height: 100dvh;
 }
 
 main {
     grid-area: main;
-    padding: 2rem;
+    padding: var(--navbar-height) 2rem;
 }
 
 footer {

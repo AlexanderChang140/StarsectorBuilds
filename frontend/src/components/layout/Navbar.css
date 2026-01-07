@@ -1,17 +1,17 @@
 nav {
-    position: sticky;
+    position: fixed;
     top: 0;
     z-index: 2;
-    grid-area: navbar;
-    height: 100%;
+    width: 100%;
+    height: var(--navbar-height);
     border-bottom: 1px solid var(--border-color);
 }
 
 .nav-container {
     display: flex;
     align-items: center;
+    height: 100%;
     padding: 0 2rem;
-    margin: 0 auto;
 }
 
 .nav-items {
@@ -24,11 +24,13 @@ nav {
 .nav-start {
     display: flex;
     gap: 1rem;
+    align-items: center;
     justify-content: flex-start;
 }
 
 .nav-end {
     display: flex;
     gap: 1rem;
+    align-items: center;
     justify-content: flex-end;
 }

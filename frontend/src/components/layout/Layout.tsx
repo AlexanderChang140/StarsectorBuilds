@@ -17,6 +17,9 @@ function Layout() {
                     <div className="nav-items">
                         <div className="nav-start">
                             <h2>StarSectorBuilds</h2>
+                            <Link to="/ships">Ships</Link>
+                            <Link to="/weapons">Weapons</Link>
+                            <Link to="/hullmods">Hullmods</Link>
                         </div>
                         <div id="middle"></div>
                         <div className="nav-end">
@@ -33,13 +36,6 @@ function Layout() {
                     </div>
                 </div>
             </nav>
-            <aside>
-                <ul className="aside-items">
-                    <Link to="/ships">Ships</Link>
-                    <Link to="/weapons">Weapons</Link>
-                    <Link to="/hullmods">Hullmods</Link>
-                </ul>
-            </aside>
             <main>
                 <Outlet />
             </main>
