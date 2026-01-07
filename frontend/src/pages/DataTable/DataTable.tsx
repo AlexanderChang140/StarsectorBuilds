@@ -100,15 +100,18 @@ export function DataTable<
             : undefined;
 
     return (
-        <div className="data-table-container">
-            {title && <h1>{title}</h1>}
-            {data.length} records found
-            <Table columns={columns} initialData={data} links={links} />
-            <PaginationControls
-                totalPages={5}
-                currPageIndex={page - 1}
-                onPageChange={onPageChange}
-            />
+        <div className="data-table">
+            <div className="data-table-container">
+                {title && <h1>{title}</h1>}
+                {data.length} records found
+                <Table columns={columns} initialData={data} links={links} />
+                <PaginationControls
+                    totalPages={5}
+                    currPageIndex={page - 1}
+                    onPageChange={onPageChange}
+                />
+            </div>
+            <div className="data-table-options"></div>
         </div>
     );
 }
