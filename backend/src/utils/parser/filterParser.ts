@@ -38,9 +38,11 @@ export function parseFilterWithExcludedKeys<
     return parseFilter<Partial<TData>>(query, validKeys, parseIntArray);
 }
 
-export function parseIntArray(values: unknown[]): number[] {
+export function parseIntArray(values: unknown[]): (string | number)[] {
     return values
         .filter((v) => typeof v === 'string')
-        .map((v) => parseInt(v, 10))
-        .filter(Number.isFinite);
+        .map((v) => {
+            const num = parseInt(v, 10);
+            return Number.isFinite(num) && String(num) === v ? num : v;
+        });
 }
