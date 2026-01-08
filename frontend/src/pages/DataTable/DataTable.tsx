@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 
 import PaginationControls from '@/components/pagination/PaginationControls';
 import Table from '@/components/table/Table';
-import useTableQuery from '@/hooks/useTableQuery';
+import useTableParams from '@/hooks/useTableParams';
 import type { ApiEndpoint } from '@/types/api';
 import type { SortOrder } from '@/types/generic';
 import { buildApiRequest } from '@/utils/apiRequestBuilder';
