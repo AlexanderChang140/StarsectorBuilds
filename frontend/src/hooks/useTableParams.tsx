@@ -15,7 +15,7 @@ export type TableQuery<T> = {
     offset?: number;
 };
 
-export default function useTableQuery<
+export default function useTableParams<
     T,
     TSortKeys extends readonly (keyof T)[],
 >(
