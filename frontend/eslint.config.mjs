@@ -1,6 +1,7 @@
 import tselint from 'typescript-eslint';
 import tsParser from '@typescript-eslint/parser';
 import globals from 'globals';
+import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import importPlugin from 'eslint-plugin-import';
@@ -11,6 +12,7 @@ export default defineConfig([
     tselint.configs.recommended,
     reactHooks.configs['recommended-latest'],
     reactRefresh.configs.vite,
+    react.configs.flat.recommended,
     {
         files: ['./src/**/*.{ts,tsx}'],
         languageOptions: {
@@ -23,6 +25,7 @@ export default defineConfig([
         },
         plugins: {
             import: importPlugin,
+            react,
         },
         rules: {
             '@typescript-eslint/no-unused-vars': 'warn',
@@ -52,11 +55,19 @@ export default defineConfig([
             ],
             'import/newline-after-import': 'warn',
             'import/no-duplicates': 'error',
+            'react/react-in-jsx-scope': 0,
         },
         settings: {
             'import/resolver': {
                 typescript: {},
                 node: { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
+            },
+        },
+    },
+    {
+        settings: {
+            react: {
+                version: 'detect',
             },
         },
     },
