@@ -16,7 +16,7 @@ body {
 
 main {
     grid-area: main;
-    padding: var(--navbar-height) 2rem 2rem 2rem;
+    padding: calc(1rem + var(--navbar-height)) 2rem;
 }
 
 footer {

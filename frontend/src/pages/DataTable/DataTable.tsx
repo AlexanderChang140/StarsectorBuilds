@@ -10,7 +10,7 @@ import type { SortOrder } from '@/types/generic';
 import { buildApiRequest } from '@/utils/apiRequestBuilder';
 import fetchSafe from '@/utils/fetchSafe';
 
-import './DataTable.css';
+import styles from './DataTable.module.css';
 
 interface DataTableProps<
     TData extends Record<string, unknown>,
@@ -119,13 +119,13 @@ export function DataTable<
     const TableMemo = memo(Table<TData>);
 
     return (
-        <div className="data-table">
-            <div className="data-table-header">
+        <div className={styles.dataTable}>
+            <div className={styles.header}>
                 {title && <h1>{title}</h1>}
                 <span>{data.length} records found</span>
             </div>
-            <div className="data-table-options"></div>
-            <div className="data-table-container">
+            <div className={styles.options}></div>
+            <div className={styles.container}>
                 <TableMemo
                     columns={columns}
                     initialData={data}
@@ -143,7 +143,6 @@ export function DataTable<
                     currPageIndex={page - 1}
                     onPageChange={onPageChange}
                 />
-                <div className="data-container-options"></div>
             </div>
         </div>
     );

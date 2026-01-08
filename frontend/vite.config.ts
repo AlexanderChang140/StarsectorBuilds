@@ -22,5 +22,10 @@ export default defineConfig(({ mode }) => {
                 },
             ],
         },
+        css: {
+            modules: {
+                localsConvention: 'camelCase',
+            },
+        },
     };
 });

@@ -7,28 +7,28 @@ nav {
     border-bottom: 1px solid var(--border-color);
 }
 
-.nav-container {
+.container {
     display: flex;
     align-items: center;
     height: 100%;
     padding: 0 2rem;
 }
 
-.nav-items {
+.items {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
 
-.nav-start {
+.start {
     display: flex;
     gap: 1rem;
     align-items: center;
     justify-content: flex-start;
 }
 
-.nav-end {
+.end {
     display: flex;
     gap: 1rem;
     align-items: center;

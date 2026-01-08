@@ -7,7 +7,7 @@
     max-height: 85dvh;
 }
 
-.data-table-header {
+.header {
     display: flex;
     gap: 2rem;
     align-items: baseline;
@@ -15,13 +15,13 @@
     margin: 0.75rem 0;
 }
 
-.data-table-options {
+.options {
     display: flex;
     grid-area: options;
     align-items: center;
 }
 
-.data-table-container {
+.container {
     display: flex;
     flex-direction: column;
     grid-area: container;
@@ -31,15 +31,15 @@
     min-height: 0;
 }
 
-.data-table-container a {
+.container a {
     color: var(--lotus-blue);
 }
 
-.data-table-container a:hover {
+.container a:hover {
     text-decoration: underline;
 }
 
-.data-table-container td,
-.data-table-container th {
+.container td,
+.container th {
     text-align: center;
 }

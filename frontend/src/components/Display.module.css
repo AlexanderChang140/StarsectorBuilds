@@ -7,17 +7,17 @@
     height: 10vh;
 }
 
-.display .title {
+.title {
     grid-area: title;
 }
 
-.display .body {
+.body {
     grid-area: body;
     font-style: italic;
     white-space: pre-line;
 }
 
-.display .profile {
+.profile {
     display: flex;
     flex-direction: column;
     grid-area: profile;
@@ -25,13 +25,13 @@
     border: 1px solid blue;
 }
 
-.display .name {
+.name {
     justify-self: center;
     height: 5rem;
     outline: 1px dotted red;
 }
 
-.display .image-container {
+.image-container {
     position: relative;
     display: block;
     width: auto;
@@ -39,15 +39,15 @@
     outline: 2px solid green;
 }
 
-.display .image-container img {
+img {
     position: absolute;
     display: block;
     width: auto;
     height: 150px;
 }
 
-.display .image-container .base,
-.display .image-container .overlay {
+.base,
+.overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -56,10 +56,10 @@
     object-fit: contain;
 }
 
-.display .image-container .overlay {
+.overlay {
     z-index: 1;
 }
 
-.display .stats {
+.stats {
     outline: 2px solid yellow;
 }

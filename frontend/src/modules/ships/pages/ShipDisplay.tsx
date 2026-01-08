@@ -1,12 +1,11 @@
 import type { ShipVersionDTO } from '@shared/ships/types.ts';
 import { useParams } from 'react-router';
 
+import styles from '@/components/Display.module.css';
 import UseVersionsQuery from '@/hooks/useVersionsQuery.tsx';
 import { sortVersions } from '@/modules/display/versionSorter';
 import { imageUrl } from '@/utils/assets';
 import { parseIntOrNaN } from '@/utils/parse.ts';
-
-import '@/components/Display.css';
 
 export default function ShipDisplay() {
     const { shipId, versionId } = useParams();
@@ -53,27 +52,26 @@ export default function ShipDisplay() {
 
     return (
         <div>
-            <div className="display">
-                <select name="versions">{versions}</select>
-                <div className="title">
+            <div className={styles.display}>
+                <div className={styles.title}>
                     <h1>{data.display_name}</h1>
                     <hr></hr>
                 </div>
-                <div className="body">
+                <div className={styles.body}>
                     <p>{data.text1}</p>
                     <p>{data.text2}</p>
                 </div>
-                <div className="profile">
-                    <div className="name">
+                <div className={styles.profile}>
+                    <div className={styles.name}>
                         <h3>{data.display_name}</h3>
                     </div>
-                    <div className="image-container">
+                    <div className={styles.imageContainer}>
                         <img
-                            className="base"
+                            className={styles.base}
                             src={imageUrl(data.ship_image_file_path)}
                         ></img>
                     </div>
-                    <div className="stats">Stats</div>
+                    <div className={styles.stats}>Stats</div>
                 </div>
             </div>
         </div>

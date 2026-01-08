@@ -1,8 +1,7 @@
+import styles from '@/components/table/Table.module.css';
 import TableBody from '@/components/table/TableBody';
 import TableHead from '@/components/table/TableHead';
 import type { SortOrder } from '@/types/generic';
-
-import '@/components/table/Table.css';
 
 type TableProps<T> = {
     columns: {
@@ -25,7 +24,7 @@ export default function Table<T>({
     const data = initialData;
 
     return (
-        <div className="table-container">
+        <div className={styles.tableContainer}>
             <table>
                 <TableHead
                     columns={columns}
