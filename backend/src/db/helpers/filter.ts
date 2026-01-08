@@ -20,7 +20,7 @@ export function createFilterFragment<T extends object>(
         const values = v?.values;
         const not = v?.not;
 
-        if (values) {
+        if (values !== undefined && values.length !== 0) {
             const inner = values
                 .map(() => `${String(col)} = $${i++}`)
                 .join(' OR ');
