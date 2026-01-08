@@ -6,7 +6,9 @@ export default function getFilterParams<
 
     for (const key of validFilterKeys) {
         const values = query.getAll(String(key));
-        filter[key] = values;
+        if (values.length !== 0) {
+            filter[key] = values;
+        }
     }
 
     return filter;
