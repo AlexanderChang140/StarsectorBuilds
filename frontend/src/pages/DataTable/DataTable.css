@@ -1,37 +1,45 @@
 .data-table {
     display: grid;
-    grid-template: 100% / 3fr 1fr;
-    grid-template-areas: 'container options';
+    grid-template: auto auto / 0.9fr 1fr;
+    grid-template-areas: 'header options' 'container container';
     max-width: 100%;
-    height: 35em;
+    height: 100em;
+    max-height: 85dvh;
 }
 
-.data-table .data-table-container {
+.data-table-header {
+    display: flex;
+    gap: 2rem;
+    align-items: baseline;
+    justify-content: flex-start;
+    margin: 0.75rem 0;
+}
+
+.data-table-options {
+    display: flex;
+    grid-area: options;
+    align-items: center;
+}
+
+.data-table-container {
     display: flex;
     flex-direction: column;
     grid-area: container;
-    align-items: flex-start;
-    min-width: 0%;
+    gap: 0.5rem;
+    align-items: center;
+    min-width: 0;
+    min-height: 0;
 }
 
-.data-table .data-table-container .controls {
-    align-self: center;
-}
-
-.data-table .data-table-container .go-to-page {
-    align-self: center;
-}
-
-.data-table .data-table-container a {
+.data-table-container a {
     color: var(--lotus-blue);
 }
 
-.data-table .data-table-container td {
-    align-self: center;
+.data-table-container a:hover {
+    text-decoration: underline;
 }
 
-.data-table .data-table-options {
-    display: flex;
-    flex-direction: column;
-    grid-area: options;
+.data-table-container td,
+.data-table-container th {
+    text-align: center;
 }
