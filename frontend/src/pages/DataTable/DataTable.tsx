@@ -44,7 +44,7 @@ export function DataTable<
     const [searchParams, setSearchParams] = useSearchParams();
     const page = Number(searchParams.get('page') ?? 1);
 
-    const onPageChange = (pageIndex: number) => {
+    const handlePageChange = (pageIndex: number) => {
         setSearchParams((prev) => {
             const params = new URLSearchParams(prev);
             params.set('page', (pageIndex + 1).toString());
@@ -52,7 +52,7 @@ export function DataTable<
         });
     };
 
-    const onSortChange = (accessor: keyof TData, sortOrder: SortOrder) => {
+    const handleSortChange = (accessor: keyof TData, sortOrder: SortOrder) => {
         setSearchParams((prev) => {
             const params = new URLSearchParams(prev);
             params.set('sort', accessor.toString());
@@ -135,13 +135,13 @@ export function DataTable<
                             ? { field: sort as keyof TData, order: order }
                             : undefined
                     }
-                    onSortChange={onSortChange}
+                    onSortChange={handleSortChange}
                 />
                 <PaginationControls
                     //TODO Get total page count from backend
                     totalPages={5}
                     currPageIndex={page - 1}
-                    onPageChange={onPageChange}
+                    onPageChange={handlePageChange}
                 />
             </div>
         </div>
