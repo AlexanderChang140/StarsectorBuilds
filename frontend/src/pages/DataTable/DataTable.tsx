@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { memo, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 
 import PaginationControls from '@/components/pagination/PaginationControls';
@@ -89,10 +88,12 @@ export function DataTable<
         queryFn: () => fetchSafe<TData[]>(request),
     });
 
-    const columns = useMemo(() => {
-        if (!data) return [];
+    if (isError) return <div>Error: {error.message}</div>;
+    if (isPending) return <div>Loading...</div>;
+    if (!data?.length) return <div>No data found</div>;
+
         const keys = (Object.keys(data[0]) as (keyof TData)[]) ?? 0;
-        return keyOrder
+    const columns = keyOrder
             .filter((key: keyof TData) => keys.includes(key))
             .map((key) => {
                 return {
@@ -102,10 +103,9 @@ export function DataTable<
                     sortByOrder: key === sort ? order : undefined,
                 };
             });
-    }, [data, keyOrder, displayMap, sort, order]);
 
-    const links = useMemo(() => {
-        return link?.linkField && link.linkFn
+    const links =
+        link?.linkField && link.linkFn
             ? ({
                   [link.linkField]: (row: TData) => link.linkFn(row),
               } as Partial<Record<keyof TData, (row: TData) => string>>)
@@ -126,7 +126,7 @@ export function DataTable<
             </div>
             <div className={styles.options}></div>
             <div className={styles.container}>
-                <TableMemo
+                <Table
                     columns={columns}
                     initialData={data}
                     links={links}
