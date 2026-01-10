@@ -6,8 +6,8 @@ export type Item = {
 };
 
 interface DropdownProps {
-    items: Item[];
-    selected: string[];
+    items: readonly Item[];
+    selected: readonly string[];
     onChange: (selected: string[]) => void;
     isMultiSelect?: boolean;
     showSelected?: boolean;
