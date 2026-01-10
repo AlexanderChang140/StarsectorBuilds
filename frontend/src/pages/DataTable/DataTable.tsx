@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 
+import ButtonDropdown from '@/components/dropdown/ButtonDropdown';
 import PaginationControls from '@/components/pagination/PaginationControls';
+import Select from '@/components/select/Select';
 import Table from '@/components/table/Table';
 import useTableParams from '@/hooks/useTableParams';
 import type { ApiEndpoint } from '@/types/api';
@@ -10,6 +13,17 @@ import { buildApiRequest } from '@/utils/apiRequestBuilder';
 import fetchSafe from '@/utils/fetchSafe';
 
 import styles from './DataTable.module.css';
+
+type FilterConfig<TData, TKey extends keyof TData & string> = {
+    field: TKey;
+    label: string;
+    values: { value: TData[TKey]; label: string }[];
+    isMultiSelect: boolean;
+};
+
+type FilterState = {
+    [field: string]: string[];
+};
 
 interface DataTableProps<
     TData extends Record<string, unknown>,
@@ -27,6 +41,9 @@ interface DataTableProps<
         keyOrder: TKeyOrder;
         displayMap: Partial<Record<TKeyOrder[number], string>>;
     };
+    controlConfig?: {
+        filters?: FilterConfig<TData, keyof TData & string>[];
+    };
     link?: { linkField: TKeyOrder[number]; linkFn: (row: TData) => string };
     title?: string;
 }
@@ -38,11 +55,21 @@ export function DataTable<
 >({
     dataConfig: { endpoint, queryKey, initialSort, defaultLimit = 20 },
     tableConfig: { tableKeys, keyOrder, displayMap },
+    controlConfig: { filters } = {},
     link,
     title,
 }: DataTableProps<TData, TTableKeys, TKeyOrder>) {
     const [searchParams, setSearchParams] = useSearchParams();
+    const [activeDropdowns, setActiveDropdowns] = useState<
+        Record<string, boolean>
+    >({});
+
     const page = Number(searchParams.get('page') ?? 1);
+    const selected =
+        filters?.reduce((acc, filter) => {
+            acc[filter.field] = searchParams.getAll(filter.field) ?? [];
+            return acc;
+        }, {} as FilterState) ?? {};
 
     const handlePageChange = (pageIndex: number) => {
         setSearchParams((prev) => {
@@ -60,6 +87,21 @@ export function DataTable<
             params.set('page', '1');
             return params;
         });
+    };
+
+    const handleFilterChange = (field: string, values: string[]) => {
+        setSearchParams((prev) => {
+            const params = new URLSearchParams(prev);
+            params.delete(field);
+            values.forEach((v) => {
+                params.append(field, v);
+            });
+            return params;
+        });
+    };
+
+    const handleActiveChange = (field: string, active: boolean) => {
+        setActiveDropdowns((prev) => ({ ...prev, [field]: active }));
     };
 
     const { filter, sort, order, limit, offset } = useTableParams<
@@ -84,7 +126,7 @@ export function DataTable<
     });
 
     const { data, isPending, isError, error } = useQuery<TData[]>({
-        queryKey: [queryKey, sort, order, limit, offset],
+        queryKey: [queryKey, filter, sort, order, limit, offset],
         queryFn: () => fetchSafe<TData[]>(request),
     });
 
@@ -92,17 +134,17 @@ export function DataTable<
     if (isPending) return <div>Loading...</div>;
     if (!data?.length) return <div>No data found</div>;
 
-        const keys = (Object.keys(data[0]) as (keyof TData)[]) ?? 0;
+    const keys = (Object.keys(data[0]) as (keyof TData)[]) ?? 0;
     const columns = keyOrder
-            .filter((key: keyof TData) => keys.includes(key))
-            .map((key) => {
-                return {
-                    label: displayMap[key] ?? String(key),
-                    accessor: key,
-                    sortable: true,
-                    sortByOrder: key === sort ? order : undefined,
-                };
-            });
+        .filter((key: keyof TData) => keys.includes(key))
+        .map((key) => {
+            return {
+                label: displayMap[key] ?? String(key),
+                accessor: key,
+                sortable: true,
+                sortByOrder: key === sort ? order : undefined,
+            };
+        });
 
     const links =
         link?.linkField && link.linkFn
@@ -110,13 +152,6 @@ export function DataTable<
                   [link.linkField]: (row: TData) => link.linkFn(row),
               } as Partial<Record<keyof TData, (row: TData) => string>>)
             : undefined;
-    }, [link]);
-
-    if (isError) return <div>Error: {error.message}</div>;
-    if (isPending) return <div>Loading...</div>;
-    if (!data?.length) return <div>No data found</div>;
-
-    const TableMemo = memo(Table<TData>);
 
     return (
         <div className={styles.dataTable}>
@@ -124,7 +159,35 @@ export function DataTable<
                 {title && <h1>{title}</h1>}
                 <span>{data.length} records found</span>
             </div>
-            <div className={styles.options}></div>
+            <div className={styles.options}>
+                {filters &&
+                    filters.map((filter) => (
+                        <div key={filter.field} className={styles.option}>
+                            <ButtonDropdown
+                                label={filter.label}
+                                isActive={activeDropdowns[filter.field]}
+                                onActiveChange={(active) =>
+                                    handleActiveChange(filter.field, active)
+                                }
+                            >
+                                <Select
+                                    items={filter.values.map((v) => ({
+                                        value: String(v.value),
+                                        label: v.label,
+                                    }))}
+                                    selected={selected[filter.field]}
+                                    onChange={(selected) =>
+                                        handleFilterChange(
+                                            filter.field,
+                                            selected,
+                                        )
+                                    }
+                                    isMultiSelect={filter.isMultiSelect}
+                                ></Select>
+                            </ButtonDropdown>
+                        </div>
+                    ))}
+            </div>
             <div className={styles.container}>
                 <Table
                     columns={columns}
