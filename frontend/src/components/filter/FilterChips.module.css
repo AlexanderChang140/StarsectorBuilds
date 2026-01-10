@@ -1,0 +1,8 @@
+.chip {
+    display: flex;
+    width: fit-content;
+}
+
+.chip .dropdown {
+    width: 5rem;
+}
