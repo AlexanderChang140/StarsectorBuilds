@@ -1,0 +1,19 @@
+.items {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.item {
+    cursor: pointer;
+    background: none;
+    border: 2px solid black;
+}
+
+.item:not(:last-child) {
+    border-bottom: none;
+}
+
+.items .item:hover {
+    background-color: gray;
+}
