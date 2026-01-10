@@ -1,13 +1,8 @@
 import ButtonDropdown from '@/components/dropdown/ButtonDropdown';
 import SearchDropdown from '@/components/dropdown/SearchDropdown';
-import Select from '@/components/select/Select';
+import Select, { type Item } from '@/components/select/Select';
 
 import styles from './FilterChips.module.css';
-
-type Item = {
-    value: string;
-    label: string;
-};
 
 type Filter = {
     item: Item;
