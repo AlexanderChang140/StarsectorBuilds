@@ -1,7 +1,16 @@
 import type { Entries } from '../../types/generic.ts';
 
+export type MatchType = 'exact' | 'contains' | 'starts_with' | 'ends_with';
+
 export type Filter<T> = Partial<
-    Record<keyof T, { values: (string | number)[] | undefined; not?: boolean }>
+    Record<
+        keyof T,
+        {
+            values: (string | number)[] | undefined;
+            match?: MatchType;
+            not?: boolean;
+        }
+    >
 >;
 
 export function createFilterFragment<T extends object>(
@@ -12,21 +21,42 @@ export function createFilterFragment<T extends object>(
         return { clause: '', params: [] };
     }
 
-    const params = [];
+    const params: (string | number)[] = [];
     const clauses = [];
     let i = startIndex;
 
     for (const [col, v] of Object.entries(conditions) as Entries<Filter<T>>) {
         const values = v?.values;
         const not = v?.not;
+        const match = v?.match ?? 'exact';
 
         if (values !== undefined && values.length !== 0) {
             const inner = values
-                .map(() => `${String(col)} = $${i++}`)
+                .map((val) => {
+                    if (typeof val === 'string') {
+                        let placeholder = `$${i++}`;
+                        switch (match) {
+                            case 'contains':
+                                val = `%${val}%`;
+                                break;
+                            case 'starts_with':
+                                val = `${val}%`;
+                                break;
+                            case 'ends_with':
+                                val = `%${val}`;
+                                break;
+                        }
+                        params.push(val);
+                        return `${String(col)} ILIKE ${placeholder}`;
+                    } else {
+                        params.push(val);
+                        return `${String(col)} = $${i++}`;
+                    }
+                })
                 .join(' OR ');
+
             const clause = not ? `NOT (${inner})` : `(${inner})`;
             clauses.push(clause);
-            params.push(...values);
         }
     }
     const clause = clauses.join(' AND ');
