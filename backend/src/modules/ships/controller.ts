@@ -6,6 +6,7 @@ import {
     fetchShipInstanceId,
     fetchShipVersionsById,
     fetchShipVersionById,
+    fetchLatestShipVersionById,
 } from './service.ts';
 import { parseShipVersionFields } from './utils/fieldParser.ts';
 import { parseShipVersionsFilter } from './utils/filterParser.ts';
@@ -58,7 +59,7 @@ export async function getLatestShipVersion(
 
         const fields = parseShipVersionFields(query);
 
-        const result = await fetchShipVersionsById(shipId, fields);
+        const result = await fetchLatestShipVersionById(shipId, fields);
 
         if (result == null) {
             res.status(404).json({ error: 'Ship version not found' });
