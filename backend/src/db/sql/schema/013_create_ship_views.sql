@@ -16,7 +16,7 @@ SELECT
     s.code AS ship_code,
     i.file_path AS ship_image_file_path,
 
-    mv.id as mod_version_id,
+    mv.id AS mod_version_id,
     mv.major,
     mv.minor,
     mv.patch,
