@@ -1,4 +1,4 @@
-import type { Projection } from '@shared/types.ts';
+import type { PaginatedResult, Projection } from '@shared/types.ts';
 import type { PoolClient } from 'pg';
 
 import { pool } from '../client.ts';
@@ -234,11 +234,6 @@ export async function selectFull<
     >(query, params);
     return result.rows;
 }
-
-export type PaginatedResult<T> = {
-    rows: T[];
-    total: number;
-};
 
 export async function selectFullWithCount<
     TFilter extends Filter<SelectableRow<DB[TTable]>>,
