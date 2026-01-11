@@ -1,3 +1,9 @@
+export type ModRoute = `${ModSubRoute}`;
+export type ModSubRoute =
+    | 'mods'
+    | 'mod-versions'
+    | 'mod-versions/search/display_name';
+
 export type WeaponRoute = `${WeaponSubRoute}`;
 export type WeaponSubRoute =
     | `weapons/${number}/versions`
@@ -17,6 +23,7 @@ export type HullmodRoute = `${HullmodSubRoute}`;
 export type HullmodSubRoute = `hullmod-versions`;
 
 export type ApiEndpoint =
+    | `/api/${ModRoute}`
     | `/api/${ShipRoute}`
     | `/api/${WeaponRoute}`
     | `/api/${HullmodRoute}`
