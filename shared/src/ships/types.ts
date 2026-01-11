@@ -58,11 +58,14 @@ export interface ShipVersionDTO {
 export interface ShipWeaponSlotDTO {
     angle: string;
     arc: string;
-    code: string;
-    id: number;
-    mount_type_id: number;
+    weapon_slot_code: string;
+    weapon_slot_id: number;
     ship_instance_id: number;
+    mount_type: string;
+    mount_type_id: number;
+    weapon_size: string;
     weapon_size_id: number;
+    weapon_type: string;
     weapon_type_id: number;
     x: string;
     y: string;
