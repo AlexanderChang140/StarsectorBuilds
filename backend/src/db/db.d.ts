@@ -205,6 +205,17 @@ export interface ModVersions {
   patch: Generated<string>;
 }
 
+export interface ModVersionsFull {
+  data_changed: boolean | null;
+  major: number | null;
+  minor: number | null;
+  mod_code: string | null;
+  mod_id: number | null;
+  mod_name: string | null;
+  mod_version_id: number | null;
+  patch: string | null;
+}
+
 export interface MountTypes {
   code: string;
   id: Generated<number>;
@@ -735,6 +746,7 @@ export interface DB {
   hullmods: Hullmods;
   images: Images;
   mod_versions: ModVersions;
+  mod_versions_full: ModVersionsFull;
   mods: Mods;
   mount_types: MountTypes;
   phase_stats: PhaseStats;
