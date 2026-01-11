@@ -30,6 +30,7 @@ export type ApiEndpoint =
     | `/api/wings`;
 
 export type ControlParams = {
+    q: string;
     fields: string;
     sort: string;
     order: 'ASC' | 'DESC';
