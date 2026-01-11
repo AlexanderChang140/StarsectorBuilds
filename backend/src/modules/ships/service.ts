@@ -10,6 +10,8 @@ import {
     makeSelectFull,
     makeSelectOne,
     selectFull,
+    selectFullWithCount,
+    type PaginatedResult,
 } from '../../db/helpers/select.ts';
 import type { Options } from '../../types/generic.ts';
 import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
@@ -25,7 +27,7 @@ export async function fetchShipVersions<
 >(
     selection: TSelection,
     options?: Options<DB['ship_versions_full']>,
-): Promise<Projection<ShipVersionDTO, TSelection>[]> {
+): Promise<PaginatedResult<Projection<ShipVersionDTO, TSelection>>> {
     const safeOptions = {
         filter: sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
         order: sanitizeOrder(options?.order),
@@ -34,7 +36,7 @@ export async function fetchShipVersions<
         client: options?.client,
     };
 
-    const result = await getShipVersionsFull(selection, safeOptions);
+    const result = await getShipVersionsFullWithCount(selection, safeOptions);
 
     return result;
 }
@@ -45,7 +47,7 @@ export async function fetchShipVersionsById<
     shipId: number,
     selection: TSelection,
     options?: Options<DB['ship_versions_full']>,
-): Promise<Projection<ShipVersionDTO, TSelection>[]> {
+): Promise<PaginatedResult<Projection<ShipVersionDTO, TSelection>>> {
     const safeOptions = {
         filter: {
             ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
@@ -57,7 +59,7 @@ export async function fetchShipVersionsById<
         client: options?.client,
     };
 
-    const result = await getShipVersionsFull(selection, safeOptions);
+    const result = await getShipVersionsFullWithCount(selection, safeOptions);
 
     return result;
 }
@@ -198,6 +200,21 @@ export async function getShipVersionsFull<
     const result = await selectFull('ship_versions_full', selection, options);
     assertProjectionRowsNonNullableKeys(result, REQUIRED_SHIP_VERSION_KEYS);
     return result;
+}
+
+export async function getShipVersionsFullWithCount<
+    TSelection extends readonly (keyof DB['ship_versions_full'])[],
+>(selection: TSelection, options?: Options<DB['ship_versions_full']>) {
+    const result = await selectFullWithCount(
+        'ship_versions_full',
+        selection,
+        options,
+    );
+    assertProjectionRowsNonNullableKeys(
+        result.rows,
+        REQUIRED_SHIP_VERSION_KEYS,
+    );
+    return { rows: result.rows, total: result.total };
 }
 
 export const getShipId = makeSelectOne<'ships', ['id'], 'mod_id' | 'code'>(

@@ -26,9 +26,9 @@ export async function getAllHullmodVersions(
         const offset = parseOffset(query);
 
         const options = { filter, order, limit, offset };
-        const result = await fetchHullmodVersions(fields, options);
+        const { rows, total } = await fetchHullmodVersions(fields, options);
 
-        res.json(result);
+        res.json({ data: rows, meta: { total } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });

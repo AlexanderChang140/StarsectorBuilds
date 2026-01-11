@@ -32,8 +32,12 @@ export async function getWeaponVersions(
         const offset = parseOffset(query);
 
         const options = { filter, order, limit, offset };
-        const result = await fetchWeaponVersionsById(weaponId, fields, options);
-        res.json(result);
+        const { rows, total } = await fetchWeaponVersionsById(
+            weaponId,
+            fields,
+            options,
+        );
+        res.json({ data: rows, meta: { total } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -85,8 +89,8 @@ export async function getAllWeaponVersions(
         const offset = parseOffset(query);
 
         const options = { filter, order, limit, offset };
-        const result = await fetchWeaponVersions(fields, options);
-        res.json(result);
+        const { rows, total } = await fetchWeaponVersions(fields, options);
+        res.json({ data: rows, meta: { total } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });

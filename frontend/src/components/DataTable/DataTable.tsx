@@ -1,3 +1,4 @@
+import type { PaginatedResponse } from '@shared/types';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
@@ -125,16 +126,22 @@ export function DataTable<
         },
     });
 
-    const { data, isPending, isError, error } = useQuery<TData[]>({
+    const {
+        data: response,
+        isPending,
+        isError,
+        error,
+    } = useQuery<PaginatedResponse<TData>>({
         queryKey: [queryKey, filter, sort, order, limit, offset],
         queryFn: () => fetchSafe<TData[]>(request),
     });
 
     if (isError) return <div>Error: {error.message}</div>;
     if (isPending) return <div>Loading...</div>;
-    if (!data?.length) return <div>No data found</div>;
+    if (!response?.data?.length) return <div>No data found</div>;
 
-    const keys = (Object.keys(data[0]) as (keyof TData)[]) ?? 0;
+    const rows = response.data;
+    const keys = (Object.keys(rows[0]) as (keyof TData)[]) ?? 0;
     const columns = keyOrder
         .filter((key: keyof TData) => keys.includes(key))
         .map((key) => {
@@ -157,7 +164,7 @@ export function DataTable<
         <div className={styles.dataTable}>
             <div className={styles.header}>
                 {title && <h1>{title}</h1>}
-                <span>{data.length} records found</span>
+                <span>{rows.length} records found</span>
             </div>
             <div className={styles.options}>
                 {filters &&
@@ -191,7 +198,7 @@ export function DataTable<
             <div className={styles.container}>
                 <Table
                     columns={columns}
-                    initialData={data}
+                    initialData={rows}
                     links={links}
                     sort={
                         order
