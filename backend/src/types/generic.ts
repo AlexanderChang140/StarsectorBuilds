@@ -14,7 +14,6 @@ export type Prettify<T> = {
 } & {};
 
 export type Options<T> = {
-    fields?: readonly (keyof T)[];
     filter?: Filter<T>;
     order?: ColumnOrder<T>;
     limit?: number;
