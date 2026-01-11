@@ -1,3 +1,9 @@
+import { useSearchParams } from 'react-router';
+
+import { DataTable } from '@/components/DataTable/DataTable';
+import DataTableFilters, {
+    type TableFilter,
+} from '@/components/DataTable/DataTableFilters';
 import { SHIP_TABLE_ROW_KEYS, type ShipTableRows } from '@/modules/ships/types';
 import { DataTable } from '@/pages/DataTable/DataTable';
 import { humanizeKeys } from '@/utils/humanizeKeys';

@@ -4,7 +4,7 @@ import {
     HULLMOD_TABLE_ROW_KEYS,
     type HullmodTableRows,
 } from '@/modules/hullmods/types';
-import { DataTable } from '@/pages/DataTable/DataTable';
+import { DataTable } from '@/components/DataTable/DataTable';
 import { humanizeKeys } from '@/utils/humanizeKeys';
 
 export default function HullmodTable() {

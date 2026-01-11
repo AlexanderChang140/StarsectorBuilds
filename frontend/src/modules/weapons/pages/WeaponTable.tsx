@@ -2,7 +2,7 @@ import {
     WEAPON_TABLE_ROW_KEYS,
     type WeaponTableRows,
 } from '@/modules/weapons/types';
-import { DataTable } from '@/pages/DataTable/DataTable';
+import { DataTable } from '@/components/DataTable/DataTable';
 import { humanizeKeys } from '@/utils/humanizeKeys';
 
 export default function WeaponTable() {
