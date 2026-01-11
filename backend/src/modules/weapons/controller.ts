@@ -68,7 +68,7 @@ export async function getLatestWeaponVersion(
             res.status(400).json({ error: 'No weapon version found' });
             return;
         }
-        res.json(result);
+        res.json({ data: result });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -118,7 +118,7 @@ export async function getWeaponVersion(
             res.status(400).json({ error: 'No weapon version found' });
             return;
         }
-        res.json(result);
+        res.json({ data: result });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });

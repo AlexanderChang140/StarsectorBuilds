@@ -46,7 +46,7 @@ export default function ShipDisplay() {
         return <div>Error: {versionQuery.error.message}</div>;
     if (versionQuery.isPending) return <div>Loading...</div>;
     if (!versionQuery.data) return <div>No data found</div>;
-    const versions = sortVersions(versionsQuery.data, 'ship_version_id');
+    const versions = sortVersions(versionsQuery.data?.data, 'ship_version_id');
 
     const data = versionQuery.data;
 

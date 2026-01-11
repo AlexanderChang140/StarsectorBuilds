@@ -36,7 +36,7 @@ export async function getShipVersions(
         const options = { filter, order, limit, offset };
 
         const result = await fetchShipVersionsById(shipId, fields, options);
-        res.json(result);
+        res.json({ data: result });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -66,7 +66,7 @@ export async function getLatestShipVersion(
             return;
         }
 
-        res.json(result);
+        res.json({ data: result });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -85,7 +85,7 @@ export async function getAllShipVersions(req: Request, res: Response) {
         const options = { filter, order, limit, offset };
 
         const result = await fetchShipVersions(fields, options);
-        res.json(result);
+        res.json({ data: result });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -115,7 +115,7 @@ export async function getShipVersionById(
             return;
         }
 
-        res.json(result);
+        res.json({ data: result });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -139,7 +139,7 @@ export async function getShipWeaponSlots(req: Request, res: Response) {
         }
 
         const result = await fetchShipWeaponSlots(shipInstanceId);
-        res.json(result);
+        res.json({ data: result });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
