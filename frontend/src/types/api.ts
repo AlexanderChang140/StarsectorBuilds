@@ -1,8 +1,8 @@
 export type ModRoute = `${ModSubRoute}`;
 export type ModSubRoute =
     | 'mods'
-    | 'mod-versions'
-    | 'mod-versions/search/display_name';
+    | 'mods/search/display_name'
+    | 'mod-versions';
 
 export type WeaponRoute = `${WeaponSubRoute}`;
 export type WeaponSubRoute =
