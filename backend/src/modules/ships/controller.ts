@@ -35,8 +35,12 @@ export async function getShipVersions(
         const offset = parseOffset(query);
         const options = { filter, order, limit, offset };
 
-        const result = await fetchShipVersionsById(shipId, fields, options);
-        res.json({ data: result });
+        const { rows, total } = await fetchShipVersionsById(
+            shipId,
+            fields,
+            options,
+        );
+        res.json({ data: rows, meta: { total } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -65,7 +69,6 @@ export async function getLatestShipVersion(
             res.status(404).json({ error: 'Ship version not found' });
             return;
         }
-
         res.json({ data: result });
     } catch (err) {
         console.error(err);
@@ -84,8 +87,8 @@ export async function getAllShipVersions(req: Request, res: Response) {
         const offset = parseOffset(query);
         const options = { filter, order, limit, offset };
 
-        const result = await fetchShipVersions(fields, options);
-        res.json({ data: result });
+        const { rows, total } = await fetchShipVersions(fields, options);
+        res.json({ data: rows, meta: { total } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error 500' });
@@ -114,7 +117,6 @@ export async function getShipVersionById(
             res.status(404).json({ error: 'Ship version not found' });
             return;
         }
-
         res.json({ data: result });
     } catch (err) {
         console.error(err);
