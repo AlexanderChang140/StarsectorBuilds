@@ -1,40 +1,45 @@
 import ButtonDropdown from '@/components/dropdown/ButtonDropdown';
 import SearchDropdown from '@/components/dropdown/SearchDropdown';
-import Select, { type Item } from '@/components/select/Select';
+import Select, {
+    type Item,
+    type SelectedItems,
+} from '@/components/select/Select';
+import { typedEntries } from '@/utils/object';
 
 import styles from './FilterChips.module.css';
 
-type Filter = {
-    item: Item;
-    children?: Item[];
-};
-
-type ChipState = {
+export type ChipState = {
+    parentLabel: string;
     input: string;
-    selected?: string;
+    selected?: Item;
 };
 
-type FilterState = {
+export type ChipFilterState = {
     input: string;
     chips: Record<string, ChipState>;
 };
 
 interface FilterChipsProps {
-    filters: Filter[];
-    filterState: FilterState;
-    onSelectedChange: (selected: string[]) => void;
-    onInputChange: (input: string) => void;
-    onChipInputChange: (value: string, input: string) => void;
-    onChipSelectedChange: (value: string, selected: string[]) => void;
+    categoryFilters: Item[];
+    chipFilters: Record<string, Item[]>;
+    filterState: ChipFilterState;
+    onCategorySelectedChange: (selected: SelectedItems) => void;
+    onCategoryInputChange: (input: string) => void;
+    onChipInputChange: (parentValue: string, input: string) => void;
+    onChipSelectedChange: (
+        parentValue: string,
+        selected: string | undefined,
+    ) => void;
     filterPlaceholder?: string;
     chipPlaceholder?: string;
 }
 
 export default function FilterChips({
-    filters,
+    categoryFilters,
+    chipFilters,
     filterState,
-    onSelectedChange,
-    onInputChange,
+    onCategorySelectedChange,
+    onCategoryInputChange,
     onChipInputChange,
     onChipSelectedChange,
     filterPlaceholder = 'Search...',
@@ -42,55 +47,61 @@ export default function FilterChips({
 }: FilterChipsProps) {
     const NONE_LABEL = 'None';
 
-    const chips = Object.keys(filterState.chips).map((value) => {
-        const parent = filters.find((filter) => filter.item.value === value);
-        const children = parent?.children ?? [];
+    const handleChipSelectedChange = (
+        parentValue: string,
+        selected: SelectedItems,
+    ) => {
+        const value = [...selected][0];
+        onChipSelectedChange(parentValue, value);
+    };
 
-        const parentLabel = parent?.item.label;
-        const selectedChildValue = filterState.chips[value]?.selected;
-        const childLabel =
-            children.find((item) => item.value === selectedChildValue)?.label ??
-            NONE_LABEL;
+    const chips = typedEntries(filterState.chips).map(
+        ([parentValue, { parentLabel, selected }]) => {
+            const chipItems = chipFilters[parentValue];
+            const currSelected: Set<string> = selected
+                ? new Set([selected.value])
+                : new Set();
 
-        const selectedChildren =
-            filterState.chips[value]?.selected !== undefined
-                ? [filterState.chips[value].selected]
-                : [];
-
-        return (
-            <div key={value} className={styles.chip}>
-                {`${parentLabel} (${childLabel})`}
-                <div className={styles.dropdown}>
-                    <SearchDropdown
-                        placeholder={chipPlaceholder}
-                        onInputChange={(input) =>
-                            onChipInputChange(value, input)
-                        }
-                    >
-                        <Select
-                            items={children}
-                            selected={selectedChildren}
-                            onChange={(selected) =>
-                                onChipSelectedChange(value, selected)
+            return (
+                <div key={parentValue} className={styles.chip}>
+                    {`${parentLabel} (${selected?.label ?? NONE_LABEL})`}
+                    <div className={styles.dropdown}>
+                        <SearchDropdown
+                            placeholder={chipPlaceholder}
+                            onInputChange={(input) =>
+                                onChipInputChange(parentValue, input)
                             }
-                        />
-                    </SearchDropdown>
+                        >
+                            <Select
+                                items={chipItems}
+                                selected={currSelected}
+                                onChange={(selected) =>
+                                    handleChipSelectedChange(
+                                        parentValue,
+                                        selected,
+                                    )
+                                }
+                            />
+                        </SearchDropdown>
+                    </div>
                 </div>
-            </div>
-        );
-    });
+            );
+        },
+    );
+
+    const selected = new Set(Object.keys(filterState.chips));
 
     return (
         <ButtonDropdown label={'Filter'}>
             <div className="select">
                 <SearchDropdown
                     placeholder={filterPlaceholder}
-                    onInputChange={onInputChange}
+                    onInputChange={onCategoryInputChange}
                 >
                     <Select
-                        items={filters.map((filter) => filter.item)}
-                        selected={Object.keys(filterState.chips)}
-                        onChange={onSelectedChange}
+                        items={categoryFilters}
+                        selected={selected}
+                        onChange={onCategorySelectedChange}
                         isMultiSelect={true}
                     />
                 </SearchDropdown>
