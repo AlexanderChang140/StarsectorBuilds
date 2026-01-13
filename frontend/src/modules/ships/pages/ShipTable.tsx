@@ -43,7 +43,7 @@ export default function ShipTable() {
                 chipCategoryKey: 'mod_id',
                 chipValueTransform: (v) => String(v.mod_version_id),
                 chipLabelTransform: (v) =>
-                    toVersionString(v.major, v.minor, v.patch),
+                    toVersionString(v),
                 chipCategoryLabelTransform: (v) => v.mod_name ?? '',
                 chipCategoryValueTransform: (v) => String(v.mod_id),
             }}
