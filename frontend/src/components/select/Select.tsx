@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 import styles from './Select.module.css';
 
 export type Item = {
@@ -5,49 +7,49 @@ export type Item = {
     label: string;
 };
 
-interface DropdownProps {
+export type SelectedItems = Set<string>;
+
+interface SelectProps {
     items: readonly Item[];
-    selected: readonly string[];
-    onChange: (selected: string[]) => void;
+    selected: SelectedItems | undefined;
+    onChange: (selected: SelectedItems) => void;
     isMultiSelect?: boolean;
-    showSelected?: boolean;
     allowDeselect?: boolean;
 }
 
 export default function Select({
     items,
-    selected = [],
+    selected,
     onChange,
     isMultiSelect = false,
-    showSelected = true,
     allowDeselect = true,
-}: DropdownProps) {
-    const handleItemClick = (item: string) => {
-        if (isMultiSelect) {
-            if (selected.includes(item)) {
-                onChange(selected.filter((i) => i !== item));
+}: SelectProps) {
+    const handleItemClick = (value: string) => {
+        const isItemSelected = selected?.has(value) ?? false;
+        if (isMultiSelect && selected) {
+            if (isItemSelected) {
+                onChange(new Set([...selected].filter((v) => v !== value)));
             } else {
-                onChange([...selected, item]);
+                onChange(new Set([...selected, value]));
             }
         } else {
-            if (allowDeselect && selected[0] === item) {
-                onChange([]);
+            if (allowDeselect && isItemSelected) {
+                onChange(new Set());
             } else {
-                onChange([item]);
+                onChange(new Set([value]));
             }
         }
     };
 
-    const shownItems = showSelected
-        ? items
-        : items.filter((item) => selected.includes(item.value));
-
     return (
         <div className={styles.items}>
-            {shownItems.map((item) => (
+            {items.map((item) => (
                 <button
                     key={item.value}
-                    className={styles.item}
+                    className={clsx(
+                        styles.item,
+                        selected?.has(item.value) && styles.selected,
+                    )}
                     onClick={() => handleItemClick(item.value)}
                 >
                     {item.label}

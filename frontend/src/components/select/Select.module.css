@@ -17,3 +17,7 @@
 .items .item:hover {
     background-color: gray;
 }
+
+.selected {
+    background: blue;
+}
