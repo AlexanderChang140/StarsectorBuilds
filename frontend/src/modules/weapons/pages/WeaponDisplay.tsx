@@ -2,7 +2,7 @@ import type { WeaponVersionDTO } from '@shared/weapons/types';
 import { useParams } from 'react-router';
 
 import styles from '@/components/Display.module.css';
-import UseVersionsQuery from '@/hooks/useVersionsQuery.tsx';
+import useVersionsQuery from '@/hooks/useVersionsQuery.tsx';
 import { sortVersions } from '@/modules/display/versionSorter.tsx';
 import { imageUrl } from '@/utils/assets';
 import { parseIntOrNaN } from '@/utils/parse';
@@ -28,7 +28,7 @@ export default function WeaponDisplay() {
         'turret_gun_image_file_path',
     ] satisfies readonly (keyof WeaponVersionDTO)[];
 
-    const { versionsQuery, versionQuery } = UseVersionsQuery<
+    const { versionsQuery, versionQuery } = useVersionsQuery<
         WeaponVersionDTO,
         typeof versionsKeys,
         typeof versionKeys
@@ -50,7 +50,7 @@ export default function WeaponDisplay() {
     if (!versionQuery.data) return <div>No data found</div>;
     const versions = sortVersions(versionsQuery.data?.data, 'weapon_version_id');
 
-    const data = versionQuery.data;
+    const data = versionQuery.data.data;
 
     return (
         <div className={styles.display}>

@@ -2,7 +2,7 @@ import type { ShipVersionDTO } from '@shared/ships/types.ts';
 import { useParams } from 'react-router';
 
 import styles from '@/components/Display.module.css';
-import UseVersionsQuery from '@/hooks/useVersionsQuery.tsx';
+import useVersionsQuery from '@/hooks/useVersionsQuery.tsx';
 import { sortVersions } from '@/modules/display/versionSorter';
 import { imageUrl } from '@/utils/assets';
 import { parseIntOrNaN } from '@/utils/parse.ts';
@@ -26,7 +26,7 @@ export default function ShipDisplay() {
         'ship_image_file_path',
     ] satisfies readonly (keyof ShipVersionDTO)[];
 
-    const { versionQuery, versionsQuery } = UseVersionsQuery<
+    const { versionQuery, versionsQuery } = useVersionsQuery<
         ShipVersionDTO,
         typeof versionsKeys,
         typeof versionKeys
@@ -48,7 +48,7 @@ export default function ShipDisplay() {
     if (!versionQuery.data) return <div>No data found</div>;
     const versions = sortVersions(versionsQuery.data?.data, 'ship_version_id');
 
-    const data = versionQuery.data;
+    const data = versionQuery.data.data;
 
     return (
         <div>
