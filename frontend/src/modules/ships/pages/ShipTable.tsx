@@ -1,4 +1,5 @@
 import type { ModDTO, ModVersionDTO } from '@shared/mods/types';
+import type { Projection } from '@shared/types';
 import { useSearchParams } from 'react-router';
 
 import { DataTable } from '@/components/DataTable/DataTable';
@@ -22,9 +23,9 @@ export default function ShipTable() {
 
     const filterChips = (
         <DataTableFilterChips<
-            ModDTO,
+            Projection<ModDTO, typeof MOD_KEYS>,
             typeof MOD_KEYS,
-            ModVersionDTO,
+            Projection<ModVersionDTO, typeof MOD_VERSION_KEYS>,
             typeof MOD_VERSION_KEYS
         >
             key={0}
@@ -42,8 +43,7 @@ export default function ShipTable() {
                 chipFilterKey: 'mod_version_id',
                 chipCategoryKey: 'mod_id',
                 chipValueTransform: (v) => String(v.mod_version_id),
-                chipLabelTransform: (v) =>
-                    toVersionString(v),
+                chipLabelTransform: (v) => toVersionString(v),
                 chipCategoryLabelTransform: (v) => v.mod_name ?? '',
                 chipCategoryValueTransform: (v) => String(v.mod_id),
             }}
