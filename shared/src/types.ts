@@ -9,3 +9,8 @@ export type PaginatedResponse<T> = {
         total: number;
     };
 };
+
+export type ApiResponse<T> = {
+    data: T;
+};
+
