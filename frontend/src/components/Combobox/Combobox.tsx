@@ -4,17 +4,15 @@ import Select, {
 } from '@/components/select/Select';
 
 interface ComboboxProps<T> {
-    value: string;
     items: readonly Item[];
     Dropdown: React.ComponentType<T>;
     dropdownProps: Omit<T, 'children'>;
     selected: SelectedItems;
-    onSelectedChange: (value: string, selected: SelectedItems) => void;
+    onSelectedChange: (selected: SelectedItems) => void;
     isMultiSelect?: boolean;
 }
 
 export default function Combobox<T>({
-    value,
     items,
     Dropdown,
     dropdownProps,
@@ -28,7 +26,7 @@ export default function Combobox<T>({
                 <Select
                     items={items}
                     selected={selected}
-                    onChange={(selected) => onSelectedChange(value, selected)}
+                    onChange={(selected) => onSelectedChange(selected)}
                     isMultiSelect={isMultiSelect}
                 ></Select>
             </Dropdown>
