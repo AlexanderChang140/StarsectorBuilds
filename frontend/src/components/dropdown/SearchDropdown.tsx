@@ -12,9 +12,9 @@ interface SearchDropdownProps {
 
 export default function SearchDropdown({
     placeholder,
+    onInputChange,
     isActive,
     onActiveChange,
-    onInputChange,
     children,
 }: SearchDropdownProps) {
     const [internalActive, setInternalActive] = useState(false);
