@@ -21,7 +21,7 @@ type VersionsProps<
     latestVersionEndpoint: ApiEndpoint;
 };
 
-export default function UseVersionsQuery<
+export default function useVersionsQuery<
     TData extends object,
     TVersionsKeys extends readonly (keyof TData)[],
     TVersionKeys extends readonly (keyof TData)[],
