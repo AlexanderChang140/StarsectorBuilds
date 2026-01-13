@@ -1,4 +1,4 @@
-import type { PaginatedResponse, Projection } from '@shared/types';
+import type { PaginatedResponse, Projection, ApiResponse } from '@shared/types';
 import { useQuery } from '@tanstack/react-query';
 
 import type { ApiEndpoint } from '@/types/api';
@@ -67,10 +67,12 @@ export default function useVersionsQuery<
         : latestVersionEndpoint;
 
     const versionKey = hasValidVersionId ? versionId : 'latest';
-    const versionQuery = useQuery<Projection<TData, typeof versionKeys>>({
+    const versionQuery = useQuery<
+        ApiResponse<Projection<TData, typeof versionKeys>>
+    >({
         queryKey: [versionQueryKey, entityId, versionKey],
         queryFn: () =>
-            fetchSafe<Projection<TData, typeof versionKeys>>(
+            fetchSafe<ApiResponse<Projection<TData, typeof versionKeys>>>(
                 currVersionRequest,
             ),
         enabled: hasValidEntityId,
