@@ -361,10 +361,13 @@ export async function selectCodeIdRecord<TTable extends TableWithIdCode>(
 ) {
     const options = client ? { client } : {};
     const rows = await select(table, ['id', 'code'], options);
-    return rows.reduce((acc, row) => {
-        acc[row.code] = row.id;
-        return acc;
-    }, {} as Record<string, number>);
+    return rows.reduce(
+        (acc, row) => {
+            acc[row.code] = row.id;
+            return acc;
+        },
+        {} as Record<string, number>,
+    );
 }
 
 /**
