@@ -13,6 +13,7 @@ import router from './routes/routes.ts';
 dotenv.config();
 
 const app = express();
+app.set('query parser', 'extended');
 const PORT = process.env.PORT || 3000;
 
 app.use('/', router);
