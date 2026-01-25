@@ -328,6 +328,13 @@ export interface ShipSystemData {
   ship_system_instance_id: number;
 }
 
+export interface ShipSystemDesc {
+  ship_system_instance_id: number;
+  text1: string | null;
+  text2: string | null;
+  text3: string | null;
+}
+
 export interface ShipSystemDescs {
   ship_system_instance_id: number;
   text1: string | null;
@@ -763,6 +770,7 @@ export interface DB {
   ship_specs: ShipSpecs;
   ship_stats: ShipStats;
   ship_system_data: ShipSystemData;
+  ship_system_desc: ShipSystemDesc;
   ship_system_descs: ShipSystemDescs;
   ship_system_instances: ShipSystemInstances;
   ship_system_versions: ShipSystemVersions;
