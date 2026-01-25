@@ -1,17 +1,21 @@
 import type { Entries } from '../../types/generic.ts';
 
-export type MatchType = 'exact' | 'contains' | 'starts_with' | 'ends_with';
+export type MatchType = (typeof MATCH_TYPES)[number];
 
-export type Filter<T> = Partial<
-    Record<
-        keyof T,
-        {
-            values: (string | number)[] | undefined;
-            match?: MatchType;
-            not?: boolean;
-        }
-    >
->;
+export const MATCH_TYPES = [
+    'exact',
+    'contains',
+    'starts_with',
+    'ends_with',
+] as const satisfies readonly string[];
+
+export type FilterOptions = {
+    values: (string | number)[] | undefined;
+    match?: MatchType;
+    not?: boolean;
+};
+
+export type Filter<T> = Partial<Record<keyof T, FilterOptions>>;
 
 export function createFilterFragment<T extends object>(
     conditions: Filter<T> | undefined,

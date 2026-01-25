@@ -20,3 +20,7 @@ export type Options<T> = {
     offset?: number;
     client?: PoolClient | undefined;
 };
+
+export type Nullable<T> = {
+    [K in keyof T]: T[K] | null;
+};
