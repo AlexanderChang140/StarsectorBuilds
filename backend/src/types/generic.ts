@@ -9,10 +9,6 @@ export type Entries<T> = [keyof T, T[keyof T]][];
 
 export type ReqQuery = ParsedQs | QueryString.ParsedQs;
 
-export type Prettify<T> = {
-    [K in keyof T]: Prettify<T[K]>;
-} & {};
-
 export type Options<T> = {
     filter?: Filter<T>;
     order?: ColumnOrder<T>;
