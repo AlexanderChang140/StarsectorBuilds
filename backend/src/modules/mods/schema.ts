@@ -17,7 +17,7 @@ export const ModVersionsFullSchema = schemaForTable<
     SelectableRow<DB['mod_versions_full']>
 >()(
     z.object({
-        data_changed: z.coerce.boolean().nullable(),
+        data_changed: z.stringbool().nullable(),
         major: z.coerce.number().nullable(),
         minor: z.coerce.number().nullable(),
         mod_code: z.string().nullable(),

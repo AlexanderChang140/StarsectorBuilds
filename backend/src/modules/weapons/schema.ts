@@ -59,7 +59,7 @@ export const WeaponVersionsFullSchema = schemaForTable<
         mod_name: z.coerce.string().nullable(),
         mod_version_id: z.coerce.number().nullable(),
 
-        no_dps_tooltip: z.coerce.boolean().nullable(),
+        no_dps_tooltip: z.stringbool().nullable(),
 
         op_cost: z.coerce.number().nullable(),
         patch: z.coerce.string().nullable(),

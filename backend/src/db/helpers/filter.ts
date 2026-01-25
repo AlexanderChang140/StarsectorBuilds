@@ -10,7 +10,7 @@ export const MATCH_TYPES = [
 ] as const satisfies readonly string[];
 
 export type FilterOptions = {
-    values: (string | number)[] | undefined;
+    values: (string | number | boolean)[] | undefined;
     match?: MatchType;
     not?: boolean;
 };
@@ -20,12 +20,12 @@ export type Filter<T> = Partial<Record<keyof T, FilterOptions>>;
 export function createFilterFragment<T extends object>(
     conditions: Filter<T> | undefined,
     startIndex: number = 1,
-): { clause: string; params: (string | number)[] } {
+): { clause: string; params: (string | number | boolean)[] } {
     if (conditions === undefined) {
         return { clause: '', params: [] };
     }
 
-    const params: (string | number)[] = [];
+    const params: (string | number | boolean)[] = [];
     const clauses = [];
     let i = startIndex;
 
