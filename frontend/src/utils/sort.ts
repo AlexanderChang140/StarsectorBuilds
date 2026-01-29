@@ -19,3 +19,8 @@ export function multiSort<T>(
         return 0;
     };
 }
+
+export function sortSubset<T>(arr: readonly T[], subset: readonly T[]) {
+    const order = new Map(arr.map((value, index) => [value, index]));
+    return [...subset].sort((a, b) => order.get(a)! - order.get(b)!);
+}

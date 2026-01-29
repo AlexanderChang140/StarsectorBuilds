@@ -1,4 +1,5 @@
 import type { ModDTO, ModVersionDTO } from '@shared/mods/types';
+import type { ShipVersionDTO } from '@shared/ships/types';
 import type { Projection } from '@shared/types';
 import { useSearchParams } from 'react-router';
 
@@ -30,22 +31,20 @@ export default function ShipTable() {
         >
             key={0}
             category={{
-                categoryQueryKey: 'shipTableMods',
-                categoryEndpoint: '/api/mods/search/display_name',
-                categoryKeys: MOD_KEYS,
-                categoryValueTransform: (mod) => String(mod.id),
-                categoryLabelTransform: (mod) => String(mod.display_name),
+                queryKey: 'shipTableMods',
+                endpoint: '/api/mods',
+                keys: MOD_KEYS,
+                filterKey: 'display_name',
+                valueKey: 'id',
+                labelTransform: (mod) => String(mod.display_name),
             }}
             chips={{
-                chipQueryKey: 'shipTableModVersions',
-                chipEndpoint: '/api/mod-versions',
-                chipKeys: MOD_VERSION_KEYS,
-                chipFilterKey: 'mod_version_id',
-                chipCategoryKey: 'mod_id',
-                chipValueTransform: (v) => String(v.mod_version_id),
-                chipLabelTransform: (v) => toVersionString(v),
-                chipCategoryLabelTransform: (v) => v.mod_name ?? '',
-                chipCategoryValueTransform: (v) => String(v.mod_id),
+                queryKey: 'shipTableModVersions',
+                endpoint: '/api/mod-versions',
+                keys: MOD_VERSION_KEYS,
+                categoryKey: 'mod_id',
+                valueKey: 'mod_version_id',
+                labelTransform: (v) => toVersionString(v),
             }}
             searchParams={searchParams}
             setSearchParams={setSearchParams}
@@ -147,7 +146,7 @@ const FILTERS = [
         ],
         isMultiSelect: true,
     },
-] as const satisfies readonly TableFilter[];
+] as const satisfies readonly TableFilter<ShipVersionDTO>[];
 
 const MOD_KEYS = [
     'id',
@@ -156,7 +155,6 @@ const MOD_KEYS = [
 
 const MOD_VERSION_KEYS = [
     'mod_id',
-    'mod_name',
     'mod_version_id',
     'major',
     'minor',

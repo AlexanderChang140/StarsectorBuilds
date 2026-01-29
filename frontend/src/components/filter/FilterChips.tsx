@@ -1,112 +1,111 @@
-import ButtonDropdown from '@/components/dropdown/ButtonDropdown';
-import SearchDropdown from '@/components/dropdown/SearchDropdown';
-import Select, {
-    type Item,
-    type SelectedItems,
-} from '@/components/select/Select';
+import {
+    Button,
+    ComboBox,
+    DialogTrigger,
+    Input,
+    Label,
+    ListBoxItem,
+    Popover,
+} from 'react-aria-components';
+
+import listBoxStyles from '@/components/ListBox/Listbox.module.css';
+import type { Item } from '@/types/component';
+import type { StringTransform } from '@/types/generic';
 import { typedEntries } from '@/utils/object';
 
+import FilterChip from './FilterChip';
 import styles from './FilterChips.module.css';
+import type { ChipFilterState } from './hooks/useChipFilterState';
+import { ListBox } from '../ListBox/ListBox';
 
-export type ChipState = {
-    parentLabel: string;
-    input: string;
-    selected?: Item;
-};
-
-export type ChipFilterState = {
-    input: string;
-    chips: Record<string, ChipState>;
-};
-
-interface FilterChipsProps {
+interface FilterChipsProps<TCategory> {
     categoryFilters: Item[];
     chipFilters: Record<string, Item[]>;
-    filterState: ChipFilterState;
-    onCategorySelectedChange: (selected: SelectedItems) => void;
+    chipFilterState: ChipFilterState<TCategory>;
+    categoryLabelTransform: StringTransform<TCategory>;
     onCategoryInputChange: (input: string) => void;
+    onSelectCategory: (value: string) => void;
+    onUnselectCategory: (value: string) => void;
     onChipInputChange: (parentValue: string, input: string) => void;
     onChipSelectedChange: (
         parentValue: string,
-        selected: string | undefined,
+        selected: Item | undefined,
     ) => void;
-    filterPlaceholder?: string;
+    categoryPlaceholder?: string;
     chipPlaceholder?: string;
 }
 
-export default function FilterChips({
+export default function FilterChips<TCategory>({
     categoryFilters,
     chipFilters,
-    filterState,
-    onCategorySelectedChange,
+    chipFilterState,
+    categoryLabelTransform,
     onCategoryInputChange,
+    onSelectCategory,
+    onUnselectCategory,
     onChipInputChange,
     onChipSelectedChange,
-    filterPlaceholder = 'Search...',
+    categoryPlaceholder = 'Search...',
     chipPlaceholder = 'Search...',
-}: FilterChipsProps) {
-    const NONE_LABEL = 'None';
-
-    const handleChipSelectedChange = (
-        parentValue: string,
-        selected: SelectedItems,
-    ) => {
-        const value = [...selected][0];
-        onChipSelectedChange(parentValue, value);
-    };
-
-    const chips = typedEntries(filterState.chips).map(
-        ([parentValue, { parentLabel, selected }]) => {
-            const chipItems = chipFilters[parentValue];
-            const currSelected: Set<string> = selected
-                ? new Set([selected.value])
-                : new Set();
-
+}: FilterChipsProps<TCategory>) {
+    const chips = typedEntries(chipFilterState.chips).map(
+        ([categoryValue, { category, selected }]) => {
+            const chipItems =
+                (chipFilters[categoryValue] as Item[] | undefined) ?? [];
             return (
-                <div key={parentValue} className={styles.chip}>
-                    {`${parentLabel} (${selected?.label ?? NONE_LABEL})`}
-                    <div className={styles.dropdown}>
-                        <SearchDropdown
-                            placeholder={chipPlaceholder}
-                            onInputChange={(input) =>
-                                onChipInputChange(parentValue, input)
-                            }
-                        >
-                            <Select
-                                items={chipItems}
-                                selected={currSelected}
-                                onChange={(selected) =>
-                                    handleChipSelectedChange(
-                                        parentValue,
-                                        selected,
-                                    )
-                                }
-                            />
-                        </SearchDropdown>
-                    </div>
-                </div>
+                <FilterChip
+                    key={categoryValue}
+                    categoryItem={{
+                        value: categoryValue,
+                        label: categoryLabelTransform(category),
+                    }}
+                    chipFilters={chipItems}
+                    selected={selected}
+                    onChipSelectedChange={onChipSelectedChange}
+                    onRemoveChip={onUnselectCategory}
+                />
             );
         },
     );
 
-    const selected = new Set(Object.keys(filterState.chips));
-
     return (
-        <ButtonDropdown label={'Filter'}>
-            <div className="select">
-                <SearchDropdown
-                    placeholder={filterPlaceholder}
-                    onInputChange={onCategoryInputChange}
-                >
-                    <Select
-                        items={categoryFilters}
-                        selected={selected}
-                        onChange={onCategorySelectedChange}
-                        isMultiSelect={true}
-                    />
-                </SearchDropdown>
-                {chips}
-            </div>
-        </ButtonDropdown>
+        <div>
+            <DialogTrigger>
+                <Label>Mods</Label>
+                <Button>Select mods</Button>
+                <Popover className={styles.content}>
+                    <ComboBox
+                        defaultFilter={() => true}
+                        inputValue={chipFilterState.input}
+                        onInputChange={(input) => {
+                            onCategoryInputChange(input);
+                        }}
+                        selectedKey={null}
+                        onSelectionChange={(value) => {
+                            if (value === null) return;
+                            onSelectCategory(String(value));
+                            onCategoryInputChange('');
+                        }}
+                        aria-label="Versions"
+                    >
+                        <Input placeholder={categoryPlaceholder}></Input>
+                        <Popover>
+                            <ListBox>
+                                {categoryFilters.map((item) => (
+                                    <ListBoxItem
+                                        key={item.value}
+                                        className={listBoxStyles.listboxItem}
+                                        id={item.value}
+                                    >
+                                        {item.label}
+                                    </ListBoxItem>
+                                ))}
+                            </ListBox>
+                        </Popover>
+                    </ComboBox>
+                    {chips}
+                </Popover>
+            </DialogTrigger>
+        </div>
     );
 }

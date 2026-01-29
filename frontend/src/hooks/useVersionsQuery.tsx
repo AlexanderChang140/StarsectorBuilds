@@ -1,9 +1,9 @@
 import type { PaginatedResponse, Projection, ApiResponse } from '@shared/types';
 import { useQuery } from '@tanstack/react-query';
 
-import type { ApiEndpoint } from '@/types/api';
-import { buildApiRequest, buildFields } from '@/utils/apiRequestBuilder';
-import fetchSafe from '@/utils/fetchSafe';
+import { buildApiRequest, buildFields } from '@/api/apiRequestBuilder';
+import fetchSafe from '@/api/fetchSafe';
+import type { ApiEndpoint } from '@/api/types';
 
 type VersionsProps<
     TData extends object,

@@ -1,14 +1,15 @@
-import type { ChipState } from './FilterChips';
-import type { Item } from '../select/Select';
+import type { Item } from '@/types/component';
 
-export default function createChipState(
-    parentLabel: string,
-    input: string,
+import type { ChipState } from './hooks/useChipFilterState';
+
+export default function createChipState<TCategory>(
+    category: TCategory,
+    input?: string,
     selected?: Item,
-): ChipState {
+): ChipState<TCategory> {
     return {
-        parentLabel,
-        input,
+        category,
+        input: input ?? '',
         selected,
     };
 }

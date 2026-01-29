@@ -1,6 +1,6 @@
 import { parseIntOrNaN } from '@/utils/parse';
 
-export default function getPagination(query: URLSearchParams, defaultLimit: number | undefined) {
+export default function getURLPagination(query: URLSearchParams, defaultLimit: number | undefined) {
     const rawLimit = query.get('limit');
     const parsedLimit = parseIntOrNaN(rawLimit);
     const limit = !Number.isNaN(parsedLimit) ? parsedLimit : defaultLimit;

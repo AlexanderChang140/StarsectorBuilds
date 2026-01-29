@@ -2,20 +2,20 @@ import type { PaginatedResponse } from '@shared/types';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, type SetURLSearchParams } from 'react-router';
 
+import { buildApiRequest } from '@/api/apiRequestBuilder';
+import fetchSafe from '@/api/fetchSafe';
+import type { ApiEndpoint } from '@/api/types';
 import PaginationControls from '@/components/pagination/PaginationControls';
 import Table from '@/components/table/Table';
-import useTableParams from '@/hooks/useTableParams';
-import type { ApiEndpoint } from '@/types/api';
-import type { SortOrder } from '@/types/generic';
-import { buildApiRequest } from '@/utils/apiRequestBuilder';
-import fetchSafe from '@/utils/fetchSafe';
+import type { SortOrder, StringKeys } from '@/types/generic';
 
 import styles from './DataTable.module.css';
+import useTableParams from './hooks/useTableParams';
 
 interface DataTableProps<
     TData extends Record<string, unknown>,
-    TTableKeys extends readonly (keyof TData)[],
-    TKeyOrder extends readonly (keyof TData)[],
+    TTableKeys extends readonly StringKeys<TData>[],
+    TKeyOrder extends readonly StringKeys<TData>[],
 > {
     dataConfig: {
         endpoint: ApiEndpoint;
@@ -39,8 +39,8 @@ interface DataTableProps<
 
 export function DataTable<
     TData extends Record<string, unknown>,
-    TTableKeys extends readonly (keyof TData)[],
-    TKeyOrder extends readonly (keyof TData)[],
+    TTableKeys extends readonly StringKeys<TData>[],
+    TKeyOrder extends readonly StringKeys<TData>[],
 >({
     dataConfig: { endpoint, queryKey, initialSort, defaultLimit = 20 },
     tableConfig: { tableKeys, keyOrder, displayMap },
@@ -78,19 +78,19 @@ export function DataTable<
         });
     };
 
-    const { filter, sort, order, limit, offset } = useTableParams<
-        TData,
-        TTableKeys
-    >(tableKeys, {
-        limit: defaultLimit,
-        sort: initialSort?.sortField,
-        order: initialSort?.sortOrder,
-    });
+    const { filter, sort, order, limit, offset } = useTableParams<TTableKeys>(
+        tableKeys,
+        {
+            limit: defaultLimit,
+            sort: initialSort?.sortField,
+            order: initialSort?.sortOrder,
+        },
+    );
 
     const request = buildApiRequest({
         endpoint,
         params: {
-            ...filter,
+            filter,
             sort,
             order,
             limit,
@@ -124,6 +124,9 @@ export function DataTable<
               } as Partial<Record<keyof TData, (row: TData) => string>>)
             : undefined;
 
+    const count = response?.meta.total ?? 0;
+    const totalPages = Math.ceil(count / defaultLimit);
+
     return (
         <div className={styles.dataTable}>
             <div className={styles.header}>
@@ -144,8 +147,7 @@ export function DataTable<
                     onSortChange={handleSortChange}
                 />
                 <PaginationControls
-                    //TODO Get total page count from backend
-                    totalPages={5}
+                    totalPages={totalPages}
                     currPageIndex={page - 1}
                     onPageChange={handlePageChange}
                 />

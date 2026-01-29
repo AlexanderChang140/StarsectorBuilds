@@ -1,8 +1,5 @@
 export type ModRoute = `${ModSubRoute}`;
-export type ModSubRoute =
-    | 'mods'
-    | 'mods/search/display_name'
-    | 'mod-versions';
+export type ModSubRoute = 'mods' | 'mods/search/display_name' | 'mod-versions';
 
 export type WeaponRoute = `${WeaponSubRoute}`;
 export type WeaponSubRoute =
@@ -29,18 +26,25 @@ export type ApiEndpoint =
     | `/api/${HullmodRoute}`
     | `/api/wings`;
 
+export type MatchType = 'exact' | 'contains' | 'starts_with' | 'ends_with';
+
+export type Filter = {
+    values: (string | number | boolean)[];
+    match?: MatchType;
+    not?: boolean;
+};
+
 export type ControlParams = {
     q: string;
     fields: string;
+    filter: Record<string, Filter>;
     sort: string;
     order: 'ASC' | 'DESC';
     limit: number;
     offset: number;
 };
 
-export type Filters = Record<string, string | string[] | number | undefined>;
-
 export type ApiRequest<TApiEndpoint extends ApiEndpoint> = {
     endpoint: TApiEndpoint;
-    params?: Partial<ControlParams & Filters>;
+    params?: Partial<ControlParams>;
 };
