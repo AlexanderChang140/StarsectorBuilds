@@ -1,7 +1,6 @@
 .controls {
     display: flex;
     gap: 1rem;
-    align-self: center;
 }
 
 .current-page-index {
@@ -11,7 +10,6 @@
 .go-to-page {
     display: flex;
     flex-direction: row;
-    align-self: center;
     justify-content: center;
 }
 

@@ -24,7 +24,6 @@ export default function TableBody<T>({
                                     {links?.[accessor] ? (
                                         <Link
                                             to={links[accessor](entry)}
-                                            className="text-blue-500 underline"
                                         >
                                             {tData}
                                         </Link>

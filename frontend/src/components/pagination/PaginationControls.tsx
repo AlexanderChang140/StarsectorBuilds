@@ -1,6 +1,7 @@
-import './PaginationControls.css';
-import { clamp } from '../../../utils/math';
-import { parseIntOrNaN } from '../../../utils/parse';
+import { clamp } from '@/utils/math';
+import { parseIntOrNaN } from '@/utils/parse';
+
+import styles from './PaginationControls.module.css';
 
 interface PaginationControlsProps {
     totalPages: number;
@@ -29,13 +30,13 @@ export default function PaginationControls({
     const indexElements = Array.from({ length: totalPages }, (_, i) => {
         if (i === currPageIndex) {
             return (
-                <span key={i + 1} className="current-page-index">
+                <span key={i + 1} className={styles.currrentPageIndex}>
                     {i + 1}
                 </span>
             );
         } else {
             return (
-                <span key={i + 1} className="button">
+                <span key={i + 1} className={styles.button}>
                     {i + 1}
                 </span>
             );
@@ -44,7 +45,7 @@ export default function PaginationControls({
 
     return (
         <>
-            <div className="controls">
+            <div className={styles.controls}>
                 <button
                     onClick={() => goToPageIndex(0)}
                     disabled={currPageIndex === 0}
@@ -71,7 +72,7 @@ export default function PaginationControls({
                     Last
                 </button>
             </div>
-            <form className="go-to-page" onSubmit={handleSubmit}>
+            <form className={styles.goToPage} onSubmit={handleSubmit}>
                 <input name="page" />
                 <button>Go</button>
             </form>

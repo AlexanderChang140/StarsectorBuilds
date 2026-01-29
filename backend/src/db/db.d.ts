@@ -5,14 +5,6 @@
 
 import type { ColumnType } from "kysely";
 
-export type ArrayType<T> = ArrayTypeImpl<T> extends (infer U)[]
-  ? U[]
-  : ArrayTypeImpl<T>;
-
-export type ArrayTypeImpl<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S[], I[], U[]>
-  : T[];
-
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
@@ -213,6 +205,17 @@ export interface ModVersions {
   patch: Generated<string>;
 }
 
+export interface ModVersionsFull {
+  data_changed: boolean | null;
+  major: number | null;
+  minor: number | null;
+  mod_code: string | null;
+  mod_id: number | null;
+  mod_name: string | null;
+  mod_version_id: number | null;
+  patch: string | null;
+}
+
 export interface MountTypes {
   code: string;
   id: Generated<number>;
@@ -280,8 +283,9 @@ export interface ShipLogisticStats {
 }
 
 export interface ShipPositions {
-  center: ArrayType<Numeric> | null;
   ship_instance_id: number;
+  x: Numeric;
+  y: Numeric;
 }
 
 export interface Ships {
@@ -388,7 +392,6 @@ export interface ShipVersionsFull {
   acceleration: number | null;
   armor_rating: number | null;
   base_value: number | null;
-  center: ArrayType<Numeric> | null;
   cr_deployment_cost: number | null;
   cr_loss_per_sec: Numeric | null;
   cr_recovery: Numeric | null;
@@ -438,6 +441,8 @@ export interface ShipVersionsFull {
   text1: string | null;
   text2: string | null;
   turn_acceleration: number | null;
+  x: Numeric | null;
+  y: Numeric | null;
 }
 
 export interface ShipWeaponSlots {
@@ -446,10 +451,27 @@ export interface ShipWeaponSlots {
   code: string;
   id: Generated<number>;
   mount_type_id: number;
-  position: ArrayType<Numeric>;
   ship_instance_id: number;
   weapon_size_id: number;
   weapon_type_id: number;
+  x: Numeric;
+  y: Numeric;
+}
+
+export interface ShipWeaponSlotsFull {
+  angle: Numeric | null;
+  arc: Numeric | null;
+  mount_type: string | null;
+  mount_type_id: number | null;
+  ship_instance_id: number | null;
+  weapon_size: string | null;
+  weapon_size_id: number | null;
+  weapon_slot_code: string | null;
+  weapon_slot_id: number | null;
+  weapon_type: string | null;
+  weapon_type_id: number | null;
+  x: Numeric | null;
+  y: Numeric | null;
 }
 
 export interface Users {
@@ -731,6 +753,7 @@ export interface DB {
   hullmods: Hullmods;
   images: Images;
   mod_versions: ModVersions;
+  mod_versions_full: ModVersionsFull;
   mods: Mods;
   mount_types: MountTypes;
   phase_stats: PhaseStats;
@@ -758,6 +781,7 @@ export interface DB {
   ship_versions: ShipVersions;
   ship_versions_full: ShipVersionsFull;
   ship_weapon_slots: ShipWeaponSlots;
+  ship_weapon_slots_full: ShipWeaponSlotsFull;
   ships: Ships;
   users: Users;
   weapon_descs: WeaponDescs;

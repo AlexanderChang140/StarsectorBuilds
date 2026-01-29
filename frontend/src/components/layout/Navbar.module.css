@@ -1,34 +1,36 @@
 nav {
-    position: sticky;
+    position: fixed;
     top: 0;
     z-index: 2;
-    grid-area: navbar;
-    height: 100%;
+    width: 100%;
+    height: var(--navbar-height);
     border-bottom: 1px solid var(--border-color);
 }
 
-.nav-container {
+.container {
     display: flex;
     align-items: center;
+    height: 100%;
     padding: 0 2rem;
-    margin: 0 auto;
 }
 
-.nav-items {
+.items {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
 
-.nav-start {
+.start {
     display: flex;
     gap: 1rem;
+    align-items: center;
     justify-content: flex-start;
 }
 
-.nav-end {
+.end {
     display: flex;
     gap: 1rem;
+    align-items: center;
     justify-content: flex-end;
 }

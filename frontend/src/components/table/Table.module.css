@@ -1,27 +1,27 @@
 .table-container {
     width: fit-content;
     max-width: 100%;
-    max-height: 65vh;
+    height: 100%;
     overflow: auto;
     border: 1px solid #ccc;
 }
 
-table,
-th,
-td {
-    width: auto;
+table {
+    width: max-content;
     border-collapse: collapse;
-    border: 3px solid black;
 }
 
-th,
 td {
-    padding: 10px;
+    padding: 0.75rem;
+    border-right: 3px solid black;
+    border-bottom: 3px solid black;
+    border-left: 3px solid black;
 }
 
 th {
     position: sticky;
     top: 0;
     z-index: 1;
+    padding: 0.75rem;
     background-color: black;
 }

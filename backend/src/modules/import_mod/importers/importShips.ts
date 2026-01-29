@@ -187,7 +187,8 @@ export async function importShips(
                         code: slot.code,
                         angle: slot.angle,
                         arc: slot.arc,
-                        position: slot.position,
+                        x: slot.x,
+                        y: slot.y,
                     },
                     client,
                 });

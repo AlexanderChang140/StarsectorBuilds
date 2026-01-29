@@ -6,11 +6,13 @@ import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
     makeSelectCodeIdRecord,
-    makeSelectFull,
     makeSelectOne,
     selectFull,
+    selectFullWithCount,
+    type PaginatedResult,
 } from '../../db/helpers/select.ts';
 import type { Options } from '../../types/generic.ts';
+import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 import {
     sanitizeFilter,
     sanitizeOrder,
@@ -23,8 +25,8 @@ export async function fetchWeaponVersions<
 >(
     selection: TSelection,
     options: Options<DB['weapon_versions_full']>,
-): Promise<Projection<WeaponVersionDTO, TSelection>[]> {
-    const safeOptions = {
+): Promise<PaginatedResult<Projection<WeaponVersionDTO, TSelection>>> {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
         filter: sanitizeFilter(options.filter, WEAPON_VERSIONS_FULL_COLUMNS),
         order: sanitizeOrder(options.order),
         limit: sanitizeLimit(options.limit, 20),
@@ -32,19 +34,119 @@ export async function fetchWeaponVersions<
         client: options.client,
     };
 
-    const result = await selectFull(
-        'weapon_versions_full',
-        selection,
-        safeOptions,
-    );
+    const result = await getWeaponVersionsFullWithCount(selection, safeOptions);
 
     return result;
 }
 
-export const getWeaponVersionsFull = makeSelectFull(
-    'weapon_versions_full',
-    WEAPON_VERSIONS_FULL_COLUMNS,
-);
+export async function fetchLatestWeaponVersionById<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(
+    weaponVersionId: number,
+    selection: TSelection,
+    options?: Options<DB['weapon_versions_full']>,
+): Promise<Projection<WeaponVersionDTO, TSelection> | null> {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
+        filter: {
+            weapon_version_id: { values: [weaponVersionId] },
+        },
+        order: {
+            major: 'DESC',
+            minor: 'DESC',
+            patch: 'DESC',
+        },
+        limit: 1,
+        client: options?.client,
+    };
+
+    const result = await getWeaponVersionsFull(selection, safeOptions);
+
+    return result[0] ?? null;
+}
+
+export async function fetchWeaponVersionsById<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(
+    weaponId: number,
+    selection: TSelection,
+    options?: Options<DB['weapon_versions_full']>,
+): Promise<PaginatedResult<Projection<WeaponVersionDTO, TSelection>>> {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
+        filter: {
+            ...sanitizeFilter(options?.filter, WEAPON_VERSIONS_FULL_COLUMNS),
+            weapon_id: { values: [weaponId] },
+        },
+        order: sanitizeOrder(options?.order),
+        limit: sanitizeLimit(options?.limit, 20),
+        offset: sanitizeOffset(options?.offset),
+        client: options?.client,
+    };
+
+    const result = await getWeaponVersionsFullWithCount(selection, safeOptions);
+
+    return result;
+}
+
+export async function fetchWeaponVersionById<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(
+    weaponVersionId: number,
+    selection: TSelection,
+    options?: Options<DB['weapon_versions_full']>,
+): Promise<Projection<WeaponVersionDTO, TSelection> | null> {
+    const safeOptions: Options<DB['weapon_versions_full']> = {
+        filter: {
+            weapon_version_id: { values: [weaponVersionId] },
+        },
+        limit: 1,
+        client: options?.client,
+    };
+
+    const result = await getWeaponVersionsFull(selection, safeOptions);
+
+    return result[0] ?? null;
+}
+
+const REQUIRED_WEAPON_VERSION_KEYS = [
+    'major',
+    'minor',
+    'patch',
+    'mod_id',
+    'mod_version_id',
+    'weapon_code',
+    'weapon_id',
+    'weapon_instance_id',
+    'weapon_size',
+    'weapon_size_id',
+    'weapon_type',
+    'weapon_type_id',
+    'weapon_version_id',
+    'damage_type',
+    'damage_type_id',
+] as const satisfies readonly (keyof DB['weapon_versions_full'])[];
+
+export async function getWeaponVersionsFull<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(selection: TSelection, options?: Options<DB['weapon_versions_full']>) {
+    const result = await selectFull('weapon_versions_full', selection, options);
+    assertProjectionRowsNonNullableKeys(result, REQUIRED_WEAPON_VERSION_KEYS);
+    return result;
+}
+
+export async function getWeaponVersionsFullWithCount<
+    TSelection extends readonly (keyof DB['weapon_versions_full'])[],
+>(selection: TSelection, options?: Options<DB['weapon_versions_full']>) {
+    const result = await selectFullWithCount(
+        'weapon_versions_full',
+        selection,
+        options,
+    );
+    assertProjectionRowsNonNullableKeys(
+        result.rows,
+        REQUIRED_WEAPON_VERSION_KEYS,
+    );
+    return { rows: result.rows, total: result.total };
+}
 
 export const getWeaponId = makeSelectOne<'weapons', ['id'], 'code'>('weapons', [
     'id',

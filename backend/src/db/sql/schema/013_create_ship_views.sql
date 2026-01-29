@@ -16,7 +16,7 @@ SELECT
     s.code AS ship_code,
     i.file_path AS ship_image_file_path,
 
-    mv.id as mod_version_id,
+    mv.id AS mod_version_id,
     mv.major,
     mv.minor,
     mv.patch,
@@ -57,7 +57,8 @@ SELECT
     sd.text1,
     sd.text2,
 
-    spo.center,
+    spo.x,
+    spo.y,
 
     sls.min_crew,
     sls.max_crew,
@@ -97,4 +98,26 @@ LEFT JOIN shield_stats sst ON si.id = sst.ship_instance_id
 LEFT JOIN phase_stats ps ON si.id = ps.ship_instance_id
 LEFT JOIN ship_meta sm ON si.id = sm.ship_instance_id
 WHERE NOT ssi.code = 'FIGHTER'
-AND NOT (coalesce(sm.hints, '{}') && ARRAY['HIDE_IN_CODEX', 'MODULE', 'STATION'])
+AND NOT (coalesce(sm.hints, '{}') && ARRAY['HIDE_IN_CODEX', 'MODULE', 'STATION']);
+
+CREATE VIEW ship_weapon_slots_full AS
+SELECT
+    sws.id weapon_slot_id ,
+    sws.code as weapon_slot_code,
+    sws.ship_instance_id,
+    sws.weapon_size_id,
+    sws.weapon_type_id,
+    sws.mount_type_id,
+    sws.angle,
+    sws.arc,
+    sws.x,
+    sws.y,
+
+    ws.code AS weapon_size,
+    wt.code AS weapon_type,
+    mt.code AS mount_type
+FROM ship_weapon_slots sws
+LEFT JOIN weapon_sizes ws ON sws.weapon_size_id = ws.id
+LEFT JOIN weapon_types wt ON sws.weapon_type_id = wt.id
+LEFT JOIN mount_types mt ON sws.mount_type_id = mt.id
+WHERE ws.code NOT IN ('LAUNCH_BAY', 'DECORATIVE') AND mt.code NOT IN ('HIDDEN');

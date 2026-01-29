@@ -1,6 +1,9 @@
-import { DataTable } from '../../../components/table/DataTable';
-import { humanizeKeys } from '../../../utils/humanizeKeys';
-import { WEAPON_TABLE_ROW_KEYS, type WeaponTableRows } from '../types';
+import {
+    WEAPON_TABLE_ROW_KEYS,
+    type WeaponTableRows,
+} from '@/modules/weapons/types';
+import { DataTable } from '@/components/DataTable/DataTable';
+import { humanizeKeys } from '@/utils/humanizeKeys';
 
 export default function WeaponTable() {
     return DataTable<
@@ -8,14 +11,22 @@ export default function WeaponTable() {
         typeof WEAPON_TABLE_ROW_KEYS,
         typeof KEY_ORDER
     >({
-        endpoint: '/api/weapon-versions',
-        tableKeys: WEAPON_TABLE_ROW_KEYS,
-        keyOrder: KEY_ORDER,
-        displayMap,
-        initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        dataConfig: {
+            endpoint: '/api/weapon-versions',
+            queryKey: 'weaponsTable',
+            initialSort: { sortField: 'display_name', sortOrder: 'ASC' },
+        },
+        tableConfig: {
+            tableKeys: WEAPON_TABLE_ROW_KEYS,
+            keyOrder: KEY_ORDER,
+            displayMap,
+        },
         link: {
             linkField: 'display_name',
-            linkFn: (row) => `/weapons/${Number(row.weapon_id)}`,
+            linkFn: (row) =>
+                `/weapons/${Number(row.weapon_id)}/version/${Number(
+                    row.weapon_version_id,
+                )}`,
         },
         title: 'Weapons',
     });

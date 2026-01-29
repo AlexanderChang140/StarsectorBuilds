@@ -6,7 +6,7 @@ import { parse } from 'csv';
 import fg from 'fast-glob';
 import { parse as jparse } from 'jsonc-parser';
 
-import { assertDefined } from '../../../utils/helpers.ts';
+import { assertDefined } from "../../../utils/assert.ts";
 import type { PreparedFullWing, PreparedWingData } from '../../wings/types.ts';
 import { isWingFormation, isWingRole } from '../../wings/utils/validate.ts';
 import {

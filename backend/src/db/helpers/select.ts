@@ -235,6 +235,64 @@ export async function selectFull<
     return result.rows;
 }
 
+export type PaginatedResult<T> = {
+    rows: T[];
+    total: number;
+};
+
+export async function selectFullWithCount<
+    TFilter extends Filter<SelectableRow<DB[TTable]>>,
+    TTable extends keyof DB,
+    TSelection extends Selection<DB[TTable]>,
+>(
+    table: TTable,
+    selection: TSelection,
+    options?: {
+        filter?: TFilter;
+        order?: ColumnOrder<SelectableRow<DB[TTable]>>;
+        limit?: number;
+        offset?: number;
+        client?: PoolClient | undefined;
+    },
+): Promise<PaginatedResult<Projection<SelectableRow<DB[TTable]>, TSelection>>> {
+    const selectClause = createSelectClause(selection);
+    const fromClause = createFromClause(table);
+    const { clause: filterFragment, params } = createFilterFragment(
+        options?.filter,
+    );
+    const filterClause = filterFragment ? `WHERE ${filterFragment}` : '';
+    const orderClause = createOrderClause(options?.order);
+    const limitClause = createLimitClause(options?.limit);
+    const offsetClause = createOffsetClause(options?.offset);
+
+    const query = `
+        SELECT *,
+               COUNT(*) OVER() AS __total_count
+        FROM (
+            ${selectClause}
+            ${fromClause}
+            ${filterClause}
+            ${orderClause}
+        ) base
+        ${limitClause}
+        ${offsetClause};
+    `;
+
+    const executor = options?.client ?? pool;
+    const result = await executor.query<
+        Projection<SelectableRow<DB[TTable]>, TSelection> & {
+            __total_count: number;
+        }
+    >(query, params);
+    const rows = result.rows.map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ({ __total_count, ...row }) => row,
+    ) as Projection<SelectableRow<DB[TTable]>, TSelection>[];
+    const total = result.rows[0]?.__total_count ?? 0;
+
+    return { rows, total };
+}
+
 /**
  * Build a reusable full-select function with optional filter/order/pagination.
  *
@@ -303,10 +361,13 @@ export async function selectCodeIdRecord<TTable extends TableWithIdCode>(
 ) {
     const options = client ? { client } : {};
     const rows = await select(table, ['id', 'code'], options);
-    return rows.reduce((acc, row) => {
-        acc[row.code] = row.id;
-        return acc;
-    }, {} as Record<string, number>);
+    return rows.reduce(
+        (acc, row) => {
+            acc[row.code] = row.id;
+            return acc;
+        },
+        {} as Record<string, number>,
+    );
 }
 
 /**

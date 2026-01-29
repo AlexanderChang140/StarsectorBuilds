@@ -5,6 +5,7 @@ import express from 'express';
 
 import authRouter from './modules/auth/routes.ts';
 import hullmodsRouter from './modules/hullmods/routes.ts';
+import modsRouter from './modules/mods/routes.ts';
 import shipsRouter from './modules/ships/routes.ts';
 import weaponsRouter from './modules/weapons/routes.ts';
 import router from './routes/routes.ts';
@@ -12,10 +13,12 @@ import router from './routes/routes.ts';
 dotenv.config();
 
 const app = express();
+app.set('query parser', 'extended');
 const PORT = process.env.PORT || 3000;
 
 app.use('/', router);
 app.use('/api', authRouter);
+app.use('/api', modsRouter);
 app.use('/api', weaponsRouter);
 app.use('/api', hullmodsRouter);
 app.use('/api', shipsRouter);

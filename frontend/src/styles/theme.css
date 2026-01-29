@@ -1,9 +1,16 @@
 :root {
-    --navbar-top: 8%;
+    --navbar-height: 3.5rem;
     --sidebar-width: 10%;
 
     /* Colors */
     --bg-color: #2c2c2c;
     --border-color: #ff1919;
-    --lotus-blue-color: #89c6e5;
+    --lotus-blue: #89c6e5;
+    --ballistic-color: #eb0;
+    --energy-color: #7dc2ff;
+    --missile-color: #4c4;
+    --hybrid-color: #f80;
+    --composite-color: #ad4;
+    --synergy-color: #2ee;
+    --universal-color: #aaa;
 }

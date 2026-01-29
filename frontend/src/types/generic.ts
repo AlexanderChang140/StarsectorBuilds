@@ -1,5 +1,9 @@
 export type StrictOmit<T, K extends keyof T> = Omit<T, K>;
 
-export type SortOrder = 'ASC' | 'DESC' | '';
+export type SortOrder = 'ASC' | 'DESC';
 
 export type Entries<T> = [keyof T, T[keyof T]][];
+
+export type StringKeys<T> = Extract<keyof T, string>;
+
+export type StringTransform<T> = (x: T) => string;

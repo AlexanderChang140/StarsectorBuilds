@@ -4,8 +4,13 @@ import type { Projection } from '@shared/types.ts';
 import { HULLMOD_VERSIONS_FULL_COLUMNS } from './constants.ts';
 import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
-import { makeSelectOne, selectFull } from '../../db/helpers/select.ts';
+import {
+    makeSelectOne,
+    selectFullWithCount,
+    type PaginatedResult,
+} from '../../db/helpers/select.ts';
 import type { Options } from '../../types/generic.ts';
+import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 import {
     sanitizeFilter,
     sanitizeLimit,
@@ -18,7 +23,7 @@ export async function fetchHullmodVersions<
 >(
     selection: TSelection,
     options: Options<DB['hullmod_versions_full']>,
-): Promise<Projection<HullmodVersionDTO, TSelection>[]> {
+): Promise<PaginatedResult<Projection<HullmodVersionDTO, TSelection>>> {
     const safeOptions = {
         filter: sanitizeFilter(options.filter, HULLMOD_VERSIONS_FULL_COLUMNS),
         order: sanitizeOrder(options.order),
@@ -27,13 +32,36 @@ export async function fetchHullmodVersions<
         client: options.client,
     };
 
-    const result = await selectFull(
-        'hullmod_versions_full',
-        selection,
-        safeOptions,
-    );
+    const result = await getHullmodVersionsFull(selection, safeOptions);
 
     return result;
+}
+
+const REQUIRED_HULLMOD_KEYS = [
+    'major',
+    'minor',
+    'patch',
+    'mod_id',
+    'mod_version_id',
+    'hullmod_id',
+    'hullmod_code',
+    'hullmod_version_id',
+    'hullmod_instance_id',
+    'data_hash',
+    'hide',
+    'hide_everywhere',
+] as const satisfies readonly (keyof DB['hullmod_versions_full'])[];
+
+export async function getHullmodVersionsFull<
+    TSelection extends readonly (keyof DB['hullmod_versions_full'])[],
+>(selection: TSelection, options?: Options<DB['hullmod_versions_full']>) {
+    const result = await selectFullWithCount(
+        'hullmod_versions_full',
+        selection,
+        options,
+    );
+    assertProjectionRowsNonNullableKeys(result.rows, REQUIRED_HULLMOD_KEYS);
+    return { rows: result.rows, total: result.total };
 }
 
 export const getHullmodId = makeSelectOne<'hullmods', ['id'], 'code'>(

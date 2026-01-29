@@ -1,0 +1,25 @@
+.chip {
+    display: flex;
+    gap: 0.5rem;
+    width: fit-content;
+}
+
+.select {
+    display: flex;
+    gap: 1rem;
+}
+
+.listbox-item {
+    padding: 0 0.15rem;
+    margin: 0.15rem;
+    cursor: pointer;
+
+    &[data-selected] {
+        background-color: green;
+    }
+}
+
+.listbox-item:hover {
+    cursor: pointer;
+    background-color: gray;
+}
