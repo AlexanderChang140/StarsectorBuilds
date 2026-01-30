@@ -12,13 +12,13 @@ import {
     type PaginatedResult,
 } from '../../db/helpers/select.ts';
 import type { Options } from '../../db/types.ts';
-import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 import {
     sanitizeFilter,
     sanitizeOrder,
     sanitizeLimit,
     sanitizeOffset,
-} from '../../utils/sanitize.ts';
+} from '../../server/sanitize.ts';
+import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 
 export async function fetchWeaponVersions<
     TSelection extends readonly (keyof DB['weapon_versions_full'])[],

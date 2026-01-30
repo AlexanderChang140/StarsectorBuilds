@@ -4,8 +4,8 @@ import { fetchHullmodVersions } from './service.ts';
 import { parseHullmodVersionFields } from './utils/fieldParser.ts';
 import { parseHullmodVersionFilter } from './utils/filterParser.ts';
 import { parseHullmodTableSort } from './utils/sortParser.ts';
-import { parseLimit } from '../../utils/parser/limitParser.ts';
-import { parseOffset } from '../../utils/parser/offsetParser.ts';
+import { parseLimit } from '../../server/parser/limitParser.ts';
+import { parseOffset } from '../../server/parser/offsetParser.ts';
 
 export async function getAllHullmodVersions(
     req: Request,

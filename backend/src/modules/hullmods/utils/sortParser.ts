@@ -1,7 +1,7 @@
 import type { DB } from '../../../db/db.js';
 import type { ColumnOrder } from '../../../db/fragments/order.ts';
+import { parseSort } from '../../../server/parser/sortParser.ts';
 import type { ReqQuery } from '../../../types/generic.ts';
-import { parseSort } from '../../../utils/parser/sortParser.ts';
 
 export const HULLMOD_TABLE_KEYS = [
     'display_name',

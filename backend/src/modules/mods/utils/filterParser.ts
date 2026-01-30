@@ -1,5 +1,5 @@
+import { parseFilterWithExcludedKeys } from '../../../server/parser/filterParser.ts';
 import type { ReqQuery } from '../../../types/generic.ts';
-import { parseFilterWithExcludedKeys } from '../../../utils/parser/filterParser.ts';
 import { MOD_COLUMNS, MOD_VERSION_FULL_COLUMNS } from '../constants.ts';
 import { ModsSchema, ModVersionsFullSchema } from '../schema.ts';
 

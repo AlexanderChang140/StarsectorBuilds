@@ -11,8 +11,8 @@ import {
 import { parseShipVersionFields } from './utils/fieldParser.ts';
 import { parseShipVersionsFilter } from './utils/filterParser.ts';
 import { parseShipVersionsSort } from './utils/sortParser.ts';
-import { parseLimit } from '../../utils/parser/limitParser.ts';
-import { parseOffset } from '../../utils/parser/offsetParser.ts';
+import { parseLimit } from '../../server/parser/limitParser.ts';
+import { parseOffset } from '../../server/parser/offsetParser.ts';
 
 export async function getShipVersions(
     req: Request,

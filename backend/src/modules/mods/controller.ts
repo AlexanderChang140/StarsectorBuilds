@@ -14,9 +14,9 @@ import {
     parseModVersionsFilter,
 } from './utils/filterParser.ts';
 import { parseModsSort, parseModVersionsSort } from './utils/sortParser.ts';
-import { parseLimit } from '../../utils/parser/limitParser.ts';
-import { parseOffset } from '../../utils/parser/offsetParser.ts';
-import { parseSearch } from '../../utils/parser/searchParser.ts';
+import { parseLimit } from '../../server/parser/limitParser.ts';
+import { parseOffset } from '../../server/parser/offsetParser.ts';
+import { parseSearch } from '../../server/parser/searchParser.ts';
 
 export async function getMods(req: Request, res: Response) {
     try {

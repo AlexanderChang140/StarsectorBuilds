@@ -14,13 +14,13 @@ import {
     type PaginatedResult,
 } from '../../db/helpers/select.ts';
 import type { Options } from '../../db/types.ts';
-import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 import {
     sanitizeFilter,
     sanitizeLimit,
     sanitizeOffset,
     sanitizeOrder,
-} from '../../utils/sanitize.ts';
+} from '../../server/sanitize.ts';
+import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 
 export async function fetchShipVersions<
     TSelection extends readonly (keyof DB['ship_versions_full'])[],

@@ -1,8 +1,8 @@
-import { filterKeys } from './helpers.ts';
-import { clamp } from './math.ts';
 import type { ColumnOrder } from '../db/fragments/order.ts';
 import type { Filter } from '../db/helpers/filter.ts';
 import type { Options } from '../db/types.ts';
+import { filterKeys } from '../utils/helpers.ts';
+import { clamp } from '../utils/math.ts';
 
 export function sanitizeFilter<T>(
     filter: Filter<T> | undefined,
