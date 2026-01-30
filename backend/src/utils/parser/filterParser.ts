@@ -1,5 +1,3 @@
-import type z from 'zod';
-
 import {
     MATCH_TYPES,
     type Filter,
@@ -8,6 +6,7 @@ import {
 } from '../../db/helpers/filter.ts';
 import type { SelectableRow } from '../../db/types.ts';
 import type { ReqQuery } from '../../types/generic.ts';
+import type { Schema } from '../../types/zod.ts';
 import {
     removeNull,
     removeUndefined,
@@ -27,11 +26,7 @@ type RawFilter = { [K in keyof FilterOptions]?: unknown };
 export function parseFilter<
     TData extends Record<string, unknown>,
     TKeys extends readonly FilterKeys<TData>[],
->(
-    query: ReqQuery,
-    validKeys: TKeys,
-    schema: z.ZodObject<{ [K in keyof TData]: z.ZodType<TData[K]> }>,
-): Filter<TData> {
+>(query: ReqQuery, validKeys: TKeys, schema: Schema<TData>): Filter<TData> {
     const cleanedQuery = removeNull(removeUndefined(query));
     const filteredQuery = filterKeys<TData>(cleanedQuery, validKeys);
 
@@ -84,7 +79,7 @@ export function parseFilterWithExcludedKeys<
     TExcludeKeys extends readonly TKeys[number][] = [],
 >(
     query: ReqQuery,
-    schema: z.ZodObject<{ [K in keyof TData]: z.ZodType<TData[K]> }>,
+    schema: Schema<TData>,
     keys: TKeys,
     excludeKeys?: TExcludeKeys | undefined,
 ) {
