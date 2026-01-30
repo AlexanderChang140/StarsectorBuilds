@@ -8,10 +8,10 @@ export type SortKeys<T> = {
 
 export type SortableColumnKeys<T> = readonly SortKeys<SelectableRow<T>>[];
 
-export function parseSort<
-    TData extends Record<string, unknown>,
-    TKeys extends readonly SortKeys<TData>[],
->(query: ReqQuery, validKeys: TKeys): ColumnOrder<TData> {
+export function parseSort<TData extends object>(
+    query: ReqQuery,
+    validKeys: SortableColumnKeys<TData>,
+): ColumnOrder<TData> {
     const rawSort = parseStringArray(query.sort).map((s) => {
         const [field, order] = s.split(':');
         return { field, order };
@@ -20,7 +20,7 @@ export function parseSort<
     const sort = rawSort.filter(
         ({ field, order }) =>
             field &&
-            validKeys.includes(field as TKeys[number]) &&
+            validKeys.includes(field as SortableColumnKeys<TData>[number]) &&
             order &&
             ['ASC', 'DESC'].includes(order),
     );
