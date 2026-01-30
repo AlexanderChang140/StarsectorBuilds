@@ -2,7 +2,10 @@ import type { Entries } from '../../types/generic.ts';
 import type { DB } from '../db.js';
 import type { Order } from '../types.ts';
 
-export type ColumnOrder<T> = Partial<Record<keyof T, Order>>;
+export type ColumnOrder<T> = {
+    field: keyof T;
+    order: Order;
+}[];
 
 export function createOrderClause<TTable extends keyof DB>(
     columns: ColumnOrder<DB[TTable]> | undefined,
@@ -24,11 +27,10 @@ export function createOrderFragment<TTable extends keyof DB>(
     }
 
     const columnFragments: string[] = [];
-    for (const [col, order] of Object.entries(columns) as Entries<
-        ColumnOrder<DB[TTable]>
-    >) {
-        columnFragments.push(`${String(col)} ${order}`);
-    }
+    columns.forEach(({ field, order }) => {
+        columnFragments.push(`${String(field)} ${order}`);
+    });
+
     const clause = columnFragments.join(', ');
     return clause;
 }

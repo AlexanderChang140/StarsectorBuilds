@@ -10,7 +10,7 @@ import {
     selectFullWithCount,
     type PaginatedResult,
 } from '../../db/helpers/select.ts';
-import type { Options } from '../../types/generic.ts';
+import type { Options } from '../../db/types.ts';
 import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 import {
     sanitizeAll,

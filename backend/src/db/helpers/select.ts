@@ -13,6 +13,7 @@ import { createWhereClause } from '../fragments/where.ts';
 import type {
     AllowedKey,
     AllowedKeys,
+    Options,
     SelectableRow,
     Selection,
 } from '../types.ts';
@@ -193,19 +194,12 @@ export function makeSelectExists<TTable extends keyof DB>(table: TTable) {
  * @returns Rows containing only the requested columns.
  */
 export async function selectFull<
-    TFilter extends Filter<SelectableRow<DB[TTable]>>,
     TTable extends keyof DB,
     TSelection extends Selection<DB[TTable]>,
 >(
     table: TTable,
     selection: TSelection,
-    options?: {
-        filter?: TFilter;
-        order?: ColumnOrder<SelectableRow<DB[TTable]>>;
-        limit?: number;
-        offset?: number;
-        client?: PoolClient | undefined;
-    },
+    options?: Options<SelectableRow<DB[TTable]>>,
 ): Promise<Projection<SelectableRow<DB[TTable]>, TSelection>[]> {
     const selectClause = createSelectClause(selection);
     const fromClause = createFromClause(table);
@@ -214,7 +208,7 @@ export async function selectFull<
     );
     const filterClause = filterFragment ? `WHERE ${filterFragment}` : '';
 
-    const orderClause = createOrderClause(options?.order);
+    const orderClause = createOrderClause<TTable>(options?.order);
 
     const limitClause = createLimitClause(options?.limit);
     const offsetClause = createOffsetClause(options?.offset);
@@ -241,19 +235,12 @@ export type PaginatedResult<T> = {
 };
 
 export async function selectFullWithCount<
-    TFilter extends Filter<SelectableRow<DB[TTable]>>,
     TTable extends keyof DB,
     TSelection extends Selection<DB[TTable]>,
 >(
     table: TTable,
     selection: TSelection,
-    options?: {
-        filter?: TFilter;
-        order?: ColumnOrder<SelectableRow<DB[TTable]>>;
-        limit?: number;
-        offset?: number;
-        client?: PoolClient | undefined;
-    },
+    options?: Options<SelectableRow<DB[TTable]>>,
 ): Promise<PaginatedResult<Projection<SelectableRow<DB[TTable]>, TSelection>>> {
     const selectClause = createSelectClause(selection);
     const fromClause = createFromClause(table);
@@ -261,7 +248,7 @@ export async function selectFullWithCount<
         options?.filter,
     );
     const filterClause = filterFragment ? `WHERE ${filterFragment}` : '';
-    const orderClause = createOrderClause(options?.order);
+    const orderClause = createOrderClause<TTable>(options?.order);
     const limitClause = createLimitClause(options?.limit);
     const offsetClause = createOffsetClause(options?.offset);
 

@@ -1,8 +1,8 @@
-import { filterKeys, filterValues } from './helpers.ts';
+import { filterKeys } from './helpers.ts';
 import { clamp } from './math.ts';
+import type { ColumnOrder } from '../db/fragments/order.ts';
 import type { Filter } from '../db/helpers/filter.ts';
-import type { Order } from '../db/types.ts';
-import type { Options } from '../types/generic.ts';
+import type { Options } from '../db/types.ts';
 
 export function sanitizeFilter<T>(
     filter: Filter<T> | undefined,
@@ -22,9 +22,9 @@ export function sanitizeFilter<T>(
 }
 
 export function sanitizeOrder<T>(
-    order: Partial<Record<keyof T, Order>> | undefined,
-): Partial<Record<keyof T, Order>> {
-    return filterValues(order ?? {}, (val) => val === 'ASC' || val === 'DESC');
+    order: ColumnOrder<T> | undefined,
+): ColumnOrder<T> {
+    return order ?? [];
 }
 
 export function sanitizeLimit(

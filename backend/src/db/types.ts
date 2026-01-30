@@ -1,4 +1,8 @@
+import type { PoolClient } from 'pg';
+
 import type { Numeric, Generated } from './db.js';
+import type { ColumnOrder } from './fragments/order.ts';
+import type { Filter } from './helpers/filter.ts';
 
 type IsNullable<T> = null | undefined extends T ? true : false;
 
@@ -48,3 +52,11 @@ export type Inserted = {
 };
 
 export type Order = 'ASC' | 'DESC';
+
+export type Options<T> = {
+    filter?: Filter<T>;
+    order?: ColumnOrder<T>;
+    limit?: number;
+    offset?: number;
+    client?: PoolClient | undefined;
+};
