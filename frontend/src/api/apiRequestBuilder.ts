@@ -43,12 +43,10 @@ export function buildQueryParams(
         queryParams.append('offset', String(controlParams.offset));
     }
 
-    if (controlParams.order !== undefined) {
-        queryParams.append('order', String(controlParams.order));
-    }
-
     if (controlParams.sort !== undefined) {
-        queryParams.append('sort', String(controlParams.sort));
+        controlParams.sort.forEach(([field, order]) =>
+            queryParams.append('sort', `${field}:${order}`),
+        );
     }
 
     return queryParams.toString();

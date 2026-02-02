@@ -34,12 +34,15 @@ export type Filter = {
     not?: boolean;
 };
 
+export type Order = 'ASC' | 'DESC';
+
+export type Sort<TKey extends string = string> = [TKey, Order];
+
 export type ControlParams = {
     q: string;
     fields: string;
     filter: Record<string, Filter>;
-    sort: string;
-    order: 'ASC' | 'DESC';
+    sort: Sort[];
     limit: number;
     offset: number;
 };

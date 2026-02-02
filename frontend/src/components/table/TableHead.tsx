@@ -1,9 +1,9 @@
-import type { SortOrder } from '@/types/generic';
+import type { Order } from '@/api/types';
 
 interface TableHeadProps<T> {
     columns: { label: string; accessor: keyof T }[];
-    sort?: { field: keyof T; order: SortOrder };
-    onSortChange: (field: keyof T, order: SortOrder) => void;
+    sort?: { field: keyof T; order: Order };
+    onSortChange: (field: keyof T, order: Order) => void;
 }
 
 export default function TableHead<T>({

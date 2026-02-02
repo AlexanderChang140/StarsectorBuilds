@@ -3,14 +3,14 @@ import { useLocation } from 'react-router';
 import getURLFilterParams from '@/api/params/getURLFilterParams';
 import getURLPagination from '@/api/params/getURLPaginationParams';
 import getURLSortParams from '@/api/params/getURLSortParams';
-import type { SortOrder } from '@/types/generic';
+import type { Order } from '@/api/types';
 
-export default function useTableParams<K extends readonly string[]>(
-    validSortKeys: K,
+export default function useTableParams<TKeys extends readonly string[]>(
+    validSortKeys: TKeys,
     defaults?: {
         limit?: number;
-        sort?: K[number];
-        order?: SortOrder;
+        sort?: TKeys[number];
+        order?: Order;
     },
 ) {
     const { search } = useLocation();
@@ -18,12 +18,12 @@ export default function useTableParams<K extends readonly string[]>(
 
     const filter = getURLFilterParams(query, validSortKeys);
 
-    const { sort, order } = getURLSortParams(query, validSortKeys, {
-        sort: defaults?.sort,
+    const { field: sortField, order } = getURLSortParams(query, validSortKeys, {
+        sortField: defaults?.sort,
         order: defaults?.order,
     });
 
     const { limit, offset } = getURLPagination(query, defaults?.limit);
 
-    return { filter, sort, order, limit, offset };
+    return { filter, sortField, order, limit, offset };
 }

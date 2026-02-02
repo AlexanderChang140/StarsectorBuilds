@@ -4,10 +4,10 @@ import { useSearchParams, type SetURLSearchParams } from 'react-router';
 
 import { buildApiRequest } from '@/api/apiRequestBuilder';
 import fetchSafe from '@/api/fetchSafe';
-import type { ApiEndpoint } from '@/api/types';
+import type { ApiEndpoint, Order, Sort } from '@/api/types';
 import PaginationControls from '@/components/pagination/PaginationControls';
 import Table from '@/components/table/Table';
-import type { SortOrder, StringKeys } from '@/types/generic';
+import type { StringKeys } from '@/types/generic';
 
 import styles from './DataTable.module.css';
 import useTableParams from './hooks/useTableParams';
@@ -20,7 +20,7 @@ interface DataTableProps<
     dataConfig: {
         endpoint: ApiEndpoint;
         queryKey: string;
-        initialSort?: { sortField: TKeyOrder[number]; sortOrder: SortOrder };
+        initialSort?: { sortField: TKeyOrder[number]; sortOrder: Order };
         defaultLimit?: number;
     };
     tableConfig: {
@@ -68,7 +68,7 @@ export function DataTable<
         });
     };
 
-    const handleSortChange = (accessor: keyof TData, sortOrder: SortOrder) => {
+    const handleSortChange = (accessor: keyof TData, sortOrder: Order) => {
         setSearchParams((prev) => {
             const params = new URLSearchParams(prev);
             params.set('sort', accessor.toString());
@@ -78,21 +78,23 @@ export function DataTable<
         });
     };
 
-    const { filter, sort, order, limit, offset } = useTableParams<TTableKeys>(
-        tableKeys,
-        {
+    const { filter, sortField, order, limit, offset } =
+        useTableParams<TTableKeys>(tableKeys, {
             limit: defaultLimit,
             sort: initialSort?.sortField,
             order: initialSort?.sortOrder,
-        },
-    );
+        });
+
+    const sort: Sort[] | undefined =
+        sortField !== undefined && order !== undefined
+            ? [[sortField, order]]
+            : undefined;
 
     const request = buildApiRequest({
         endpoint,
         params: {
             filter,
             sort,
-            order,
             limit,
             offset,
             fields: tableKeys.join(','),
@@ -100,7 +102,7 @@ export function DataTable<
     });
 
     const { data: response } = useQuery<PaginatedResponse<TData>>({
-        queryKey: [queryKey, filter, sort, order, limit, offset],
+        queryKey: [queryKey, filter, sort, limit, offset],
         queryFn: () => fetchSafe<PaginatedResponse<TData>>(request),
     });
 
@@ -113,7 +115,7 @@ export function DataTable<
                 label: displayMap[key] ?? String(key),
                 accessor: key,
                 sortable: true,
-                sortByOrder: key === sort ? order : undefined,
+                sortByOrder: key === sortField ? order : undefined,
             };
         });
 
@@ -140,8 +142,8 @@ export function DataTable<
                     initialData={rows}
                     links={links}
                     sort={
-                        order
-                            ? { field: sort as keyof TData, order: order }
+                        order !== undefined && sortField !== undefined
+                            ? { field: sortField, order }
                             : undefined
                     }
                     onSortChange={handleSortChange}

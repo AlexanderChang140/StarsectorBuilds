@@ -1,26 +1,27 @@
-import type { SortOrder } from '@/types/generic';
+import { isValidOrder } from '@/utils/isValidOrder';
 
-export default function getURLSortParams<K extends readonly string[]>(
+import type { Order } from '../types';
+
+export default function getURLSortParams<TKeys extends readonly string[]>(
     query: URLSearchParams,
-    validSortKeys: K,
+    validSortKeys: TKeys,
     defaults?: {
-        sort?: K[number];
-        order?: SortOrder;
+        sortField?: TKeys[number];
+        order?: Order;
     },
 ): {
-    sort?: K[number];
-    order?: SortOrder;
+    field?: TKeys[number];
+    order?: Order;
 } {
-    const rawSort = query.get('sort');
+    const rawField = query.get('sort');
 
-    const sort =
-        rawSort && (validSortKeys as readonly string[]).includes(rawSort)
-            ? (rawSort as K[number])
-            : defaults?.sort;
+    const field =
+        rawField && validSortKeys.includes(rawField)
+            ? rawField
+            : defaults?.sortField;
 
     const rawOrder = query.get('order');
-    const order =
-        rawOrder === 'ASC' || rawOrder === 'DESC' ? rawOrder : defaults?.order;
+    const order = isValidOrder(rawOrder) ? rawOrder : defaults?.order;
 
-    return { sort, order };
+    return { field, order };
 }

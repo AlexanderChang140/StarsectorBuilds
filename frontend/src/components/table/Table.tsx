@@ -1,7 +1,7 @@
+import type { Order } from '@/api/types';
 import styles from '@/components/table/Table.module.css';
 import TableBody from '@/components/table/TableBody';
 import TableHead from '@/components/table/TableHead';
-import type { SortOrder } from '@/types/generic';
 
 type TableProps<T> = {
     columns: {
@@ -10,8 +10,8 @@ type TableProps<T> = {
     }[];
     initialData: T[];
     links?: Partial<Record<keyof T, (row: T) => string>>;
-    sort?: { field: keyof T; order: SortOrder };
-    onSortChange: (accessor: keyof T, sortOrder: SortOrder) => void;
+    sort?: { field: keyof T; order: Order };
+    onSortChange: (accessor: keyof T, sortOrder: Order) => void;
 };
 
 export default function Table<T>({
