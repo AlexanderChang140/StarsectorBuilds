@@ -2,40 +2,35 @@ import { useState } from 'react';
 
 import type { Item } from '@/types/component';
 
-export type ChipState<TCategory> = {
-    category: TCategory;
+export type ChipState = {
+    categoryLabel: string;
     input: string;
     selected?: Item;
 };
-export type ChipFilterState<TCategory> = {
+export type ChipFilterState = {
     input: string;
-    chips: Record<string, ChipState<TCategory>>;
+    chips: Record<string, ChipState>;
 };
 
-export default function useChipFilterState<TCategory>() {
-    const [chipFilterState, setChipFilterState] = useState<
-        ChipFilterState<TCategory>
-    >({
+export default function useChipFilterState() {
+    const [chipFilterState, setChipFilterState] = useState<ChipFilterState>({
         input: '',
         chips: {},
     });
 
-    const getNextCategoryInput = (
-        prev: ChipFilterState<TCategory>,
-        input: string,
-    ) => {
+    const getNextCategoryInput = (prev: ChipFilterState, input: string) => {
         return { ...prev, input };
     };
 
     const getNextCategorySelected = (
-        prev: ChipFilterState<TCategory>,
-        category: TCategory,
+        prev: ChipFilterState,
+        categoryLabel: string,
         value: string,
     ) => {
         const exists = prev.chips[value];
 
-        const newChip: ChipState<TCategory> = {
-            category,
+        const newChip: ChipState = {
+            categoryLabel,
             input: '',
             selected: exists?.selected,
         };
@@ -50,7 +45,7 @@ export default function useChipFilterState<TCategory>() {
     };
 
     const getNextChipInput = (
-        prev: ChipFilterState<TCategory>,
+        prev: ChipFilterState,
         value: string,
         input: string,
     ) => {
@@ -67,11 +62,11 @@ export default function useChipFilterState<TCategory>() {
     };
 
     const addSelectedCategory = (
-        prev: ChipFilterState<TCategory>,
+        prev: ChipFilterState,
         categoryValue: string,
         selected: Item | undefined,
     ) => {
-        const nextChips: Record<string, ChipState<TCategory>> = {
+        const nextChips: Record<string, ChipState> = {
             ...prev.chips,
             [categoryValue]: {
                 ...prev.chips[categoryValue],
@@ -83,7 +78,7 @@ export default function useChipFilterState<TCategory>() {
     };
 
     const removeSelectedCategory = (
-        prev: ChipFilterState<TCategory>,
+        prev: ChipFilterState,
         categoryValue: string,
     ) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

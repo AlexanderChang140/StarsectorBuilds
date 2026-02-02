@@ -1,16 +1,38 @@
 import type { PaginatedResponse } from '@shared/types';
 
-import type {
-    CategoryConfig,
-    ChipConfig,
-} from '@/components/DataTable/DataTableFilterChips';
+import type { ApiEndpoint, Sort } from '@/api/types';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { Item } from '@/types/component';
+import type { ValueKeys, StringTransform } from '@/types/generic';
 import { typedEntries } from '@/utils/object';
 
 import useCategoriesQuery from './useCategoriesQuery';
-import type { ChipFilterState } from './useChipFilterState';
+import type { ChipState } from './useChipFilterState';
 import useChipsQuery from './useChipsQuery';
+
+export type CategoryConfig<
+    TCategory,
+    TCategoryKeys extends readonly (keyof TCategory)[],
+> = {
+    queryKey: string;
+    endpoint: ApiEndpoint;
+    keys: TCategoryKeys;
+    filterKey: TCategoryKeys[number];
+    valueKey: ValueKeys<TCategory, TCategoryKeys>;
+    labelTransform: StringTransform<TCategory>;
+    options?: {
+        sort: (categoryRow: TCategory) => Sort;
+    };
+};
+
+export type ChipConfig<TChip, TChipKeys extends readonly (keyof TChip)[]> = {
+    queryKey: string;
+    endpoint: ApiEndpoint;
+    keys: TChipKeys;
+    categoryKey: TChipKeys[number];
+    valueKey: ValueKeys<TChip, TChipKeys>;
+    labelTransform: StringTransform<TChip>;
+};
 
 interface UseFilterChipsDataProps<
     TCategory,
@@ -18,7 +40,8 @@ interface UseFilterChipsDataProps<
     TChip,
     TChipKeys extends readonly (keyof TChip)[],
 > {
-    chipFilterState: ChipFilterState<TCategory>;
+    chipStates: Record<string, ChipState>;
+    categoryInput: string;
     category: CategoryConfig<TCategory, TCategoryKeys>;
     chips: ChipConfig<TChip, TChipKeys>;
 }
@@ -29,15 +52,16 @@ export default function useFilterChipsData<
     TChip,
     TChipKeys extends readonly (keyof TChip)[],
 >({
-    chipFilterState,
+    chipStates,
+    categoryInput,
     category,
     chips,
 }: UseFilterChipsDataProps<TCategory, TCategoryKeys, TChip, TChipKeys>) {
-    const debouncedInput = useDebounce(chipFilterState.input, 300);
+    const debouncedInput = useDebounce(categoryInput, 300);
 
     const categoriesQuery = useCategoriesQuery<TCategory, TCategoryKeys>({
         input: debouncedInput,
-        exclude: typedEntries(chipFilterState.chips).map(([value]) => value),
+        exclude: typedEntries(chipStates).map(([value]) => value),
         excludeKey: category.valueKey,
         filterKey: category.filterKey,
         queryKey: category.queryKey,
@@ -45,16 +69,12 @@ export default function useFilterChipsData<
         fieldKeys: category.keys,
     });
 
-    const { categoryValues, chipsQueries } = useChipsQuery<
-        TCategory,
-        TChip,
-        TChipKeys
-    >(
+    const { categoryValues, chipsQueries } = useChipsQuery<TChip, TChipKeys>(
         chips.queryKey,
         chips.endpoint,
         chips.keys,
         chips.categoryKey,
-        chipFilterState.chips,
+        chipStates,
     );
 
     const categoriesData = categoriesQuery?.data?.data ?? [];

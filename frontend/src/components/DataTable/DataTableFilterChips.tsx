@@ -1,44 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { SetURLSearchParams } from 'react-router';
 
-import type { ApiEndpoint } from '@/api/types';
-import type { StringTransform } from '@/types/generic';
-import { typedEntries } from '@/utils/object';
+import type { Item } from '@/types/component';
+import { typedEntries, removeKey, addKey, updateKey } from '@/utils/object';
 
 import useURLChips from './hooks/useURLChips';
-import FilterChips from '../filter/FilterChips';
-import useChipFilterState from '../filter/hooks/useChipFilterState';
-import useFilterChipsData from '../filter/hooks/useFilterChipsData';
-
-type ValueKeys<
-    TCategory,
-    TCategoryKeys extends readonly (keyof TCategory)[],
-> = {
-    [K in TCategoryKeys[number]]: TCategory[K] extends string | number
-        ? K
-        : never;
-}[TCategoryKeys[number]];
-
-export type CategoryConfig<
-    TCategory,
-    TCategoryKeys extends readonly (keyof TCategory)[],
-> = {
-    queryKey: string;
-    endpoint: ApiEndpoint;
-    keys: TCategoryKeys;
-    filterKey: TCategoryKeys[number];
-    valueKey: ValueKeys<TCategory, TCategoryKeys>;
-    labelTransform: StringTransform<TCategory>;
-};
-
-export type ChipConfig<TChip, TChipKeys extends readonly (keyof TChip)[]> = {
-    queryKey: string;
-    endpoint: ApiEndpoint;
-    keys: TChipKeys;
-    categoryKey: TChipKeys[number];
-    valueKey: ValueKeys<TChip, TChipKeys>;
-    labelTransform: StringTransform<TChip>;
-};
+import CommandComboBox from '../CommandComboBox/CommandComboBox';
+import type { ChipState } from '../filter/hooks/useChipFilterState';
+import useFilterChipsData, {
+    type CategoryConfig,
+    type ChipConfig,
+} from '../filter/hooks/useFilterChipsData';
+import createChipState from '../LabeledSelectChip/createChipState';
+import LabeledSelectChip from '../LabeledSelectChip/LabeledSelectChip';
 
 interface DataTableFilterChipsProps<
     TCategory,
@@ -63,18 +37,15 @@ export default function DataTableFilterChips<
     searchParams,
     setSearchParams,
 }: DataTableFilterChipsProps<TCategory, TCategoryKeys, TChip, TChipKeys>) {
-    const {
-        chipFilterState,
-        setChipFilterState,
-        getNextCategoryInput,
-        getNextCategorySelected,
-        getNextChipInput,
-        addSelectedCategory,
-        removeSelectedCategory,
-    } = useChipFilterState<TCategory>();
+    const [categoryInput, setCategoryInput] = useState('');
+    const [chipStates, setChipStates] = useState<Record<string, ChipState>>({});
+
+    const handleURLChipsChange = (next: Record<string, ChipState>) => {
+        setChipStates((prev) => ({ ...prev, ...next }));
+    };
 
     useURLChips<TCategory, TCategoryKeys, TChip, TChipKeys>({
-        onFilterStateChange: setChipFilterState,
+        onURLChipsChange: handleURLChipsChange,
         category,
         chips,
         searchParams,
@@ -86,7 +57,8 @@ export default function DataTableFilterChips<
         TChip,
         TChipKeys
     >({
-        chipFilterState,
+        chipStates,
+        categoryInput,
         category,
         chips,
     });
@@ -95,49 +67,84 @@ export default function DataTableFilterChips<
         setSearchParams((prevParams) => {
             const params = new URLSearchParams(prevParams);
             params.delete(String(chips.valueKey));
-            typedEntries(chipFilterState.chips).forEach(([, { selected }]) => {
+            typedEntries(chipStates).forEach(([, { selected }]) => {
                 if (selected) {
                     params.append(String(chips.valueKey), selected.value);
                 }
             });
             return params;
         });
-    }, [chipFilterState.chips, chips.valueKey, setSearchParams]);
+    }, [chipStates, chips.valueKey, setSearchParams]);
+
+    const handleChipSelectedChange = (
+        categoryValue: string,
+        selected: Item | undefined,
+    ) => {
+        setChipStates((prev) => {
+            const chipState = updateKey(
+                prev[categoryValue],
+                'selected',
+                selected,
+            );
+            return addKey(prev, categoryValue, chipState);
+        });
+    };
+
+    const handleRemoveChip = (categoryValue: string) => {
+        setChipStates((prev) => removeKey(prev, categoryValue));
+    };
+
+    const chipList = typedEntries(chipStates).map(
+        ([categoryValue, { categoryLabel, selected }]) => {
+            const chipItems =
+                (chipFilters[categoryValue] as Item[] | undefined) ?? [];
+            return (
+                <LabeledSelectChip
+                    key={categoryValue}
+                    categoryItem={{
+                        value: categoryValue,
+                        label: categoryLabel,
+                    }}
+                    items={chipItems}
+                    selected={selected}
+                    onSelectedChange={handleChipSelectedChange}
+                    onRemoveChip={handleRemoveChip}
+                />
+            );
+        },
+    );
 
     return (
-        <FilterChips
-            categoryFilters={categoryFilters}
-            chipFilters={chipFilters}
-            chipFilterState={chipFilterState}
-            categoryLabelTransform={category.labelTransform}
-            onCategoryInputChange={(input) =>
-                setChipFilterState((prev) => getNextCategoryInput(prev, input))
-            }
-            onSelectCategory={(value) =>
-                setChipFilterState((prev) => {
+        <CommandComboBox
+            commands={categoryFilters}
+            input={categoryInput}
+            onInputChange={setCategoryInput}
+            onSelect={(categoryValue) =>
+                setChipStates((prev) => {
                     const nextCategory = categoryData.find(
-                        (data) => String(data[category.valueKey]) === value,
+                        (data) =>
+                            String(data[category.valueKey]) === categoryValue,
                     );
 
                     if (nextCategory === undefined) return prev;
-                    return getNextCategorySelected(prev, nextCategory, value);
+
+                    const newChipState: ChipState = createChipState(
+                        category.labelTransform(nextCategory),
+                    );
+
+                    return addKey(prev, categoryValue, newChipState);
                 })
             }
-            onUnselectCategory={(value) =>
-                setChipFilterState((prev) =>
-                    removeSelectedCategory(prev, value),
-                )
-            }
-            onChipInputChange={(value, input) =>
-                setChipFilterState((prev) =>
-                    getNextChipInput(prev, value, input),
-                )
-            }
-            onChipSelectedChange={(categoryValue, selected) =>
-                setChipFilterState((prev) =>
-                    addSelectedCategory(prev, categoryValue, selected),
-                )
-            }
-        />
+            options={{
+                button: {
+                    label: 'Mods',
+                    isLabelVisible: true,
+                    text: 'Select a mod',
+                },
+                comboBox: { defaultFilter: () => true },
+            }}
+        >
+            {chipList}
+        </CommandComboBox>
     );
 }

@@ -9,7 +9,6 @@ import { typedEntries } from '@/utils/object';
 import type { ChipState } from './useChipFilterState';
 
 export default function useChipsQuery<
-    TCategory,
     TChip,
     TChipKeys extends readonly (keyof TChip)[],
 >(
@@ -17,7 +16,7 @@ export default function useChipsQuery<
     endpoint: ApiEndpoint,
     fieldKeys: TChipKeys,
     categoryKey: keyof TChip,
-    chips: Record<string, ChipState<TCategory>>,
+    chips: Record<string, ChipState>,
 ) {
     const chipsRequests = Object.fromEntries(
         typedEntries(chips).map(([categoryValue]) => [

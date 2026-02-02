@@ -5,13 +5,12 @@ import { useEffect } from 'react';
 import { buildApiRequest } from '@/api/apiRequestBuilder';
 import fetchSafe from '@/api/fetchSafe';
 import type { ApiEndpoint } from '@/api/types';
-import createChipState from '@/components/filter/createChipState';
+import type { ChipState } from '@/components/filter/hooks/useChipFilterState';
 import type {
-    ChipFilterState,
-    ChipState,
-} from '@/components/filter/hooks/useChipFilterState';
-
-import type { CategoryConfig, ChipConfig } from '../DataTableFilterChips';
+    CategoryConfig,
+    ChipConfig,
+} from '@/components/filter/hooks/useFilterChipsData';
+import createChipState from '@/components/LabeledSelectChip/createChipState';
 
 interface UseURLChipsProps<
     TCategory,
@@ -19,9 +18,7 @@ interface UseURLChipsProps<
     TChip,
     TChipKeys extends readonly (keyof TChip)[],
 > {
-    onFilterStateChange: React.Dispatch<
-        React.SetStateAction<ChipFilterState<TCategory>>
-    >;
+    onURLChipsChange: (next: Record<string, ChipState>) => void;
     category: CategoryConfig<TCategory, TCategoryKeys>;
     chips: ChipConfig<TChip, TChipKeys>;
     searchParams: URLSearchParams;
@@ -33,7 +30,7 @@ export default function useURLChips<
     TChip,
     TChipKeys extends readonly (keyof TChip)[],
 >({
-    onFilterStateChange,
+    onURLChipsChange,
     category,
     chips,
     searchParams,
@@ -62,41 +59,31 @@ export default function useURLChips<
         if (!urlCategoriesQuery.data) return;
 
         const urlChipState = Object.fromEntries(
-            urlChipsQuery.data.data.map(
-                (chipRow): [string, ChipState<TCategory>] => {
-                    const categoryValue = String(chipRow[chips.categoryKey]);
-                    const categoryRow = urlCategoriesQuery.data.data.find(
-                        (cat) =>
-                            String(cat[category.valueKey]) === categoryValue,
-                    );
-                    if (!categoryRow) throw new Error('wtf');
-                    return [
-                        categoryValue,
-                        createChipState<TCategory>(categoryRow!, '', {
-                            value: String(chipRow[chips.valueKey]),
-                            label: chips.labelTransform(chipRow),
-                        }),
-                    ];
-                },
-            ),
+            urlChipsQuery.data.data.map((chipRow): [string, ChipState] => {
+                const categoryValue = String(chipRow[chips.categoryKey]);
+                const categoryRow = urlCategoriesQuery.data.data.find(
+                    (cat) => String(cat[category.valueKey]) === categoryValue,
+                );
+                if (!categoryRow) throw new Error('Category row not found');
+                return [
+                    categoryValue,
+                    createChipState(category.labelTransform(categoryRow), '', {
+                        value: String(chipRow[chips.valueKey]),
+                        label: chips.labelTransform(chipRow),
+                    }),
+                ];
+            }),
         );
 
-        onFilterStateChange((prev) => {
-            return {
-                ...prev,
-                chips: {
-                    ...prev.chips,
-                    ...urlChipState,
-                },
-            };
-        });
+        onURLChipsChange(urlChipState);
     }, [
         chips,
-        onFilterStateChange,
         urlChipsQuery.data,
         urlCategoriesQuery.data,
         category.filterKey,
         category.valueKey,
+        category,
+        onURLChipsChange,
     ]);
 }
 

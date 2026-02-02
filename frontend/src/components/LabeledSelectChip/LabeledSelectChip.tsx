@@ -8,48 +8,61 @@ import {
 
 import type { Item } from '@/types/component';
 
-import styles from './FilterChip.module.css';
+import styles from './LabeledSelectChip.module.css';
 import { ListBox, ListBoxItem } from '../ListBox/ListBox';
 
-interface FilterChipProps {
+type Options = {
+    noneLabel?: string;
+};
+
+interface LabeledSelectChipProps {
     categoryItem: Item;
-    chipFilters: Item[];
+    items: Item[];
     selected: Item | undefined;
-    onChipSelectedChange: (
+    onSelectedChange: (
         categoryValue: string,
         selected: Item | undefined,
     ) => void;
     onRemoveChip: (categoryValue: string) => void;
+    options?: Options;
 }
 
-export default function FilterChip({
+export default function LabeledSelectChip({
     categoryItem,
-    chipFilters,
+    items,
     selected,
-    onChipSelectedChange,
+    onSelectedChange,
     onRemoveChip,
-}: FilterChipProps) {
-    const NONE_LABEL = 'None';
+    options,
+}: LabeledSelectChipProps) {
+    const defaultOptions: Options = {
+        noneLabel: 'None',
+    };
+
+    const mergedOptions = {
+        ...defaultOptions,
+        options,
+    };
 
     return (
-        <div key={categoryItem.value} className={styles.chip}>
+        <div className={styles.chip}>
             <Select
                 className={styles.select}
                 value={selected?.value}
                 onChange={(value) => {
-                    const nextSelected = chipFilters.find(
+                    const nextSelected = items.find(
                         (item) => item.value === value,
                     );
-                    onChipSelectedChange(categoryItem.value, nextSelected);
+                    onSelectedChange(categoryItem.value, nextSelected);
                 }}
             >
-                <Label>{`${categoryItem.label} (${selected?.label ?? NONE_LABEL})`}</Label>
+                <Label>{`${categoryItem.label} (${selected?.label ?? mergedOptions.noneLabel})`}</Label>
                 <Button className={styles.button}>
                     <SelectValue />
                 </Button>
                 <Popover className={styles.content}>
                     <ListBox>
-                        {chipFilters.map(({ value, label }) => (
+                        {items.map(({ value, label }) => (
                             <ListBoxItem key={value} id={value}>
                                 {label}
                             </ListBoxItem>
