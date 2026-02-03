@@ -2,16 +2,15 @@ import { useEffect, useState } from 'react';
 import type { SetURLSearchParams } from 'react-router';
 
 import type { Item } from '@/types/component';
-import { typedEntries, removeKey, addKey, updateKey } from '@/utils/object';
+import { typedEntries } from '@/utils/object';
 
 import useURLChips from './hooks/useURLChips';
 import CommandComboBox from '../CommandComboBox/CommandComboBox';
-import type { ChipState } from '../filter/hooks/useChipFilterState';
 import useFilterChipsData, {
     type CategoryConfig,
     type ChipConfig,
 } from '../filter/hooks/useFilterChipsData';
-import createChipState from '../LabeledSelectChip/createChipState';
+import useChipStates from '../LabeledSelectChip/hooks/useChipStates';
 import LabeledSelectChip from '../LabeledSelectChip/LabeledSelectChip';
 
 interface DataTableFilterChipsProps<
@@ -38,14 +37,16 @@ export default function DataTableFilterChips<
     setSearchParams,
 }: DataTableFilterChipsProps<TCategory, TCategoryKeys, TChip, TChipKeys>) {
     const [categoryInput, setCategoryInput] = useState('');
-    const [chipStates, setChipStates] = useState<Record<string, ChipState>>({});
-
-    const handleURLChipsChange = (next: Record<string, ChipState>) => {
-        setChipStates((prev) => ({ ...prev, ...next }));
-    };
+    const {
+        chipStates,
+        addChipState,
+        removeChipState,
+        updateChipState,
+        hydrateChipStates,
+    } = useChipStates();
 
     useURLChips<TCategory, TCategoryKeys, TChip, TChipKeys>({
-        onURLChipsChange: handleURLChipsChange,
+        onURLChipsChange: hydrateChipStates,
         category,
         chips,
         searchParams,
@@ -76,24 +77,6 @@ export default function DataTableFilterChips<
         });
     }, [chipStates, chips.valueKey, setSearchParams]);
 
-    const handleChipSelectedChange = (
-        categoryValue: string,
-        selected: Item | undefined,
-    ) => {
-        setChipStates((prev) => {
-            const chipState = updateKey(
-                prev[categoryValue],
-                'selected',
-                selected,
-            );
-            return addKey(prev, categoryValue, chipState);
-        });
-    };
-
-    const handleRemoveChip = (categoryValue: string) => {
-        setChipStates((prev) => removeKey(prev, categoryValue));
-    };
-
     const chipList = typedEntries(chipStates).map(
         ([categoryValue, { categoryLabel, selected }]) => {
             const chipItems =
@@ -107,8 +90,8 @@ export default function DataTableFilterChips<
                     }}
                     items={chipItems}
                     selected={selected}
-                    onSelectedChange={handleChipSelectedChange}
-                    onRemoveChip={handleRemoveChip}
+                    onSelectedChange={updateChipState}
+                    onRemoveChip={removeChipState}
                 />
             );
         },
@@ -119,22 +102,18 @@ export default function DataTableFilterChips<
             commands={categoryFilters}
             input={categoryInput}
             onInputChange={setCategoryInput}
-            onSelect={(categoryValue) =>
-                setChipStates((prev) => {
-                    const nextCategory = categoryData.find(
-                        (data) =>
-                            String(data[category.valueKey]) === categoryValue,
-                    );
+            onSelect={(categoryValue) => {
+                const nextCategory = categoryData.find(
+                    (data) => String(data[category.valueKey]) === categoryValue,
+                );
 
-                    if (nextCategory === undefined) return prev;
+                if (nextCategory === undefined) return;
 
-                    const newChipState: ChipState = createChipState(
-                        category.labelTransform(nextCategory),
-                    );
-
-                    return addKey(prev, categoryValue, newChipState);
-                })
-            }
+                addChipState({
+                    value: categoryValue,
+                    label: category.labelTransform(nextCategory),
+                });
+            }}
             options={{
                 button: {
                     label: 'Mods',

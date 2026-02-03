@@ -5,12 +5,12 @@ import { useEffect } from 'react';
 import { buildApiRequest } from '@/api/apiRequestBuilder';
 import fetchSafe from '@/api/fetchSafe';
 import type { ApiEndpoint } from '@/api/types';
-import type { ChipState } from '@/components/filter/hooks/useChipFilterState';
 import type {
     CategoryConfig,
     ChipConfig,
 } from '@/components/filter/hooks/useFilterChipsData';
 import createChipState from '@/components/LabeledSelectChip/createChipState';
+import type { ChipState } from '@/components/LabeledSelectChip/hooks/useChipStates';
 
 interface UseURLChipsProps<
     TCategory,

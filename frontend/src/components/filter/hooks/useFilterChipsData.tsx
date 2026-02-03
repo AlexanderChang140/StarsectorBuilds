@@ -1,13 +1,13 @@
 import type { PaginatedResponse } from '@shared/types';
 
 import type { ApiEndpoint, Sort } from '@/api/types';
+import type { ChipState } from '@/components/LabeledSelectChip/hooks/useChipStates';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { Item } from '@/types/component';
 import type { ValueKeys, StringTransform } from '@/types/generic';
 import { typedEntries } from '@/utils/object';
 
 import useCategoriesQuery from './useCategoriesQuery';
-import type { ChipState } from './useChipFilterState';
 import useChipsQuery from './useChipsQuery';
 
 export type CategoryConfig<

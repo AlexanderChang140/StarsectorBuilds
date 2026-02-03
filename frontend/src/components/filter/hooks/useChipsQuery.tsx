@@ -4,9 +4,8 @@ import { type UseQueryResult, useQueries } from '@tanstack/react-query';
 import { buildApiRequest } from '@/api/apiRequestBuilder';
 import fetchSafe from '@/api/fetchSafe';
 import type { ApiEndpoint } from '@/api/types';
+import type { ChipState } from '@/components/LabeledSelectChip/hooks/useChipStates';
 import { typedEntries } from '@/utils/object';
-
-import type { ChipState } from './useChipFilterState';
 
 export default function useChipsQuery<
     TChip,

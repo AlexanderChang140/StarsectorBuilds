@@ -1,6 +1,6 @@
 import type { Item } from '@/types/component';
 
-import type { ChipState } from '../filter/hooks/useChipFilterState';
+import type { ChipState } from './hooks/useChipStates';
 
 export default function createChipState(
     categoryLabel: string,
