@@ -101,5 +101,5 @@ export default function useFilterChipsData<
         }),
     );
 
-    return { categoryData: categoriesData, categoryFilters, chipFilters };
+    return { categoryFilters, chipFilters };
 }

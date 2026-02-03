@@ -52,7 +52,7 @@ export default function DataTableFilterChips<
         searchParams,
     });
 
-    const { categoryData, categoryFilters, chipFilters } = useFilterChipsData<
+    const { categoryFilters, chipFilters } = useFilterChipsData<
         TCategory,
         TCategoryKeys,
         TChip,
@@ -103,15 +103,15 @@ export default function DataTableFilterChips<
             input={categoryInput}
             onInputChange={setCategoryInput}
             onSelect={(categoryValue) => {
-                const nextCategory = categoryData.find(
-                    (data) => String(data[category.valueKey]) === categoryValue,
+                const nextCategory = categoryFilters.find(
+                    (categoryFilter) => categoryFilter.value === categoryValue,
                 );
 
                 if (nextCategory === undefined) return;
 
                 addChipState({
                     value: categoryValue,
-                    label: category.labelTransform(nextCategory),
+                    label: nextCategory.label,
                 });
             }}
             options={{
