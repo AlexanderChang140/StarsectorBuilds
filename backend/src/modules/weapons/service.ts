@@ -50,11 +50,11 @@ export async function fetchLatestWeaponVersionById<
         filter: {
             weapon_version_id: { values: [weaponVersionId] },
         },
-        order: {
-            major: 'DESC',
-            minor: 'DESC',
-            patch: 'DESC',
-        },
+        order: [
+            { field: 'major', order: 'DESC' },
+            { field: 'minor', order: 'DESC' },
+            { field: 'patch', order: 'DESC' },
+        ],
         limit: 1,
         client: options?.client,
     };
