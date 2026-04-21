@@ -41,7 +41,7 @@ type ShipRecord = {
     'armor rating': string;
     'max flux': string;
     'flux dissipation': string;
-    'ordinance points': string;
+    'ordnance points': string;
     'fighter bays': string;
     'max speed': string;
     acceleration: string;
@@ -289,7 +289,7 @@ function buildShipStats(record: ShipRecord): PreparedShipStats {
         armor_rating: convertInteger(record['armor rating']),
         max_flux: convertInteger(record['max flux']),
         flux_dissipation: convertInteger(record['flux dissipation']),
-        op_cost: convertInteger(record['ordinance points']),
+        op_cost: convertInteger(record['ordnance points']),
         fighter_bays: convertInteger(record['fighter bays']),
         acceleration: convertInteger(record['acceleration']),
         deceleration: convertInteger(record['deceleration']),
