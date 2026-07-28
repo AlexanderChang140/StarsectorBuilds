@@ -13,8 +13,13 @@ async function main() {
         case 'deleteMod':
             if (args.length != 1 || !args[0])
                 throw new Error('Usage: deleteMod <code>');
-            await deleteMod(args[0]);
-            console.log(`Deleted mod: ${args[0]}`);
+            const res = await deleteMod(args[0]);
+            if (res) {
+                console.log(`Deleted mod: ${args[0]}`);
+            } else {
+                console.log(`Failed to delete mod: ${args[0]}`);
+            }
+            
             break;
 
         case 'deleteModVersion':

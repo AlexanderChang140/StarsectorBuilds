@@ -16,9 +16,10 @@ export async function deleteMod(modCode: string) {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        await executeAll(client, [query], [[modCode]]);
+        const res = await client.query(query, [modCode]);
         await executeAll(client, CLEANUP_QUERIES);
         await client.query('COMMIT');
+        return res.rowCount !== 0;
     } catch (err) {
         await client.query('ROLLBACK');
         throw new Error(`Failed to delete mod: ${modCode}`, { cause: err });
