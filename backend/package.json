@@ -12,6 +12,7 @@
         "gen:db": "npx kysely-codegen --out-file ./src/db/db.d.ts"
     },
     "dependencies": {
+        "@starsector/shared": "*",
         "argon2": "^0.44.0",
         "cookie-parser": "^1.4.7",
         "csv": "^6.4.1",

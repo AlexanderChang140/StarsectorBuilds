@@ -1,8 +1,19 @@
 {
-  "name": "shared",
-  "scripts": {},
-  "type": "module",
-  "dependencies": {
-    "zod": "^4.2.1"
-  }
+    "name": "@starsector/shared",
+    "private": true,
+    "scripts": {},
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./src/index.ts",
+            "default": "./src/index.ts"
+        },
+        "./*": {
+            "types": "./src/*.ts",
+            "default": "./src/*.ts"
+        }
+    },
+    "dependencies": {
+        "zod": "^4.2.1"
+    }
 }
