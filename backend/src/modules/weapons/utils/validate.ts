@@ -1,17 +1,4 @@
-const WEAPON_TYPE_LIST = [
-    'BALLISTIC',
-    'ENERGY',
-    'MISSILE',
-    'HYBRID',
-    'COMPOSITE',
-    'SYNERGY',
-    'UNIVERSAL',
-    'LAUNCH_BAY',
-    'SYSTEM',
-    'DECORATIVE',
-    'BUILT_IN',
-    'STATION_MODULE',
-] as const;
+import { WEAPON_TYPE_LIST } from '../constants.ts';
 
 export type WeaponType = (typeof WEAPON_TYPE_LIST)[number];
 

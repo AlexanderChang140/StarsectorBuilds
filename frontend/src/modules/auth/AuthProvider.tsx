@@ -1,79 +1,95 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import type { User } from '@starsector-builds/shared/user/types';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
 
-import { AuthContext } from '@/hooks/useAuth';
+import fetchSafe from '@/api/fetchSafe';
+import { AuthContext } from '@/modules/auth/hooks/useAuth';
+
+const AUTH_STALE_TIME = 1000 * 60 * 5; // 5 minutes
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<string | null>(null);
-    const [isLoading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        validateSession();
-    }, []);
-
-    async function signup(username: string, password: string) {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-                credentials: 'include',
-            });
-
-            if (!res.ok) {
-                throw new Error('Username is taken');
+    const { data: user = null, isLoading } = useQuery<User | null>({
+        queryKey: ['user'],
+        queryFn: async () => {
+            try {
+                const data = await fetchSafe<User>('/api/validate', {
+                    credentials: 'include',
+                });
+                return { username: data.username };
+            } catch {
+                return null;
             }
-            const data = await res.json();
-            setUser(data.username);
-        } finally {
-            setLoading(false);
-        }
-    }
+        },
+        staleTime: AUTH_STALE_TIME,
+        retry: false,
+    });
 
-    async function login(username: string, password: string) {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-                credentials: 'include',
-            });
+    const signupMutation = useMutation({
+        mutationFn: async ({
+            username,
+            password,
+            email,
+        }: {
+            username: string;
+            password: string;
+            email: string;
+        }) => {
+            return fetchSafe<{ username: string }>(
+                '/api/signup',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password, email }),
+                    credentials: 'include',
+                },
+                'Signup failed',
+            );
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(['user'], { username: data.username });
+        },
+    });
 
-            if (!res.ok) {
-                throw new Error('Invalid credentials');
-            }
-            const data = await res.json();
-            setUser(data.username);
-        } finally {
-            setLoading(false);
-        }
-    }
+    const loginMutation = useMutation({
+        mutationFn: async ({
+            identifier,
+            password,
+        }: {
+            identifier: string;
+            password: string;
+        }) => {
+            return fetchSafe<{ username: string }>(
+                '/api/login',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ identifier, password }),
+                    credentials: 'include',
+                },
+                'Invalid credentials',
+            );
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(['user'], { username: data.username });
+        },
+    });
 
-    async function logout() {
-        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-        setUser(null);
-    }
-
-    async function validateSession() {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/validate', {
-                credentials: 'include',
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setUser(data.username);
-            } else {
-                setUser(null);
-            }
-        } catch {
-            setUser(null);
-        } finally {
-            setLoading(false);
-        }
-    }
+    const logoutMutation = useMutation({
+        mutationFn: async () => {
+            await fetchSafe<void>(
+                '/api/logout',
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                },
+                'Logout failed',
+            );
+        },
+        onSuccess: () => {
+            queryClient.setQueryData(['user'], null);
+            queryClient.clear();
+        },
+    });
 
     return (
         <AuthContext.Provider
@@ -81,10 +97,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 user,
                 isAuthenticated: !!user,
                 isLoading,
-                signup,
-                login,
-                logout,
-                validateSession,
+                signup: async (username, password, email) => {
+                    await signupMutation.mutateAsync({
+                        username,
+                        password,
+                        email,
+                    });
+                },
+                login: async (identifier, password) => {
+                    await loginMutation.mutateAsync({
+                        identifier,
+                        password,
+                    });
+                },
+                logout: async () => {
+                    await logoutMutation.mutateAsync();
+                },
             }}
         >
             {children}

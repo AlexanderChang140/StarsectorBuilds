@@ -1,4 +1,4 @@
-import type { ShipVersionDTO } from '@shared/ships/types.ts';
+import type { ShipVersionFull } from '@starsector-builds/shared/ships/schema';
 import { useParams } from 'react-router';
 
 import styles from '@/components/Display.module.css';
@@ -17,17 +17,17 @@ export default function ShipDisplay() {
         'major',
         'minor',
         'patch',
-    ] as const satisfies readonly (keyof ShipVersionDTO)[];
+    ] as const satisfies readonly (keyof ShipVersionFull)[];
 
     const versionKeys = [
         'display_name',
         'text1',
         'text2',
         'ship_image_file_path',
-    ] satisfies readonly (keyof ShipVersionDTO)[];
+    ] satisfies readonly (keyof ShipVersionFull)[];
 
     const { versionQuery, versionsQuery } = useVersionsQuery<
-        ShipVersionDTO,
+        ShipVersionFull,
         typeof versionsKeys,
         typeof versionKeys
     >({
@@ -48,7 +48,7 @@ export default function ShipDisplay() {
     if (!versionQuery.data) return <div>No data found</div>;
     const versions = sortVersions(versionsQuery.data?.data, 'ship_version_id');
 
-    const data = versionQuery.data.data;
+    const data = versionQuery.data;
 
     return (
         <div>
@@ -73,6 +73,9 @@ export default function ShipDisplay() {
                     </div>
                     <div className={styles.stats}>Stats</div>
                 </div>
+                <a href={`/builds/new/${parsedShipId}/${parsedVersionId}`}>
+                    Create Build
+                </a>
             </div>
         </div>
     );

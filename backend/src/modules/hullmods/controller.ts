@@ -4,14 +4,12 @@ import { fetchHullmodVersions } from './service.ts';
 import { parseHullmodVersionFields } from './utils/fieldParser.ts';
 import { parseHullmodVersionFilter } from './utils/filterParser.ts';
 import { parseHullmodTableSort } from './utils/sortParser.ts';
+import { asyncHandler } from '../../server/asyncHandler.ts';
 import { parseLimit } from '../../server/parser/limitParser.ts';
 import { parseOffset } from '../../server/parser/offsetParser.ts';
 
-export async function getAllHullmodVersions(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
+export const getAllHullmodVersions = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
 
         const fields = parseHullmodVersionFields(query);
@@ -19,13 +17,13 @@ export async function getAllHullmodVersions(
         const order = parseHullmodTableSort(query);
         const limit = parseLimit(query);
         const offset = parseOffset(query);
-
         const options = { filter, order, limit, offset };
+
         const { rows, total } = await fetchHullmodVersions(fields, options);
 
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
+        return res.json({
+            data: rows,
+            meta: { total },
+        });
+    },
+);

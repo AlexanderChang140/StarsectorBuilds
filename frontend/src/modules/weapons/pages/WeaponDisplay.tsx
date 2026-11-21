@@ -1,4 +1,4 @@
-import type { WeaponVersionDTO } from '@shared/weapons/types';
+import type { WeaponVersionFull } from '@starsector-builds/shared/weapons/schema';
 import { useParams } from 'react-router';
 
 import styles from '@/components/Display.module.css';
@@ -6,7 +6,6 @@ import useVersionsQuery from '@/hooks/useVersionsQuery.tsx';
 import { sortVersions } from '@/modules/display/versionSorter.tsx';
 import { imageUrl } from '@/utils/assets';
 import { parseIntOrNaN } from '@/utils/parse';
-
 
 export default function WeaponDisplay() {
     const { weaponId, versionId } = useParams();
@@ -18,7 +17,7 @@ export default function WeaponDisplay() {
         'major',
         'minor',
         'patch',
-    ] as const satisfies readonly (keyof WeaponVersionDTO)[];
+    ] as const satisfies readonly (keyof WeaponVersionFull)[];
 
     const versionKeys = [
         'display_name',
@@ -26,10 +25,10 @@ export default function WeaponDisplay() {
         'text2',
         'turret_image_file_path',
         'turret_gun_image_file_path',
-    ] satisfies readonly (keyof WeaponVersionDTO)[];
+    ] satisfies readonly (keyof WeaponVersionFull)[];
 
     const { versionsQuery, versionQuery } = useVersionsQuery<
-        WeaponVersionDTO,
+        WeaponVersionFull,
         typeof versionsKeys,
         typeof versionKeys
     >({
@@ -48,9 +47,11 @@ export default function WeaponDisplay() {
         return <div>Error: {versionQuery.error.message}</div>;
     if (versionQuery.isPending) return <div>Loading...</div>;
     if (!versionQuery.data) return <div>No data found</div>;
-    const versions = sortVersions(versionsQuery.data?.data, 'weapon_version_id');
-
-    const data = versionQuery.data.data;
+    const versions = sortVersions(
+        versionsQuery.data?.data,
+        'weapon_version_id',
+    );
+    const data = versionQuery.data;
 
     return (
         <div className={styles.display}>

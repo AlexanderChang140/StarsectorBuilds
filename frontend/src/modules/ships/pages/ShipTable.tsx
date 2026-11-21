@@ -1,6 +1,6 @@
-import type { ModDTO, ModVersionDTO } from '@shared/mods/types';
-import type { ShipVersionDTO } from '@shared/ships/types';
-import type { Projection } from '@shared/types';
+import type { ModDTO, ModVersionDTO } from '@starsector-builds/shared/mods/types';
+import type { ShipVersionFull } from '@starsector-builds/shared/ships/schema';
+import type { Projection } from '@starsector-builds/shared/types';
 import { useSearchParams } from 'react-router';
 
 import { DataTable } from '@/components/DataTable/DataTable';
@@ -94,7 +94,7 @@ const KEY_ORDER = [
     'armor_rating',
     'max_flux',
     'flux_dissipation',
-    'op_cost',
+    'op',
     'fighter_bays',
     'max_speed',
     'acceleration',
@@ -146,7 +146,7 @@ const FILTERS = [
         ],
         isMultiSelect: true,
     },
-] as const satisfies readonly TableFilter<ShipVersionDTO>[];
+] as const satisfies readonly TableFilter<ShipVersionFull>[];
 
 const MOD_KEYS = [
     'id',

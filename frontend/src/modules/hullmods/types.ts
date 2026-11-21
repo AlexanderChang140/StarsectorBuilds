@@ -1,5 +1,5 @@
-import type { HullmodVersionDTO } from '@shared/hullmods/types';
-import type { Projection } from '@shared/types';
+import type { HullmodVersionFull } from '@starsector-builds/shared/hullmods/types';
+import type { Projection } from '@starsector-builds/shared/types';
 
 export const HULLMOD_TABLE_ROW_KEYS = [
     'base_value',
@@ -17,9 +17,9 @@ export const HULLMOD_TABLE_ROW_KEYS = [
     'mod_id',
     'mod_name',
     'mod_version_id',
-] as const satisfies readonly (keyof HullmodVersionDTO)[];
+] as const satisfies readonly (keyof HullmodVersionFull)[];
 
 export type HullmodTableRows = Projection<
-    HullmodVersionDTO,
+    HullmodVersionFull,
     typeof HULLMOD_TABLE_ROW_KEYS
 >;

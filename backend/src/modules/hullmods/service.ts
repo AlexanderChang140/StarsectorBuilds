@@ -1,14 +1,17 @@
-import type { HullmodVersionDTO } from '@shared/hullmods/types.ts';
-import type { Projection } from '@shared/types.ts';
+import {
+    HullmodVersionFullSchema,
+    type HullmodVersionFull,
+} from '@starsector-builds/shared/hullmods/types';
+import type { Projection } from '@starsector-builds/shared/types';
 
 import { HULLMOD_VERSIONS_FULL_COLUMNS } from './constants.ts';
-import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
     makeSelectOne,
-    selectFullWithCount,
+    selectWithCount,
     type PaginatedResult,
 } from '../../db/helpers/select.ts';
+import type { HullmodVersionsFullRow } from '../../db/tables.ts';
 import type { Options } from '../../db/types.ts';
 import {
     sanitizeFilter,
@@ -16,16 +19,19 @@ import {
     sanitizeOffset,
     sanitizeOrder,
 } from '../../server/sanitize.ts';
-import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
+import { parseProjectionArray } from '../../utils/zod.ts';
 
 export async function fetchHullmodVersions<
-    TSelection extends readonly (keyof DB['hullmod_versions_full'])[],
+    TSelection extends readonly (keyof HullmodVersionsFullRow)[],
 >(
     selection: TSelection,
-    options: Options<DB['hullmod_versions_full']>,
-): Promise<PaginatedResult<Projection<HullmodVersionDTO, TSelection>>> {
+    options: Options<HullmodVersionsFullRow>,
+): Promise<PaginatedResult<Projection<HullmodVersionFull, TSelection>>> {
     const safeOptions = {
-        filter: sanitizeFilter(options.filter, HULLMOD_VERSIONS_FULL_COLUMNS),
+        filter: {
+            ...sanitizeFilter(options.filter, HULLMOD_VERSIONS_FULL_COLUMNS),
+            hide_everywhere: { values: [false] },
+        },
         order: sanitizeOrder(options.order),
         limit: sanitizeLimit(options.limit, 20),
         offset: sanitizeOffset(options.offset),
@@ -37,37 +43,27 @@ export async function fetchHullmodVersions<
     return result;
 }
 
-const REQUIRED_HULLMOD_KEYS = [
-    'major',
-    'minor',
-    'patch',
-    'mod_id',
-    'mod_version_id',
-    'hullmod_id',
-    'hullmod_code',
-    'hullmod_version_id',
-    'hullmod_instance_id',
-    'data_hash',
-    'hide',
-    'hide_everywhere',
-] as const satisfies readonly (keyof DB['hullmod_versions_full'])[];
-
 export async function getHullmodVersionsFull<
-    TSelection extends readonly (keyof DB['hullmod_versions_full'])[],
->(selection: TSelection, options?: Options<DB['hullmod_versions_full']>) {
-    const result = await selectFullWithCount(
+    TSelection extends readonly (keyof HullmodVersionsFullRow)[],
+>(selection: TSelection, options?: Options<HullmodVersionsFullRow>) {
+    const result = await selectWithCount(
         'hullmod_versions_full',
         selection,
         options,
     );
-    assertProjectionRowsNonNullableKeys(result.rows, REQUIRED_HULLMOD_KEYS);
-    return { rows: result.rows, total: result.total };
+
+    const data = parseProjectionArray(
+        result.rows,
+        selection,
+        HullmodVersionFullSchema,
+    );
+    return {
+        rows: data,
+        total: result.total,
+    };
 }
 
-export const getHullmodId = makeSelectOne<'hullmods', ['id'], 'code'>(
-    'hullmods',
-    ['id'],
-);
+export const getHullmodId = makeSelectOne('hullmods', ['id']);
 
 export const insertHullmod = makeInsertReturn('hullmods', ['mod_id', 'code']);
 

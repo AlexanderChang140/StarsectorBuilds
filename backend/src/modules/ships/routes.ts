@@ -1,33 +1,26 @@
 import express from 'express';
 
 import {
-    getAllShipVersions,
-    getLatestShipVersion,
-    getShipVersionById,
     getShipVersions,
-    getShipWeaponSlots,
+    getLatestShipVersionByShipId,
+    getShipVersionByVid,
+    getShipVersionsByShipId,
+    getShipWeaponSlotsByVid,
+    getWeaponSlots,
 } from './controller.ts';
 
 const router = express.Router();
 
-router.get('/ships/:shipId/versions', (req, res) => {
-    getShipVersions(req, res);
-});
+router.get('/ships/:shipId/versions', getShipVersionsByShipId);
 
-router.get('/ships/:shipId/versions/latest', (req, res) => {
-    getLatestShipVersion(req, res);
-});
+router.get('/ships/:shipId/versions/latest', getLatestShipVersionByShipId);
 
-router.get('/ship-versions', (req, res) => {
-    getAllShipVersions(req, res);
-});
+router.get('/ship-versions', getShipVersions);
 
-router.get('/ship-versions/:shipVersionId', (req, res) => {
-    getShipVersionById(req, res);
-});
+router.get('/ship-versions/:shipVersionId', getShipVersionByVid);
 
-router.get('/ship-versions/:shipVersionId/slots', (req, res) => {
-    getShipWeaponSlots(req, res);
-});
+router.get('/ship-versions/:shipVersionId/slots', getShipWeaponSlotsByVid);
+
+router.get('/weapon-slots', getWeaponSlots);
 
 export default router;

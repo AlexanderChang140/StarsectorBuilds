@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS ship_system_data
 (
     ship_system_instance_id integer NOT NULL,
     display_name text,
-    PRIMARY KEY (ship_system_instance_id)
+    PRIMARY KEY (ship_system_instance_id),
+    FOREIGN KEY (ship_system_instance_id) REFERENCES ship_system_instances(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS ship_system_descs
@@ -47,6 +48,7 @@ CREATE TABLE IF NOT EXISTS ship_system_descs
     text1 text,
     text2 text,
     text3 text,
-    PRIMARY KEY (ship_system_instance_id)
+    PRIMARY KEY (ship_system_instance_id),
+    FOREIGN KEY (ship_system_instance_id) REFERENCES ship_system_instances(id) ON DELETE CASCADE
 );
 

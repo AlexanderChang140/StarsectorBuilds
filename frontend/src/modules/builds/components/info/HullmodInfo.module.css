@@ -1,0 +1,8 @@
+.section-header {
+    --section-color: var(--s-mod-color-light);
+    --section-bg: var(--s-mod-color-dark);
+}
+
+.desc {
+    white-space: pre-line;
+}

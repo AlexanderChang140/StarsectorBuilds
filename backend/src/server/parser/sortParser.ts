@@ -1,9 +1,11 @@
 import type { ColumnOrder } from '../../db/fragments/order.ts';
-import type { SelectableRow } from '../../db/types.ts';
+import type { SelectableRow, QueryOrder } from '../../db/types.ts';
 import type { QueryParam, ReqQuery } from '../../types/generic.ts';
 
+type SortableValues = string | number | null | Date;
+
 export type SortKeys<T> = {
-    [K in keyof T]: T[K] extends string | number | null ? K : never;
+    [K in keyof T]: T[K] extends SortableValues ? K : never;
 }[keyof T];
 
 export type SortableColumnKeys<T> = readonly SortKeys<SelectableRow<T>>[];
@@ -11,7 +13,7 @@ export type SortableColumnKeys<T> = readonly SortKeys<SelectableRow<T>>[];
 export function parseSort<TData extends object>(
     query: ReqQuery,
     validKeys: SortableColumnKeys<TData>,
-): ColumnOrder<TData> {
+): QueryOrder<TData> {
     const rawSort = parseStringArray(query.sort).map((s) => {
         const [field, order] = s.split(':');
         return { field, order };

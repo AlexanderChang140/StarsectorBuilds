@@ -1,6 +1,6 @@
 import type { ColumnOrder } from '../db/fragments/order.ts';
 import type { Filter } from '../db/helpers/filter.ts';
-import type { Options } from '../db/types.ts';
+import type { Options, SelectableRow, TransformNumeric } from '../db/types.ts';
 import { filterKeys } from '../utils/helpers.ts';
 import { clamp } from '../utils/math.ts';
 
@@ -44,7 +44,10 @@ export function sanitizeAll<T, TKeys extends readonly (keyof T)[]>(
     defaultLimit = 20,
 ): Options<T> {
     return {
-        filter: sanitizeFilter(options.filter, filterColumns),
+        filter: sanitizeFilter<SelectableRow<TransformNumeric<T>>>(
+            options.filter,
+            filterColumns,
+        ),
         order: sanitizeOrder(options.order),
         limit: sanitizeLimit(options.limit, defaultLimit),
         offset: sanitizeOffset(options.offset),

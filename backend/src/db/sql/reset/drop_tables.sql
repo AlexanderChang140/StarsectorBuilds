@@ -67,6 +67,9 @@ DROP TABLE IF EXISTS ship_systems CASCADE;
 -- Hullmods
 DROP TABLE IF EXISTS hullmod_ui_tags CASCADE;
 DROP TABLE IF EXISTS hullmod_ui_tag_junction CASCADE;
+DROP TABLE IF EXISTS hullmod_tags CASCADE;
+DROP TABLE IF EXISTS hullmod_tag_junction CASCADE;
+DROP TABLE IF EXISTS hullmod_data CASCADE;
 DROP TABLE IF EXISTS hullmod_versions CASCADE;
 DROP TABLE IF EXISTS hullmod_instances CASCADE;
 DROP TABLE IF EXISTS hullmods CASCADE;

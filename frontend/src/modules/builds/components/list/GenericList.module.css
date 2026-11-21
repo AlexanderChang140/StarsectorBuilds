@@ -1,0 +1,10 @@
+.listbox {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 25rem;
+    height: 40rem;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    background-color: var(--color-charcoal);
+}

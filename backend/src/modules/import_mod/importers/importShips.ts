@@ -1,15 +1,17 @@
 import type { PoolClient } from 'pg';
 
 import type { ModInfo } from './importMod.ts';
+import { createKeyedFilter } from '../../../db/helpers/filter.ts';
 import { insertJunctionItems } from '../../../db/helpers/insert.ts';
 import { getOrThrow } from '../../../utils/helpers.ts';
+import { logger } from '../../../utils/logger.ts';
 import { insertImage } from '../../images/service.ts';
 import type { PreparedImage } from '../../images/types.ts';
 import { getShipSystemId } from '../../ship_systems/service.ts';
 import {
-    getMountTypes,
-    getShieldTypes,
-    getShipSizes,
+    selectMountTypes,
+    selectShieldTypes,
+    selectShipSizes,
     insertPhaseStats,
     insertShieldStats,
     insertShip,
@@ -27,9 +29,9 @@ import {
     insertShipVersion,
     insertShipWeaponSlot,
 } from '../../ships/service.ts';
-import type { PreparedFullShip } from '../../ships/types.ts';
 import { getWeaponSizes, getWeaponTypes } from '../../weapons/service.ts';
 import { buildImage } from '../parsers/imageParser.ts';
+import type { PreparedFullShip } from '../types/ships.ts';
 
 export async function importShips(
     modInfo: ModInfo,
@@ -46,9 +48,9 @@ export async function importShips(
         shipInstanceIds: Record<string, number>;
     } = { dataChanged: false, shipInstanceIds: {} };
 
-    const mountTypes = await getMountTypes(client);
-    const shieldTypes = await getShieldTypes(client);
-    const shipSizes = await getShipSizes(client);
+    const mountTypes = await selectMountTypes(client);
+    const shieldTypes = await selectShieldTypes(client);
+    const shipSizes = await selectShipSizes(client);
     const weaponTypes = await getWeaponTypes(client);
     const weaponSizes = await getWeaponSizes(client);
 
@@ -113,7 +115,7 @@ export async function importShips(
             const ship_system_id = shipSystemCode
                 ? (
                       await getShipSystemId({
-                          where: { code: shipSystemCode },
+                          where: createKeyedFilter('code', shipSystemCode),
                       })
                   )?.id
                 : null;
@@ -232,13 +234,11 @@ export async function importShips(
                 client,
             );
         } catch (err) {
-            const formatted = new Error(`Failed to insert ship: ${code}`, {
-                cause: err,
+            logger.error(`Failed to insert ship: ${code} \n ${ship}`, {
+                error: err,
             });
-            console.log(formatted);
-            console.log(ship);
         }
     }
-    console.log(`Successfully imported ships from: ${modInfo.modCode}`);
+    logger.info(`Successfully imported ships from: ${modInfo.modCode}`);
     return out;
 }

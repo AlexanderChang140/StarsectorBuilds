@@ -1,10 +1,9 @@
 import {
     MATCH_TYPES,
-    type Filter,
-    type FilterOptions,
+    type FilterableKeys,
     type MatchType,
 } from '../../db/helpers/filter.ts';
-import type { SelectableRow } from '../../db/types.ts';
+import type { FilterableRow, QueryFilter } from '../../db/types.ts';
 import type { ReqQuery } from '../../types/generic.ts';
 import type { Schema } from '../../types/zod.ts';
 import {
@@ -14,31 +13,34 @@ import {
     removeArrayKeys,
 } from '../../utils/helpers.ts';
 import { typedEntries } from '../../utils/object.ts';
+import { getFilterSchema, safeParse } from '../../utils/zod.ts';
 
-export type FilterKeys<T> = {
-    [K in keyof T]: T[K] extends string | number | boolean | null ? K : never;
-}[keyof T];
+type RawFilter = {
+    values?: unknown;
+    match?: unknown;
+    not?: unknown;
+};
 
-export type FilterableColumnKeys<T> = readonly FilterKeys<SelectableRow<T>>[];
+export function parseFilter<TData extends object>(
+    query: ReqQuery,
+    validKeys: readonly FilterableKeys<FilterableRow<TData>>[],
+    schema: Schema<FilterableRow<TData>>,
+): QueryFilter<TData> {
+    type Row = FilterableRow<TData>;
 
-type RawFilter = { [K in keyof FilterOptions]?: unknown };
-
-export function parseFilter<
-    TData extends Record<string, unknown>,
-    TKeys extends readonly FilterKeys<TData>[],
->(query: ReqQuery, validKeys: TKeys, schema: Schema<TData>): Filter<TData> {
     const cleanedQuery = removeNull(removeUndefined(query));
-    const filteredQuery = filterKeys<TData>(cleanedQuery, validKeys);
+    const filteredQuery = filterKeys<Row>(cleanedQuery, validKeys);
 
-    const filter: Filter<TData> = {};
+    const filter = {} as QueryFilter<TData>;
 
     for (const [key, rawFilter] of typedEntries(filteredQuery)) {
         if (
             typeof rawFilter !== 'object' ||
             rawFilter === null ||
-            !validKeys.includes(key as TKeys[number])
-        )
+            !validKeys.includes(key as FilterableKeys<Row>)
+        ) {
             continue;
+        }
 
         const {
             values: rawValues,
@@ -48,7 +50,8 @@ export function parseFilter<
 
         if (rawValues == null) continue;
 
-        const fieldSchema = schema.shape[key as keyof typeof schema.shape];
+        const baseFieldSchema = schema.shape[key as keyof typeof schema.shape];
+        const fieldSchema = getFilterSchema(baseFieldSchema);
         const wrappedValues = Array.isArray(rawValues)
             ? rawValues
             : [rawValues];
@@ -57,8 +60,12 @@ export function parseFilter<
 
         const values = wrappedValues
             .filter((v) => v !== undefined && v !== null)
-            .map((v) => fieldSchema.parse(v))
-            .filter((v) => v != null);
+            .flatMap((v) => {
+                const result = safeParse(v, fieldSchema);
+                return result.success ? [result.data] : [];
+            });
+
+        if (values.length === 0) continue;
 
         const match: MatchType =
             typeof rawMatch === 'string' &&
@@ -68,23 +75,22 @@ export function parseFilter<
 
         const not = rawNot === 'true' || rawNot === true;
 
-        filter[key] = { values: values as (string | number)[], match, not };
+        Object.assign(filter, {
+            [key]: { values, match, not },
+        });
     }
+
     return filter;
 }
 
 export function parseFilterWithExcludedKeys<
     TData extends Record<string, unknown>,
-    TKeys extends readonly FilterKeys<TData>[],
-    TExcludeKeys extends readonly TKeys[number][] = [],
 >(
     query: ReqQuery,
-    schema: Schema<TData>,
-    keys: TKeys,
-    excludeKeys?: TExcludeKeys | undefined,
-) {
-    const safeExcludeKeys = (excludeKeys ?? []) as TExcludeKeys;
-
-    const validKeys = removeArrayKeys(keys, safeExcludeKeys);
-    return parseFilter<TData, typeof validKeys>(query, validKeys, schema);
+    schema: Schema<FilterableRow<TData>>,
+    keys: readonly FilterableKeys<FilterableRow<TData>>[],
+    excludeKeys: readonly FilterableKeys<FilterableRow<TData>>[] = [],
+): QueryFilter<TData> {
+    const validKeys = removeArrayKeys(keys, excludeKeys);
+    return parseFilter(query, validKeys, schema);
 }

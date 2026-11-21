@@ -1,7 +1,5 @@
-export function typedEntries<T extends object>(
-    obj: T,
-): [keyof T, T[keyof T]][] {
-    return Object.entries(obj) as [keyof T, T[keyof T]][];
+export function typedEntries<T extends object>(obj: T): [string, T[keyof T]][] {
+    return Object.entries(obj) as [string, T[keyof T]][];
 }
 
 export function typedKeys<T extends object>(obj: T): (keyof T)[] {

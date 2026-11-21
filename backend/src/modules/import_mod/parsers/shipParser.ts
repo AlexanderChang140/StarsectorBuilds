@@ -20,7 +20,7 @@ import type {
     PreparedShipStats,
     PreparedShipText,
     PreparedShipWeaponSlot,
-} from '../../ships/types.ts';
+} from '../types/ships.ts';
 import { isShieldType, isShipSize } from '../../ships/utils/validate.ts';
 import {
     convertString,
@@ -289,7 +289,7 @@ function buildShipStats(record: ShipRecord): PreparedShipStats {
         armor_rating: convertInteger(record['armor rating']),
         max_flux: convertInteger(record['max flux']),
         flux_dissipation: convertInteger(record['flux dissipation']),
-        op_cost: convertInteger(record['ordnance points']),
+        op: convertInteger(record['ordnance points']),
         fighter_bays: convertInteger(record['fighter bays']),
         acceleration: convertInteger(record['acceleration']),
         deceleration: convertInteger(record['deceleration']),

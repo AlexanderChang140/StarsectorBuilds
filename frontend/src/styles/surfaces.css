@@ -1,0 +1,21 @@
+.grid-bg {
+    background-image:
+        linear-gradient(
+            to right,
+            var(--ship-builder-bg-color-grid) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            to bottom,
+            var(--ship-builder-bg-color-grid) 1px,
+            transparent 1px
+        ),
+        repeating-linear-gradient(
+            0,
+            var(--ship-builder-bg-color-dark),
+            var(--ship-builder-bg-color-dark) 2px,
+            var(--ship-builder-bg-color-light) 2px,
+            var(--ship-builder-bg-color-light) 3px
+        );
+    background-size: 30px 30px;
+}

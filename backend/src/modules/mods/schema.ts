@@ -2,14 +2,13 @@ import z from 'zod';
 
 import type { DB } from '../../db/db.js';
 import type { SelectableRow } from '../../db/types.ts';
-import type { Nullable } from '../../types/generic.ts';
 import { schemaForTable } from '../../utils/zod.ts';
 
-export const ModsSchema = schemaForTable<Nullable<SelectableRow<DB['mods']>>>()(
+export const ModsSchema = schemaForTable<SelectableRow<DB['mods']>>()(
     z.object({
-        code: z.string().nullable(),
-        display_name: z.string().nullable(),
-        id: z.coerce.number().nullable(),
+        code: z.string(),
+        display_name: z.string(),
+        id: z.coerce.number(),
     }),
 );
 

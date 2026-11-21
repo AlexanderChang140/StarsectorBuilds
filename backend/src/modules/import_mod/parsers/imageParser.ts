@@ -3,9 +3,7 @@ import path from 'path';
 
 import dotenv from 'dotenv';
 
-
-
-import type { DB } from '../../../db/db.js';
+import type { ImagesRow } from '../../../db/tables.ts';
 import type { InsertableRow } from '../../../db/types.ts';
 import type { PreparedImage } from '../../images/types.ts';
 import { hashImage } from '../util/hash.ts';
@@ -30,9 +28,10 @@ export function buildImage(
     modCode: string,
     category: ImageCategories,
     preparedImage: PreparedImage | null,
-): InsertableRow<DB['images']> | null {
+): InsertableRow<ImagesRow> | null {
     if (!preparedImage) return null;
-    const filePath = [modCode, category, preparedImage.file_hash].join('/') + '.png';
+    const filePath =
+        [modCode, category, preparedImage.file_hash].join('/') + '.png';
     copyImage(preparedImage.copy_path, filePath);
     return {
         file_hash: preparedImage.file_hash,

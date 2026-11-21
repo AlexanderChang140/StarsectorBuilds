@@ -1,9 +1,14 @@
 import type { PoolClient } from 'pg';
 
 import type { ModInfo } from './importMod.ts';
+import {
+    createFilterCondition,
+    createKeyedFilter,
+} from '../../../db/helpers/filter.ts';
 import { insertJunctionItems } from '../../../db/helpers/insert.ts';
 import { getOrThrow } from '../../../utils/helpers.ts';
-import { getShipId } from '../../ships/service.ts';
+import { logger } from '../../../utils/logger.ts';
+import { selectShipId } from '../../ships/service.ts';
 import { getWeaponId } from '../../weapons/service.ts';
 import {
     getWingFormations,
@@ -34,13 +39,16 @@ export async function importWings(
 
     for (const [code, wing] of Object.entries(preparedFullWings)) {
         try {
+            console.log('!')
             const shipId = (
-                await getShipId({
-                    where: { mod_id: modInfo.modId, code },
+                await selectShipId({
+                    where: {
+                        mod_id: createFilterCondition(modInfo.modId),
+                        code: createFilterCondition(code),
+                    },
                     client,
                 })
             )?.id;
-
             if (shipId === undefined) {
                 throw new Error(`Failed to find ship id for: ${code}`);
             }
@@ -94,7 +102,7 @@ export async function importWings(
                 )) {
                     const weaponId = (
                         await getWeaponId({
-                            where: { code: weapon },
+                            where: createKeyedFilter('code', weapon),
                             client,
                         })
                     )?.id;
@@ -125,12 +133,11 @@ export async function importWings(
                 client,
             );
         } catch (err) {
-            const formatted = new Error(`Failed to insert to wing: ${code}`, {
+            throw new Error(`Failed to insert to wing: ${code}`, {
                 cause: err,
             });
-            console.log(formatted);
         }
     }
-    console.log(`Successfully imported wings from: ${modInfo.modCode}`);
+    logger.info(`Successfully imported wings from: ${modInfo.modCode}`);
     return dataChanged;
 }

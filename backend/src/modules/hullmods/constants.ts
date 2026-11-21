@@ -1,4 +1,4 @@
-import type { DB } from '../../db/db.js';
+import type { HullmodVersionsFullRow } from '../../db/tables.ts';
 
 export const HULLMOD_VERSIONS_FULL_COLUMNS = [
     'base_value',
@@ -12,6 +12,7 @@ export const HULLMOD_VERSIONS_FULL_COLUMNS = [
     'hide_everywhere',
     'hullmod_code',
     'hullmod_desc',
+    'hullmod_desc_s_mod',
     'hullmod_id',
     'hullmod_image_file_path',
     'hullmod_instance_id',
@@ -25,4 +26,4 @@ export const HULLMOD_VERSIONS_FULL_COLUMNS = [
     'patch',
     'tags',
     'ui_tags',
-] as const satisfies readonly (keyof DB['hullmod_versions_full'])[];
+] as const satisfies readonly (keyof HullmodVersionsFullRow)[];

@@ -1,0 +1,16 @@
+.wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.img {
+    display: block;
+    width: auto;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+}
+

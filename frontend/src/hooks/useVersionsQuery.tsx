@@ -1,4 +1,7 @@
-import type { PaginatedResponse, Projection, ApiResponse } from '@shared/types';
+import type {
+    PaginatedResponse,
+    Projection,
+} from '@starsector-builds/shared/types';
 import { useQuery } from '@tanstack/react-query';
 
 import { buildApiRequest, buildFields } from '@/api/apiRequestBuilder';
@@ -67,12 +70,10 @@ export default function useVersionsQuery<
         : latestVersionEndpoint;
 
     const versionKey = hasValidVersionId ? versionId : 'latest';
-    const versionQuery = useQuery<
-        ApiResponse<Projection<TData, typeof versionKeys>>
-    >({
+    const versionQuery = useQuery({
         queryKey: [versionQueryKey, entityId, versionKey],
         queryFn: () =>
-            fetchSafe<ApiResponse<Projection<TData, typeof versionKeys>>>(
+            fetchSafe<Projection<TData, typeof versionKeys>>(
                 currVersionRequest,
             ),
         enabled: hasValidEntityId,

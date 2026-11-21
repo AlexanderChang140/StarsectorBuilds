@@ -1,5 +1,5 @@
-import type { DB } from '../../../db/db.js';
 import type { ColumnOrder } from '../../../db/fragments/order.ts';
+import type { HullmodVersionsFullRow } from '../../../db/tables.ts';
 import { parseSort } from '../../../server/parser/sortParser.ts';
 import type { ReqQuery } from '../../../types/generic.ts';
 
@@ -10,10 +10,10 @@ export const HULLMOD_TABLE_KEYS = [
     'cost_cruiser',
     'cost_destroyer',
     'base_value',
-] as const satisfies (keyof DB['hullmod_versions_full'])[];
+] as const satisfies (keyof HullmodVersionsFullRow)[];
 
 export function parseHullmodTableSort(
     query: ReqQuery,
-): ColumnOrder<DB['hullmod_versions_full']> {
-    return parseSort<DB['hullmod_versions_full']>(query, HULLMOD_TABLE_KEYS);
+): ColumnOrder<HullmodVersionsFullRow> {
+    return parseSort(query, HULLMOD_TABLE_KEYS);
 }

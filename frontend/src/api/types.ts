@@ -1,13 +1,6 @@
 export type ModRoute = `${ModSubRoute}`;
 export type ModSubRoute = 'mods' | 'mods/search/display_name' | 'mod-versions';
 
-export type WeaponRoute = `${WeaponSubRoute}`;
-export type WeaponSubRoute =
-    | `weapons/${number}/versions`
-    | `weapons/${number}/versions/latest`
-    | 'weapon-versions'
-    | `weapon-versions/${number}`;
-
 export type ShipRoute = `${ShipSubRoute}`;
 export type ShipSubRoute =
     | `ships/${number}/versions`
@@ -16,15 +9,34 @@ export type ShipSubRoute =
     | `ship-versions/${number}`
     | `ship-versions/${number}/slots`;
 
+export type WeaponRoute = `${WeaponSubRoute}`;
+
+export type WeaponSubRoute =
+    | `weapons/${number}/versions`
+    | `weapons/${number}/versions/latest`
+    | 'weapon-versions'
+    | `weapon-versions/${number}`;
+
+export type WingRoute = `${WingSubRoute}`;
+export type WingSubRoute = `wings/${number}/versions` | `wing-versions`;
+
 export type HullmodRoute = `${HullmodSubRoute}`;
 export type HullmodSubRoute = `hullmod-versions`;
 
+export type BuildRoute = BuildSubRoute;
+export type BuildSubRoute = 'builds' | `builds/${number}`;
+
 export type ApiEndpoint =
+    | '/api/signup'
+    | '/api/login'
+    | '/api/validate'
     | `/api/${ModRoute}`
     | `/api/${ShipRoute}`
     | `/api/${WeaponRoute}`
+    | `/api/${WingRoute}`
     | `/api/${HullmodRoute}`
-    | `/api/wings`;
+    | `/api/${BuildRoute}`
+    | '/api/weapon-slots';
 
 export type MatchType = 'exact' | 'contains' | 'starts_with' | 'ends_with';
 
@@ -48,6 +60,6 @@ export type ControlParams = {
 };
 
 export type ApiRequest<TApiEndpoint extends ApiEndpoint> = {
-    endpoint: TApiEndpoint;
+    endpoint: TApiEndpoint | null;
     params?: Partial<ControlParams>;
 };

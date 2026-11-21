@@ -1,5 +1,5 @@
 {
-    "name": "@starsector/shared",
+    "name": "@starsector-builds/shared",
     "private": true,
     "scripts": {},
     "type": "module",

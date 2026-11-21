@@ -1,10 +1,7 @@
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import { makeSelectOne } from '../../db/helpers/select.ts';
 
-export const getShipSystemId = makeSelectOne<'ship_systems', ['id'], 'code'>(
-    'ship_systems',
-    ['id'],
-);
+export const getShipSystemId = makeSelectOne('ship_systems', ['id']);
 
 export const insertShipSystem = makeInsertReturn('ship_systems', [
     'mod_id',

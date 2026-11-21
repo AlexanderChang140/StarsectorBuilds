@@ -1,7 +1,7 @@
 export type ModDTO = {
     code: string;
     id: number;
-    display_name: string | null;
+    display_name: string;
 };
 
 

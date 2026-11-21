@@ -1,0 +1,75 @@
+.card {
+    display: grid;
+    grid-template-areas:
+        'img text1  .'
+        'img text2 op-cost'
+        'img text3 op-text';
+    grid-template-columns: auto 1fr auto;
+    column-gap: 0.5rem;
+    width: 100%;
+    margin: auto;
+    overflow: hidden;
+}
+
+.image-wrapper {
+    display: grid;
+    grid-area: img;
+    place-items: center;
+    width: 3rem;
+    height: auto;
+}
+
+.img {
+    position: relative;
+    grid-area: 1 / 1;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+}
+
+.text1 {
+    grid-area: text1;
+}
+
+.text2 {
+    grid-area: text2;
+    color: var(--text2-color);
+}
+
+.text3 {
+    grid-area: text3;
+}
+
+.text1,
+.text2,
+.text3 {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: start;
+}
+
+.op-cost {
+    grid-area: op-cost;
+    color: var(--text2-color);
+}
+
+.op-text {
+    grid-area: op-text;
+    font-size: 0.6rem;
+    color: lightgrey;
+    text-align: right;
+}
+
+.info-container {
+    position: fixed;
+    z-index: 10;
+    display: flex;
+    pointer-events: none;
+}
+
+.listbox-item:hover {
+    cursor: pointer;
+    background-color: var(--color-muted-cyan);
+}

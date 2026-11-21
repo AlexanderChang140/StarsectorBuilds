@@ -1,15 +1,11 @@
-import type { DB } from '../../../db/db.js';
 import { parseFields } from '../../../server/parser/fieldParser.ts';
 import type { ReqQuery } from '../../../types/generic.ts';
 import { MOD_COLUMNS, MOD_VERSION_FULL_COLUMNS } from '../constants.ts';
 
 export function parseModsFields(query: ReqQuery) {
-    return parseFields<DB['mods'], typeof MOD_COLUMNS>(query, MOD_COLUMNS);
+    return parseFields(query, MOD_COLUMNS);
 }
 
 export function parseModVersionsFields(query: ReqQuery) {
-    return parseFields<
-        DB['mod_versions_full'],
-        typeof MOD_VERSION_FULL_COLUMNS
-    >(query, MOD_VERSION_FULL_COLUMNS);
+    return parseFields(query, MOD_VERSION_FULL_COLUMNS);
 }

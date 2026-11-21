@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS build_mod_versions(
     mod_id integer NOT NULL,
     PRIMARY KEY (build_id, mod_id),
     UNIQUE (build_id, mod_version_id),
-    FOREIGN KEY (build_id) REFERENCES builds(id),
+    FOREIGN KEY (build_id) REFERENCES builds(id) ON DELETE CASCADE,
     FOREIGN KEY (mod_version_id, mod_id) REFERENCES mod_versions(id, mod_id)
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS build_weapons
     mod_version_id integer NOT NULL,
     ship_instance_id integer NOT NULL,
     ship_weapon_slot_id integer NOT NULL,
-    weapon_instance_id integer NOT NULL,
+    weapon_version_id integer NOT NULL,
 
     PRIMARY KEY (build_id, ship_weapon_slot_id),
 
@@ -51,35 +51,39 @@ CREATE TABLE IF NOT EXISTS build_weapons
         REFERENCES build_mod_versions(build_id, mod_version_id)
         ON DELETE CASCADE,
 
-    -- Bind ship_instance_id to build_id 
+    -- Bind ship_instance_id to build_id
     FOREIGN KEY (ship_instance_id, build_id)
         REFERENCES builds(ship_instance_id, id),
 
     -- Bind ship_weapon_slot_id to ship_instance_id
+    -- Is the slot part of the ship?
     FOREIGN KEY (ship_weapon_slot_id, ship_instance_id)
         REFERENCES ship_weapon_slots(id, ship_instance_id),
 
-    -- Bind weapon_instance_id to mod_version_id
-    FOREIGN KEY (weapon_instance_id, mod_version_id)
-        REFERENCES weapon_versions(weapon_instance_id, mod_version_id)
+    -- Bind weapon_version_id to mod_version_id
+    -- Is the weapon from one of the build's mods?
+    FOREIGN KEY (weapon_version_id, mod_version_id) 
+        REFERENCES weapon_versions(id, mod_version_id)
 );
 
 CREATE TABLE IF NOT EXISTS build_hullmods
 (
     build_id integer NOT NULL,
     mod_version_id integer NOT NULL,
-    hullmod_instance_id integer NOT NULL,
+    hullmod_version_id integer NOT NULL,
+    built_in boolean NOT NULL DEFAULT false,
 
-    PRIMARY KEY (build_id, hullmod_instance_id),
+    PRIMARY KEY (build_id, hullmod_version_id),
 
     -- Start with build_id and mod_version_id
     FOREIGN KEY (build_id, mod_version_id)
         REFERENCES build_mod_versions(build_id, mod_version_id)
         ON DELETE CASCADE,
 
-    -- Bind hullmod_instance_id to mod_version_id
-    FOREIGN KEY (hullmod_instance_id, mod_version_id)
-        REFERENCES hullmod_versions(hullmod_instance_id, mod_version_id)
+    -- Bind hullmod_version_id to mod_version_id
+    -- Is the hullmod from one of the build's mods?
+    FOREIGN KEY (hullmod_version_id, mod_version_id)
+        REFERENCES hullmod_versions(id, mod_version_id)
 );
 
 CREATE TABLE IF NOT EXISTS build_wings
@@ -88,7 +92,7 @@ CREATE TABLE IF NOT EXISTS build_wings
     mod_version_id integer NOT NULL,
     ship_instance_id integer NOT NULL,
     ship_weapon_slot_id integer NOT NULL,
-    wing_instance_id integer NOT NULL,
+    wing_version_id integer NOT NULL,
 
     PRIMARY KEY (build_id, ship_weapon_slot_id),
 
@@ -102,12 +106,14 @@ CREATE TABLE IF NOT EXISTS build_wings
         REFERENCES builds(ship_instance_id, id),
 
     -- Bind ship_weapon_slot_id to ship_instance_id
+    -- Is the slot part of the ship?
     FOREIGN KEY (ship_weapon_slot_id, ship_instance_id)
         REFERENCES ship_weapon_slots(id, ship_instance_id),
 
-    -- Bind wing_instance_id to mod_version_id
-    FOREIGN KEY (wing_instance_id, mod_version_id)
-        REFERENCES wing_versions(wing_instance_id, mod_version_id)
+    -- Bind wing_version_id to mod_version_id
+    -- Is the wing from one of the build's mods?
+    FOREIGN KEY (wing_version_id, mod_version_id)
+        REFERENCES wing_versions(id, mod_version_id)
 );
 
 CREATE TABLE IF NOT EXISTS build_comments

@@ -1,4 +1,4 @@
-import type { Projection } from '@shared/types.ts';
+import type { Projection } from '@starsector-builds/shared/types';
 
 export function assertDefined<T>(
     value: T,
@@ -9,11 +9,22 @@ export function assertDefined<T>(
     }
 }
 
-type NonNullableKeys<
+export type RemoveUndefined<T> = T extends undefined ? never : T;
+
+export type NonUndefinedKeys<
     TData extends object,
     TKeys extends readonly (keyof TData)[],
 > = {
     [K in keyof TData]: K extends TKeys[number]
+        ? RemoveUndefined<TData[K]>
+        : TData[K];
+};
+
+export type NonNullableKeys<
+    TData extends object,
+    TKeys extends readonly (keyof TData)[],
+> = {
+    [K in keyof TData]-?: K extends TKeys[number]
         ? NonNullable<TData[K]>
         : TData[K];
 };

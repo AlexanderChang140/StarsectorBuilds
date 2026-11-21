@@ -8,3 +8,13 @@ CREATE TABLE IF NOT EXISTS users
     PRIMARY KEY (id),
     UNIQUE (username)
 );
+
+CREATE TABLE IF NOT EXISTS sessions
+(
+    token text NOT NULL,
+    user_id integer NOT NULL,
+    expires_at timestamptz NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (token),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)

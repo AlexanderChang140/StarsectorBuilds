@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@shared/types';
+import type { PaginatedResponse } from '@starsector-builds/shared/types';
 
 import type { ApiEndpoint, Sort } from '@/api/types';
 import type { ChipState } from '@/components/LabeledSelectChip/hooks/useChipStates';

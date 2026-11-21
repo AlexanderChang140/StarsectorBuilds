@@ -3,6 +3,7 @@ import type { PoolClient } from 'pg';
 import type { ModInfo } from './importMod.ts';
 import { insertJunctionItems } from '../../../db/helpers/insert.ts';
 import { getOrThrow } from '../../../utils/helpers.ts';
+import { logger } from '../../../utils/logger.ts';
 import { insertImage } from '../../images/service.ts';
 import {
     insertWeapon,
@@ -237,12 +238,11 @@ export async function importWeapons(
                 client,
             );
         } catch (err) {
-            const formatted = new Error(`Failed to insert weapon: ${code}`, {
+            throw new Error(`Failed to insert weapon: ${code}`, {
                 cause: err,
             });
-            console.log(formatted);
         }
     }
-    console.log(`Successfully imported weapons from: ${modInfo.modCode}`);
+    logger.info(`Successfully imported weapons from: ${modInfo.modCode}`);
     return dataChanged;
 }

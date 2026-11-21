@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@shared/types';
+import type { PaginatedResponse } from '@starsector-builds/shared/types';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, type SetURLSearchParams } from 'react-router';
 
@@ -150,6 +150,7 @@ export function DataTable<
                 />
                 <PaginationControls
                     totalPages={totalPages}
+                    siblingCount={2}
                     currPageIndex={page - 1}
                     onPageChange={handlePageChange}
                 />

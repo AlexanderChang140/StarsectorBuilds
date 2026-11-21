@@ -2,6 +2,7 @@ import type { PoolClient } from 'pg';
 
 import type { ModInfo } from './importMod.ts';
 import { insertJunctionItems } from '../../../db/helpers/insert.ts';
+import { logger } from '../../../utils/logger.ts';
 import {
     insertHullmod,
     insertHullmodInstance,
@@ -104,12 +105,11 @@ export async function importHullmods(
                 client,
             );
         } catch (err) {
-            const formatted = new Error(`Failed to insert hullmod: ${code}`, {
+            throw new Error(`Failed to insert hullmod: ${code}`, {
                 cause: err,
             });
-            console.log(formatted);
         }
     }
-    console.log(`Successfully imported hullmods from: ${modInfo.modCode}`);
+    logger.info(`Successfully imported hullmods from: ${modInfo.modCode}`);
     return dataChanged;
 }

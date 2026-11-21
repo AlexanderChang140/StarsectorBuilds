@@ -1,76 +1,108 @@
-import dotenv from 'dotenv';
 import type { Request, Response } from 'express';
 
-import { signup, login, logout, validateSession } from './auth.ts';
+import { signup, login, logout, validateSession } from './service.ts';
+import { config } from '../../config/env.ts';
+import { asyncHandler } from '../../server/asyncHandler.ts';
+import { Status } from '../../server/constants/http.ts';
+import { BadRequestError, UnauthorizedError } from '../../server/error.ts';
+import { logger } from '../../utils/logger.ts';
 
-dotenv.config();
+export const postSignup = asyncHandler(async (req: Request, res: Response) => {
+    const { username, password, email } = parseSignup(req);
 
-export async function postSignup(req: Request, res: Response) {
-    const { username, password } = parseUser(req);
+    const result = await signup(username, password, email);
 
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Missing username or password' });
+    generateSessionCookie(res, result.token);
+
+    return res
+        .status(Status.CREATED)
+        .json({ username: result.username, message: 'Signup successful' });
+});
+
+export const postLogin = asyncHandler(async (req: Request, res: Response) => {
+    const { identifier, password } = parseLogin(req);
+
+    const result = await login(identifier, password);
+
+    generateSessionCookie(res, result.token);
+
+    return res.json({ username: result.username, message: 'Login successful' });
+});
+
+export const postLogout = asyncHandler(async (req: Request, res: Response) => {
+    if (req.cookies?.token) {
+        const isLoggedOut = await logout(
+            req.cookies[config.session.cookieName],
+        );
+        if (!isLoggedOut) {
+            logger.warn('Failed to log out');
+        }
     }
 
-    const token = await signup(username, password);
+    res.clearCookie(config.session.cookieName);
+    return res.json({ message: 'Logged out' });
+});
 
-    if (token) {
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'prod',
-            sameSite: 'strict',
-            maxAge: 1000 * 60 * 60,
-        });
-        return res.status(201).json({ username, message: 'Signup successful' });
-    } else {
-        return res.status(409).json({ error: 'User already exists' });
-    }
-}
+export const getValidate = asyncHandler(async (req: Request, res: Response) => {
+    const session = await validateSession(
+        req.cookies[config.session.cookieName],
+    );
 
-export async function postLogin(req: Request, res: Response) {
-    const { username, password } = parseUser(req);
-
-    if (!username || !password) {
-        return res
-            .status(400)
-            .json({ username, error: 'Missing username or password' });
+    if (session == null) {
+        throw new UnauthorizedError('Invalid session');
     }
 
-    const token = await login(username, password);
+    return res.json({
+        user: { username: session.username },
+        message: 'Valid session',
+    });
+});
 
-    if (token) {
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'prod',
-            sameSite: 'strict',
-            maxAge: 1000 * 60 * 60,
-        });
-        return res.status(200).json({ username, message: 'Login successful' });
-    } else {
-        return res.status(401).json({ error: 'Invalid credentials' });
-    }
-}
-
-export async function postLogout(req: Request, res: Response) {
-    logout(req.cookies.token);
-    res.clearCookie('token');
-    return res.status(200).json({ message: 'Logged out' });
-}
-
-export async function getValidate(req: Request, res: Response) {
-    const username = await validateSession(req.cookies.token);
-    if (username !== undefined) {
-        return res.status(200).json({ username, message: 'Valid session' });
-    } else {
-        return res.status(401).json({ error: 'Invalid session' });
-    }
-}
-
-function parseUser(req: Request) {
+function parseSignup(req: Request): {
+    username: string;
+    password: string;
+    email: string;
+} {
     const usernamePattern = /^[a-zA-Z0-9_]{3,20}$/;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     const username = req.body.username?.toString();
     const password = req.body.password?.toString();
+    const email = req.body.email?.toString();
 
-    return usernamePattern.test(username) ? { username, password } : {};
+    if (!username || !usernamePattern.test(username)) {
+        throw new BadRequestError('Invalid or missing username');
+    }
+    if (!email || !emailPattern.test(email)) {
+        throw new BadRequestError('Invalid or missing email');
+    }
+    if (!password) {
+        throw new BadRequestError('Missing password');
+    }
+
+    return { username, password, email };
+}
+
+function parseLogin(req: Request): {
+    identifier: string;
+    password: string;
+} {
+    const identifier = req.body.identifier?.toString();
+    const password = req.body.password?.toString();
+    if (!identifier || identifier.trim() === '') {
+        throw new BadRequestError('Missing username or email');
+    }
+    if (!password) {
+        throw new BadRequestError('Missing password');
+    }
+
+    return { identifier: identifier.trim(), password };
+}
+function generateSessionCookie(res: Response, token: string) {
+    res.cookie(config.session.cookieName, token, {
+        httpOnly: true,
+        secure: config.isProd,
+        sameSite: 'strict',
+        maxAge: config.session.ttlMs,
+    });
 }

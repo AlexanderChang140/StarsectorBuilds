@@ -1,5 +1,5 @@
-import type { Projection } from '@shared/types';
-import type { WeaponVersionDTO } from '@shared/weapons/types';
+import type { Projection } from '@starsector-builds/shared/types';
+import type { WeaponVersionFull } from '@starsector-builds/shared/weapons/schema';
 
 export const WEAPON_TABLE_ROW_KEYS = [
     'ammo_per_second',
@@ -41,9 +41,9 @@ export const WEAPON_TABLE_ROW_KEYS = [
     'weapon_size',
     'weapon_type',
     'weapon_version_id',
-] as const satisfies readonly (keyof WeaponVersionDTO)[];
+] as const satisfies readonly (keyof WeaponVersionFull)[];
 
 export type WeaponTableRows = Projection<
-    WeaponVersionDTO,
+    WeaponVersionFull,
     typeof WEAPON_TABLE_ROW_KEYS
 >;

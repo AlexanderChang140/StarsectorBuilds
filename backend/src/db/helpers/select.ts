@@ -1,96 +1,105 @@
-import type { Projection } from '@shared/types.ts';
+import type { Projection } from '@starsector-builds/shared/types';
+import type { Generated } from 'kysely';
 import type { PoolClient } from 'pg';
 
 import { pool } from '../client.ts';
-import type { DB, Generated } from '../db.js';
-import { type Filter, createFilterFragment } from './filter.ts';
+import {
+    createFilterFragment,
+    type Filter,
+    type FilterableKeys,
+} from './filter.ts';
 import { createFromClause } from '../fragments/from.ts';
 import { createLimitClause } from '../fragments/limit.ts';
 import { createOffsetClause } from '../fragments/offset.ts';
-import { createOrderClause, type ColumnOrder } from '../fragments/order.ts';
+import { createOrderClause } from '../fragments/order.ts';
 import { createSelectClause } from '../fragments/select.ts';
 import { createWhereClause } from '../fragments/where.ts';
+import type { Table } from '../tables.ts';
 import type {
-    AllowedKey,
-    AllowedKeys,
+    FilterableRow,
     Options,
     SelectableRow,
     Selection,
 } from '../types.ts';
 
 /**
- * Select multiple rows with a typed column list.
+ * Run a select with optional filter/order/pagination.
  *
  * @template TTable - Table name in the schema.
  * @template TSelection - Column keys to return from the table.
  * @param table - Target table name.
  * @param selection - Readonly array of columns to return.
- * @param options - Optional query settings (where filter, client override).
+ * @param options - Optional filter/order/limit/offset/client settings.
  * @returns Rows containing only the requested columns.
  */
 export async function select<
-    TTable extends keyof DB,
-    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
-    TAllowedKey extends keyof SelectableRow<DB[TTable]> = AllowedKey<
-        TAllowedKeys,
-        SelectableRow<DB[TTable]>
-    >,
+    TTable extends keyof Table,
+    TSelection extends Selection<SelectableRow<Table[TTable]>>,
 >(
     table: TTable,
-    selection: Selection<DB[TTable]>,
-    options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey> | undefined;
-        client?: PoolClient | undefined;
-    },
-) {
-    const { query: partial, values } = createSelectQuery(
-        table,
-        selection,
-        options,
+    selection: TSelection,
+    options?: Options<Table[TTable]> | undefined,
+): Promise<Projection<SelectableRow<Table[TTable]>, TSelection>[]> {
+    const selectClause = createSelectClause(selection);
+    const fromClause = createFromClause(table);
+    const { clause: filterFragment, params } = createFilterFragment(
+        options?.filter,
     );
-    const query = partial + ';';
+    const filterClause = filterFragment ? `WHERE ${filterFragment}` : '';
 
-    const executor = options?.client ?? pool;
-    const { rows } = await executor.query<
-        Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>
-    >(query, values);
-    return rows;
+    const orderClause = createOrderClause<TTable>(
+        options?.order,
+        options?.isNullsLast,
+    );
+
+    const limitClause = createLimitClause(options?.limit);
+    const offsetClause = createOffsetClause(options?.offset);
+
+    const query = `
+        ${selectClause}
+        ${fromClause}
+        ${filterClause}
+        ${orderClause}
+        ${limitClause}
+        ${offsetClause};
+    `;
+
+    const executor = options?.client ? options.client : pool;
+    const result = await executor.query(query, params);
+    return result.rows;
 }
 
 /**
- * Build a typed select with optional allowed WHERE keys.
+ * Build a typed select query factory with optional allowed FILTER keys.
  *
- * @template TTable - Table name in the schema.
- * @template TSelection - Column keys to return from the table.
- * @template TAllowedKeys - Keys permitted in the WHERE clause.
- * @param table - Target table name.
- * @param selection - Readonly array of columns to return.
- * @param allowedKeys - Optional whitelist for WHERE keys.
- * @returns Function that executes select with optional where/client.
+ * @template TTable Table name in the schema.
+ * @template TAllowedKeys Keys permitted in the filter clause.
+ * @param table Table name.
+ * @param allowedKeys Optional whitelist for filterable keys.
+ * @returns Function that executes selectFull with optional restricted filters/options.
  */
 export function makeSelect<
-    TTable extends keyof DB,
-    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
-    TAllowedKey extends AllowedKey<TAllowedKeys, SelectableRow<DB[TTable]>>,
->(table: TTable, selection: Selection<DB[TTable]>, allowedKeys?: TAllowedKeys) {
-    return async (options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey>;
-        client?: PoolClient | undefined;
-    }) => {
-        const allowed:
-            | Pick<SelectableRow<DB[TTable]>, TAllowedKey>
-            | undefined =
-            options?.where && allowedKeys
+    TTable extends keyof Table,
+    TAllowedKeys extends FilterableKeys<FilterableRow<Table[TTable]>>,
+    TSelection extends Selection<SelectableRow<Table[TTable]>>,
+>(table: TTable, allowedKeys?: readonly TAllowedKeys[]) {
+    return async (
+        selection: TSelection,
+        options?: Options<Table[TTable]> | undefined,
+    ) => {
+        const filtered =
+            options?.filter && allowedKeys
                 ? (Object.fromEntries(
-                      Object.entries(options.where).filter(([k]) =>
-                          (allowedKeys as readonly TAllowedKey[]).includes(
-                              k as TAllowedKey,
-                          ),
+                      Object.entries(options.filter).filter(([k]) =>
+                          (allowedKeys as readonly string[]).includes(k),
                       ),
-                  ) as Pick<SelectableRow<DB[TTable]>, TAllowedKey>)
-                : options?.where;
+                  ) as Filter<FilterableRow<Table[TTable]>>) 
+                : options?.filter;
 
-        return select(table, selection, { ...options, where: allowed });
+        return select(table, selection, {
+            ...options,
+            filter: filtered,
+        });
     };
 }
 
@@ -98,66 +107,50 @@ export function makeSelect<
  * Select a single row with a typed column list.
  *
  * @template TTable - Table name in the schema.
- * @template TSelection - Column keys to return from the table.
  * @param table - Target table name.
  * @param selection - Readonly array of columns to return.
  * @param options - Optional query settings (where filter, client override).
  * @returns The matching row or undefined.
  */
 export async function selectOne<
-    TTable extends keyof DB,
-    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
-    TAllowedKey extends AllowedKey<TAllowedKeys, SelectableRow<DB[TTable]>>,
+    TTable extends keyof Table,
+    TSelection extends Selection<SelectableRow<Table[TTable]>>,
 >(
     table: TTable,
-    selection: Selection<DB[TTable]>,
-    options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey>;
-        client?: PoolClient;
-    },
-) {
-    const { query: partial, values } = createSelectQuery(
-        table,
-        selection,
-        options,
-    );
-    const query = partial + 'LIMIT 1;';
-
-    const executor = options?.client ?? pool;
-    const { rows } = await executor.query<
-        Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>
-    >(query, values);
-    return rows[0];
+    selection: TSelection,
+    options?: Options<Table[TTable]> | undefined,
+): Promise<Projection<SelectableRow<Table[TTable]>, TSelection> | undefined> {
+    return (
+        await select(table, selection, {
+            ...options,
+            limit: 1,
+        })
+    )[0];
 }
 
 /**
  * Build a typed single-row selector for a table.
  *
  * @template TTable - Table name in the schema.
- * @template TSelection - Column keys to return from the table.
- * @template TWhereKeys - Keys permitted in the WHERE clause (defaults to all keys).
  * @param table - Target table name.
  * @param selection - Readonly array of columns to return.
  * @returns Function that runs the select with optional where/client.
  */
 export function makeSelectOne<
-    TTable extends keyof DB,
-    TSelection extends readonly (keyof SelectableRow<DB[TTable]>)[],
-    TWhereKeys extends keyof SelectableRow<DB[TTable]> = keyof SelectableRow<
-        DB[TTable]
-    >,
+    TTable extends keyof Table,
+    TSelection extends Selection<SelectableRow<Table[TTable]>>,
 >(table: TTable, selection: TSelection) {
     return async (options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TWhereKeys>;
+        where?: Filter<Table[TTable]>;
         client?: PoolClient;
     }) => selectOne(table, selection, options);
 }
 
-export async function selectExists<TTable extends keyof DB>(
+export async function selectExists<TTable extends keyof Table>(
     table: TTable,
     options?: {
-        where?: Partial<DB[TTable]>;
-        client?: PoolClient;
+        where?: Filter<Table[TTable]>;
+        client?: PoolClient | undefined;
     },
 ): Promise<boolean> {
     const fromClause = createFromClause(table);
@@ -175,58 +168,11 @@ export async function selectExists<TTable extends keyof DB>(
     return result.rows[0]?.exists ?? false;
 }
 
-export function makeSelectExists<TTable extends keyof DB>(table: TTable) {
+export function makeSelectExists<TTable extends keyof Table>(table: TTable) {
     return async (options?: {
-        where?: Partial<DB[TTable]>;
-        client?: PoolClient;
+        where?: Filter<Table[TTable]>;
+        client?: PoolClient | undefined;
     }) => selectExists(table, options);
-}
-
-/**
- * Run a full select with optional filter/order/pagination.
- *
- * @template TFilter - Shape of the filter input.
- * @template TTable - Table name in the schema.
- * @template TRow - Row type (defaults to DB[TTable]).
- * @param table - Target table name.
- * @param selection - Readonly array of columns to return.
- * @param options - Optional filter/order/limit/offset/client settings.
- * @returns Rows containing only the requested columns.
- */
-export async function selectFull<
-    TTable extends keyof DB,
-    TSelection extends Selection<DB[TTable]>,
->(
-    table: TTable,
-    selection: TSelection,
-    options?: Options<SelectableRow<DB[TTable]>>,
-): Promise<Projection<SelectableRow<DB[TTable]>, TSelection>[]> {
-    const selectClause = createSelectClause(selection);
-    const fromClause = createFromClause(table);
-    const { clause: filterFragment, params } = createFilterFragment(
-        options?.filter,
-    );
-    const filterClause = filterFragment ? `WHERE ${filterFragment}` : '';
-
-    const orderClause = createOrderClause<TTable>(options?.order);
-
-    const limitClause = createLimitClause(options?.limit);
-    const offsetClause = createOffsetClause(options?.offset);
-
-    const query = `
-        ${selectClause}
-        ${fromClause}
-        ${filterClause}
-        ${orderClause}
-        ${limitClause}
-        ${offsetClause};
-    `;
-
-    const executor = options?.client ? options.client : pool;
-    const result = await executor.query<
-        Pick<SelectableRow<DB[TTable]>, Selection<DB[TTable]>[number]>
-    >(query, params);
-    return result.rows;
 }
 
 export type PaginatedResult<T> = {
@@ -234,14 +180,16 @@ export type PaginatedResult<T> = {
     total: number;
 };
 
-export async function selectFullWithCount<
-    TTable extends keyof DB,
-    TSelection extends Selection<DB[TTable]>,
+export async function selectWithCount<
+    TTable extends keyof Table,
+    TSelection extends Selection<SelectableRow<Table[TTable]>>,
 >(
     table: TTable,
     selection: TSelection,
-    options?: Options<SelectableRow<DB[TTable]>>,
-): Promise<PaginatedResult<Projection<SelectableRow<DB[TTable]>, TSelection>>> {
+    options?: Options<Table[TTable]>,
+): Promise<
+    PaginatedResult<Projection<SelectableRow<Table[TTable]>, TSelection>>
+> {
     const selectClause = createSelectClause(selection);
     const fromClause = createFromClause(table);
     const { clause: filterFragment, params } = createFilterFragment(
@@ -267,72 +215,24 @@ export async function selectFullWithCount<
 
     const executor = options?.client ?? pool;
     const result = await executor.query<
-        Projection<SelectableRow<DB[TTable]>, TSelection> & {
+        Projection<SelectableRow<Table[TTable]>, TSelection> & {
             __total_count: number;
         }
     >(query, params);
     const rows = result.rows.map(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ({ __total_count, ...row }) => row,
-    ) as Projection<SelectableRow<DB[TTable]>, TSelection>[];
+    ) as Projection<SelectableRow<Table[TTable]>, TSelection>[];
     const total = result.rows[0]?.__total_count ?? 0;
 
     return { rows, total };
 }
 
-/**
- * Build a reusable full-select function with optional filter/order/pagination.
- *
- * @template TFilter - Shape of the filter input.
- * @template TTable - Table name in the schema.
- * @template TRow - Row type (defaults to DB[TTable]).
- * @param table - Target table name.
- * @param selection - Readonly array of columns to return.
- * @returns Function that executes selectFull with optional settings.
- */
-export function makeSelectFull<
-    TFilter extends Filter<SelectableRow<DB[TTable]>>,
-    TTable extends keyof DB,
->(table: TTable, selection: Selection<DB[TTable]>) {
-    return async (options?: {
-        filter?: TFilter;
-        order?: ColumnOrder<SelectableRow<DB[TTable]>>;
-        limit?: number;
-        offset?: number;
-        client?: PoolClient | undefined;
-    }) => selectFull(table, selection, options);
-}
-
-/**
- * Higher-order helper that builds filtered select functions.
- *
- * @template TFilter - Shape of the filter input.
- * @returns Factory that accepts table and columns, producing a filtered select function.
- */
-/*
-export function makeSelectFullWithFilter<TFilter extends Filter<TRow>, TRow>() {
-    return function <TTable extends keyof DB, TRow = DB[TTable]>(
-        table: TTable,
-        selection: readonly (keyof TRow)[],
-    ) {
-        return async (options?: {
-            filter?: TFilter;
-            order?: ColumnOrder<TRow>;
-            limit?: number;
-            offset?: number;
-            client?: PoolClient;
-        }) => {
-            return selectFull(table, selection, options);
-        };
-    };
-}
-*/
-
 type TableWithIdCode = {
-    [K in keyof DB]: DB[K] extends { id: Generated<number>; code: string }
+    [K in keyof Table]: Table[K] extends { id: Generated<number>; code: string }
         ? K
         : never;
-}[keyof DB];
+}[keyof Table];
 
 /**
  * Select rows with id/code and map codes to ids.
@@ -350,7 +250,9 @@ export async function selectCodeIdRecord<TTable extends TableWithIdCode>(
     const rows = await select(table, ['id', 'code'], options);
     return rows.reduce(
         (acc, row) => {
-            acc[row.code] = row.id;
+            if (row.code != null && row.id != null) {
+                acc[String(row.code)] = Number(row.id);
+            }
             return acc;
         },
         {} as Record<string, number>,
@@ -368,29 +270,4 @@ export function makeSelectCodeIdRecord<TTable extends TableWithIdCode>(
     table: TTable,
 ) {
     return async (client?: PoolClient) => selectCodeIdRecord(table, client);
-}
-
-function createSelectQuery<
-    TTable extends keyof DB,
-    TAllowedKeys extends AllowedKeys<SelectableRow<DB[TTable]>>,
-    TAllowedKey extends AllowedKey<TAllowedKeys, SelectableRow<DB[TTable]>>,
->(
-    table: TTable,
-    selection: Selection<DB[TTable]>,
-    options?: {
-        where?: Pick<SelectableRow<DB[TTable]>, TAllowedKey> | undefined;
-        order?: ColumnOrder<DB[TTable]>;
-        limit?: number;
-        offset?: number;
-    },
-) {
-    const selectClause = createSelectClause(selection);
-    const fromClause = createFromClause(table);
-    const { clause: whereClause, values } = createWhereClause(options?.where);
-    const query = `
-        ${selectClause}
-        ${fromClause}
-        ${whereClause}
-    `;
-    return { query, values };
 }

@@ -1,5 +1,5 @@
 import type { Entries } from '../../types/generic.ts';
-import type { DB } from '../db.js';
+import type { Table } from '../tables.ts';
 import type { Order } from '../types.ts';
 
 export type ColumnOrder<T> = {
@@ -7,20 +7,22 @@ export type ColumnOrder<T> = {
     order: Order;
 }[];
 
-export function createOrderClause<TTable extends keyof DB>(
-    columns: ColumnOrder<DB[TTable]> | undefined,
+export function createOrderClause<TTable extends keyof Table>(
+    columns: ColumnOrder<Table[TTable]> | undefined,
+    isNullsLast: boolean = true,
 ) {
     if (columns === undefined || Object.keys(columns).length === 0) {
         return '';
     }
 
     const fragment = createOrderFragment<TTable>(columns);
-    const clause = `ORDER BY ${fragment}`;
+    const nullsLast = isNullsLast ? ' NULLS LAST' : '';
+    const clause = `ORDER BY ${fragment}${nullsLast}`;
     return clause;
 }
 
-export function createOrderFragment<TTable extends keyof DB>(
-    columns: ColumnOrder<DB[TTable]> | undefined,
+export function createOrderFragment<TTable extends keyof Table>(
+    columns: ColumnOrder<Table[TTable]> | undefined,
 ): string {
     if (columns === undefined) {
         return '';
@@ -35,7 +37,7 @@ export function createOrderFragment<TTable extends keyof DB>(
     return clause;
 }
 
-export function createOrderFragmentWithAliases<TTable extends keyof DB>(
+export function createOrderFragmentWithAliases<TTable extends keyof Table>(
     aliases: Record<string, ColumnOrder<TTable> | undefined>,
 ): string {
     const columnFragments: string[] = [];

@@ -4,8 +4,6 @@ import { getAllHullmodVersions } from './controller.ts';
 
 const router = express.Router();
 
-router.get('/hullmod-versions', (req, res) => {
-    getAllHullmodVersions(req, res);
-});
+router.get('/hullmod-versions', getAllHullmodVersions);
 
 export default router;

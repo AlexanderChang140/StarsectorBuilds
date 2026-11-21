@@ -37,7 +37,8 @@ export interface BuildComments {
 
 export interface BuildHullmods {
   build_id: number;
-  hullmod_instance_id: number;
+  built_in: Generated<boolean>;
+  hullmod_version_id: number;
   mod_version_id: number;
 }
 
@@ -59,6 +60,30 @@ export interface Builds {
   user_id: number;
 }
 
+export interface BuildsFull {
+  build_id: number | null;
+  built_in_hullmods: number[] | null;
+  capacitors: number | null;
+  content: string | null;
+  created_at: Timestamp | null;
+  installed_hullmods: number[] | null;
+  installed_weapons: number[] | null;
+  installed_wings: number[] | null;
+  mod_versions: number[] | null;
+  ship_code: string | null;
+  ship_id: number | null;
+  ship_image_file_path: string | null;
+  ship_instance_id: number | null;
+  ship_name: string | null;
+  ship_size: string | null;
+  ship_version_id: number | null;
+  title: string | null;
+  updated_at: Timestamp | null;
+  user_id: number | null;
+  username: string | null;
+  vents: number | null;
+}
+
 export interface BuildStats {
   build_id: number;
   capacitors: Generated<number>;
@@ -70,7 +95,7 @@ export interface BuildWeapons {
   mod_version_id: number;
   ship_instance_id: number;
   ship_weapon_slot_id: number;
-  weapon_instance_id: number;
+  weapon_version_id: number;
 }
 
 export interface BuildWings {
@@ -78,7 +103,7 @@ export interface BuildWings {
   mod_version_id: number;
   ship_instance_id: number;
   ship_weapon_slot_id: number;
-  wing_instance_id: number;
+  wing_version_id: number;
 }
 
 export interface BuiltInHullmods {
@@ -103,6 +128,64 @@ export interface DamageTypes {
   id: Generated<number>;
 }
 
+export interface FighterVersionsFull {
+  acceleration: number | null;
+  armor_rating: number | null;
+  base_value: number | null;
+  built_in_weapons: number[] | null;
+  cr_deployment_cost: number | null;
+  cr_loss_per_sec: Numeric | null;
+  cr_recovery: Numeric | null;
+  data_hash: string | null;
+  deceleration: number | null;
+  designation: string | null;
+  display_name: string | null;
+  fighter_bays: number | null;
+  flux_dissipation: number | null;
+  fuel_per_ly: Numeric | null;
+  hints: string[] | null;
+  hitpoints: number | null;
+  major: number | null;
+  manufacturer: string | null;
+  mass: number | null;
+  max_cargo: number | null;
+  max_crew: number | null;
+  max_flux: number | null;
+  max_fuel: number | null;
+  max_speed: number | null;
+  max_turn_rate: number | null;
+  min_crew: number | null;
+  minor: number | null;
+  mod_id: number | null;
+  mod_name: string | null;
+  mod_version_id: number | null;
+  op: number | null;
+  patch: string | null;
+  peak_cr_sec: number | null;
+  phase_cost: number | null;
+  phase_upkeep: number | null;
+  shield_arc: number | null;
+  shield_efficiency: Numeric | null;
+  shield_type: string | null;
+  shield_type_id: number | null;
+  shield_upkeep: Numeric | null;
+  ship_code: string | null;
+  ship_id: number | null;
+  ship_image_file_path: string | null;
+  ship_instance_id: number | null;
+  ship_size: string | null;
+  ship_size_id: number | null;
+  ship_system: string | null;
+  ship_system_id: number | null;
+  ship_version_id: number | null;
+  tags: string[] | null;
+  text1: string | null;
+  text2: string | null;
+  turn_acceleration: number | null;
+  x: Numeric | null;
+  y: Numeric | null;
+}
+
 export interface HullmodData {
   base_value: number | null;
   cost_capital: Generated<number>;
@@ -113,6 +196,7 @@ export interface HullmodData {
   hide: Generated<boolean>;
   hide_everywhere: Generated<boolean>;
   hullmod_desc: string | null;
+  hullmod_desc_s_mod: string | null;
   hullmod_instance_id: number;
   manufacturer: string | null;
 }
@@ -169,6 +253,7 @@ export interface HullmodVersionsFull {
   hide_everywhere: boolean | null;
   hullmod_code: string | null;
   hullmod_desc: string | null;
+  hullmod_desc_s_mod: string | null;
   hullmod_id: number | null;
   hullmod_image_file_path: string | null;
   hullmod_instance_id: number | null;
@@ -233,6 +318,13 @@ export interface ProjWeapons {
   launch_speed: number | null;
   speed: number | null;
   weapon_instance_id: number;
+}
+
+export interface Sessions {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  token: string;
+  user_id: number;
 }
 
 export interface ShieldStats {
@@ -318,7 +410,7 @@ export interface ShipStats {
   max_flux: number | null;
   max_speed: number | null;
   max_turn_rate: number | null;
-  op_cost: number | null;
+  op: number | null;
   ship_instance_id: number;
   turn_acceleration: number | null;
 }
@@ -326,13 +418,6 @@ export interface ShipStats {
 export interface ShipSystemData {
   display_name: string | null;
   ship_system_instance_id: number;
-}
-
-export interface ShipSystemDesc {
-  ship_system_instance_id: number;
-  text1: string | null;
-  text2: string | null;
-  text3: string | null;
 }
 
 export interface ShipSystemDescs {
@@ -392,6 +477,9 @@ export interface ShipVersionsFull {
   acceleration: number | null;
   armor_rating: number | null;
   base_value: number | null;
+  built_in_hullmods: number[] | null;
+  built_in_weapons: number[] | null;
+  built_in_wings: number[] | null;
   cr_deployment_cost: number | null;
   cr_loss_per_sec: Numeric | null;
   cr_recovery: Numeric | null;
@@ -418,7 +506,7 @@ export interface ShipVersionsFull {
   mod_id: number | null;
   mod_name: string | null;
   mod_version_id: number | null;
-  op_cost: number | null;
+  op: number | null;
   patch: string | null;
   peak_cr_sec: number | null;
   phase_cost: number | null;
@@ -715,6 +803,44 @@ export interface WingVersions {
   wing_instance_id: number;
 }
 
+export interface WingVersionsFull {
+  armor_rating: number | null;
+  base_value: number | null;
+  capacitors: number | null;
+  data_hash: string | null;
+  deployment_range: number | null;
+  display_name: string | null;
+  fighter_ship_code: string | null;
+  fighter_ship_id: number | null;
+  formation: string | null;
+  formation_id: number | null;
+  hitpoints: number | null;
+  major: number | null;
+  manufacturer: string | null;
+  max_crew: number | null;
+  max_speed: number | null;
+  min_crew: number | null;
+  minor: number | null;
+  mod_id: number | null;
+  mod_name: string | null;
+  mod_version_id: number | null;
+  num_fighters: number | null;
+  op_cost: number | null;
+  patch: string | null;
+  refit_time: number | null;
+  role: string | null;
+  role_desc: string | null;
+  role_id: number | null;
+  shield_type: string | null;
+  ship_image_file_path: string | null;
+  tags: string[] | null;
+  text1: string | null;
+  text2: string | null;
+  vents: number | null;
+  wing_instance_id: number | null;
+  wing_version_id: number | null;
+}
+
 export interface WingWeaponGroups {
   id: Generated<number>;
   mode: string | null;
@@ -738,10 +864,12 @@ export interface DB {
   build_weapons: BuildWeapons;
   build_wings: BuildWings;
   builds: Builds;
+  builds_full: BuildsFull;
   built_in_hullmods: BuiltInHullmods;
   built_in_weapons: BuiltInWeapons;
   built_in_wings: BuiltInWings;
   damage_types: DamageTypes;
+  fighter_versions_full: FighterVersionsFull;
   hullmod_data: HullmodData;
   hullmod_instances: HullmodInstances;
   hullmod_tag_junction: HullmodTagJunction;
@@ -758,6 +886,7 @@ export interface DB {
   mount_types: MountTypes;
   phase_stats: PhaseStats;
   proj_weapons: ProjWeapons;
+  sessions: Sessions;
   shield_stats: ShieldStats;
   shield_types: ShieldTypes;
   ship_descs: ShipDescs;
@@ -770,7 +899,6 @@ export interface DB {
   ship_specs: ShipSpecs;
   ship_stats: ShipStats;
   ship_system_data: ShipSystemData;
-  ship_system_desc: ShipSystemDesc;
   ship_system_descs: ShipSystemDescs;
   ship_system_instances: ShipSystemInstances;
   ship_system_versions: ShipSystemVersions;
@@ -808,6 +936,7 @@ export interface DB {
   wing_tag_junction: WingTagJunction;
   wing_tags: WingTags;
   wing_versions: WingVersions;
+  wing_versions_full: WingVersionsFull;
   wing_weapon_groups: WingWeaponGroups;
   wing_weapons: WingWeapons;
 }

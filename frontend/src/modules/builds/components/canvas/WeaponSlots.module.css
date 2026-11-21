@@ -1,0 +1,34 @@
+.slot {
+    position: absolute;
+    display: grid;
+    grid-template: 100% / 100%;
+    place-items: center;
+    place-items: stretch;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+
+    --transition-time: 0.2s;
+}
+
+.img {
+    z-index: 1;
+    grid-area: 1 / 1;
+    place-self: center;
+    width: auto;
+    height: auto;
+    user-select: none;
+    transition: all var(--transition-time) ease-in-out;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+}
+
+.tooltip {
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+    pointer-events: none;
+}

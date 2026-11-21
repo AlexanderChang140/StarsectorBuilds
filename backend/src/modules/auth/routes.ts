@@ -1,27 +1,18 @@
-import cookieParser from 'cookie-parser';
 import express from 'express';
 
-import { postSignup, postLogin, postLogout, getValidate } from './controller.ts';
+import {
+    postSignup,
+    postLogin,
+    postLogout,
+    getValidate,
+} from './controller.ts';
 
 const router = express.Router();
 
-router.use(express.json());
-router.use(cookieParser());
-
-router.post('/signup', (req, res) => {
-    postSignup(req, res);
-});
-
-router.post('/login', (req, res) => {
-    postLogin(req, res);
-});
-
-router.post('/logout', (req, res) => {
-    postLogout(req, res);
-});
-
-router.get('/validate', (req, res) => {
-    getValidate(req, res);
-});
+router.post('/signup', postSignup);
+router.post('/login', postLogin);
+router.post('/logout', postLogout);
+router.get('/validate', getValidate);
+router.get('/validate', getValidate);
 
 export default router;

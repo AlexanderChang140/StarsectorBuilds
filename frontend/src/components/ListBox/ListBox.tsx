@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import {
     ListBox as AriaListBox,
     ListBoxItem as AriaListBoxItem,
@@ -11,10 +12,11 @@ import { Text } from '../Content/Content';
 
 export function ListBox<T extends object>({
     children,
+    className,
     ...props
 }: ListBoxProps<T>) {
     return (
-        <AriaListBox className={styles.listbox} {...props}>
+        <AriaListBox className={clsx(styles.listbox, className)} {...props}>
             {children}
         </AriaListBox>
     );

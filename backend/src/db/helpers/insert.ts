@@ -1,9 +1,9 @@
 import type { PoolClient } from 'pg';
 
 import { pool } from '../client.ts';
-import type { DB } from '../db.js';
 import { createFromClause } from '../fragments/from.ts';
 import { createWhereClause } from '../fragments/where.ts';
+import type { Table } from '../tables.ts';
 import type { InsertableRow, SelectableRow, Inserted } from '../types.ts';
 
 /**
@@ -19,18 +19,22 @@ import type { InsertableRow, SelectableRow, Inserted } from '../types.ts';
  * @returns Inserted or existing row plus `inserted` flag.
  * @throws If no row is inserted or found.
  */
-export async function insert<TTable extends keyof DB>(
+export async function insert<TTable extends keyof Table>(
     table: TTable,
     args: {
-        record: InsertableRow<DB[TTable]>;
-        conflictKeys?: readonly (keyof InsertableRow<DB[TTable]>)[] | undefined;
-        returnKeys?: readonly (keyof SelectableRow<DB[TTable]>)[] | undefined;
+        record: InsertableRow<Table[TTable]>;
+        conflictKeys?:
+            | readonly (keyof InsertableRow<Table[TTable]>)[]
+            | undefined;
+        returnKeys?:
+            | readonly (keyof SelectableRow<Table[TTable]>)[]
+            | undefined;
         client?: PoolClient | undefined;
     },
-): Promise<SelectableRow<DB[TTable]> & Inserted> {
+): Promise<SelectableRow<Table[TTable]> & Inserted> {
     const { record, conflictKeys = [], returnKeys = [], client } = args;
 
-    const keys = Object.keys(record) as (keyof InsertableRow<DB[TTable]>)[];
+    const keys = Object.keys(record) as (keyof InsertableRow<Table[TTable]>)[];
     const values = keys.map((k) => record[k]);
     const columns = keys.join(', ');
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
@@ -43,10 +47,16 @@ export async function insert<TTable extends keyof DB>(
         ? `RETURNING ${returnString}`
         : 'RETURNING 1';
 
-    const where = conflictKeys.reduce((acc, key) => {
-        acc[key] = record[key];
-        return acc;
-    }, {} as Record<(typeof conflictKeys)[number], InsertableRow<DB[TTable]>[keyof InsertableRow<DB[TTable]>]>);
+    const where = conflictKeys.reduce(
+        (acc, key) => {
+            acc[key] = record[key];
+            return acc;
+        },
+        {} as Record<
+            (typeof conflictKeys)[number],
+            InsertableRow<Table[TTable]>[keyof InsertableRow<Table[TTable]>]
+        >,
+    );
 
     const { clause: whereClause, values: whereValues } = createWhereClause(
         where,
@@ -63,20 +73,19 @@ export async function insert<TTable extends keyof DB>(
             ${returningClause}
         )
         SELECT ${returnKeys}${
-        returnKeys.length ? ',' : ''
-    } TRUE AS inserted FROM ins
+            returnKeys.length ? ',' : ''
+        } TRUE AS inserted FROM ins
         UNION ALL
-        SELECT ${returnKeys}${returnKeys.length ? ',' : ''} FALSE AS inserted
+        SELECT ${returnString}${returnKeys.length ? ',' : ''} FALSE AS inserted
         ${fromClause}
         ${whereClause}
         LIMIT 1;
     `;
 
     const executor = client ?? pool;
-    const { rows } = await executor.query<SelectableRow<DB[TTable]> & Inserted>(
-        query,
-        [...values, ...whereValues],
-    );
+    const { rows } = await executor.query<
+        SelectableRow<Table[TTable]> & Inserted
+    >(query, [...values, ...whereValues]);
 
     if (!rows[0]) {
         throw new Error(
@@ -94,14 +103,14 @@ export async function insert<TTable extends keyof DB>(
  * @param conflictKeys - Columns that trigger conflict handling.
  * @returns Function that runs the insert with optional client.
  */
-export function makeInsert<TTable extends keyof DB>(
+export function makeInsert<TTable extends keyof Table>(
     table: TTable,
-    conflictKeys?: (keyof InsertableRow<DB[TTable]>)[] | undefined,
+    conflictKeys?: (keyof InsertableRow<Table[TTable]>)[] | undefined,
 ) {
     return async (args: {
-        record: InsertableRow<DB[TTable]>;
+        record: InsertableRow<Table[TTable]>;
         client?: PoolClient | undefined;
-    }): Promise<SelectableRow<DB[TTable]> & Inserted> => {
+    }): Promise<SelectableRow<Table[TTable]> & Inserted> => {
         return insert(table, {
             ...args,
             conflictKeys,
@@ -117,15 +126,17 @@ export function makeInsert<TTable extends keyof DB>(
  * @param conflictKeys - Columns that trigger conflict handling.
  * @returns Function that runs the insert with optional return keys/client.
  */
-export function makeInsertReturn<TTable extends keyof DB>(
+export function makeInsertReturn<TTable extends keyof Table>(
     table: TTable,
-    conflictKeys?: (keyof InsertableRow<DB[TTable]>)[] | undefined,
+    conflictKeys?: (keyof InsertableRow<Table[TTable]>)[] | undefined,
 ) {
     return async (args: {
-        record: InsertableRow<DB[TTable]>;
-        returnKeys?: readonly (keyof SelectableRow<DB[TTable]>)[] | undefined;
+        record: InsertableRow<Table[TTable]>;
+        returnKeys?:
+            | readonly (keyof SelectableRow<Table[TTable]>)[]
+            | undefined;
         client?: PoolClient | undefined;
-    }): Promise<SelectableRow<DB[TTable]> & Inserted> => {
+    }): Promise<SelectableRow<Table[TTable]> & Inserted> => {
         return insert(table, {
             ...args,
             conflictKeys,

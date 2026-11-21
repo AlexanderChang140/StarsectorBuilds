@@ -1,4 +1,4 @@
-import type { HullmodVersionDTO } from '@shared/hullmods/types';
+import type { HullmodVersionFull } from '@starsector-builds/shared/hullmods/types';
 
 import {
     HULLMOD_TABLE_ROW_KEYS,
@@ -39,6 +39,6 @@ const KEY_ORDER = [
     'cost_destroyer',
     'cost_cruiser',
     'cost_capital',
-] as const satisfies (keyof HullmodVersionDTO)[];
+] as const satisfies (keyof HullmodVersionFull)[];
 
 const displayMap = humanizeKeys(KEY_ORDER);

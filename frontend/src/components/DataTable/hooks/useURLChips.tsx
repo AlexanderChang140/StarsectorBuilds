@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@shared/types';
+import type { PaginatedResponse } from '@starsector-builds/shared/types';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 

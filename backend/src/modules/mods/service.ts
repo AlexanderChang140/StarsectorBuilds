@@ -1,15 +1,19 @@
-import type { ModDTO, ModVersionDTO } from '@shared/mods/types.ts';
-import type { Projection } from '@shared/types.ts';
+import type { ModDTO, ModVersionDTO } from '@starsector-builds/shared/mods/types';
+import type { Projection } from '@starsector-builds/shared/types';
 import type { PoolClient } from 'pg';
 
 import { MOD_COLUMNS, MOD_VERSION_FULL_COLUMNS } from './constants.ts';
 import { pool } from '../../db/client.ts';
-import type { DB } from '../../db/db.js';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
-    selectFullWithCount,
+    selectWithCount,
     type PaginatedResult,
 } from '../../db/helpers/select.ts';
+import type {
+    ModsRow,
+    ModVersionsFullRow,
+    ModVersionsRow,
+} from '../../db/tables.ts';
 import type { Options } from '../../db/types.ts';
 import {
     sanitizeAll,
@@ -20,11 +24,9 @@ import {
 } from '../../server/sanitize.ts';
 import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
 
-export async function fetchMods<
-    TSelection extends readonly (keyof DB['mods'])[],
->(
+export async function fetchMods<TSelection extends readonly (keyof ModsRow)[]>(
     selection: TSelection,
-    options: Options<DB['mods']>,
+    options: Options<ModsRow>,
 ): Promise<PaginatedResult<Projection<ModDTO, TSelection>>> {
     const safeOptions = sanitizeAll(options, MOD_COLUMNS);
 
@@ -34,10 +36,10 @@ export async function fetchMods<
 }
 
 export async function fetchModVersions<
-    TSelection extends readonly (keyof DB['mod_versions_full'])[],
+    TSelection extends readonly (keyof ModVersionsFullRow)[],
 >(
     selection: TSelection,
-    options: Options<DB['mod_versions_full']>,
+    options: Options<ModVersionsFullRow>,
 ): Promise<PaginatedResult<Projection<ModVersionDTO, TSelection>>> {
     const safeOptions = sanitizeAll(options, MOD_VERSION_FULL_COLUMNS);
 
@@ -47,13 +49,13 @@ export async function fetchModVersions<
 }
 
 export async function searchModsByDisplayName<
-    TSelection extends readonly (keyof DB['mods'])[],
+    TSelection extends readonly (keyof ModsRow)[],
 >(
     displayName: string,
     selection: TSelection,
-    options: Options<DB['mods']>,
+    options: Options<ModsRow>,
 ): Promise<PaginatedResult<Projection<ModDTO, TSelection>>> {
-    const safeOptions: Options<DB['mods']> = {
+    const safeOptions: Options<ModsRow> = {
         filter: {
             ...sanitizeFilter(options.filter, MOD_COLUMNS),
             display_name: {
@@ -72,11 +74,11 @@ export async function searchModsByDisplayName<
     return result;
 }
 
-export async function getMods<TSelection extends readonly (keyof DB['mods'])[]>(
+export async function getMods<TSelection extends readonly (keyof ModsRow)[]>(
     selection: TSelection,
-    options: Options<DB['mods']>,
+    options: Options<ModsRow>,
 ) {
-    const result = await selectFullWithCount('mods', selection, options);
+    const result = await selectWithCount('mods', selection, options);
     assertProjectionRowsNonNullableKeys(result.rows, ['id', 'code']);
     return { rows: result.rows, total: result.total };
 }
@@ -89,12 +91,12 @@ const REQUIRED_MOD_VERSION_KEYS = [
     'data_changed',
     'mod_id',
     'mod_code',
-] as const satisfies readonly (keyof DB['mod_versions_full'])[];
+] as const satisfies readonly (keyof ModVersionsFullRow)[];
 
 export async function getModVersionsFull<
-    TSelection extends readonly (keyof DB['mod_versions_full'])[],
->(selection: TSelection, options: Options<DB['mod_versions_full']>) {
-    const result = await selectFullWithCount(
+    TSelection extends readonly (keyof ModVersionsFullRow)[],
+>(selection: TSelection, options: Options<ModVersionsFullRow>) {
+    const result = await selectWithCount(
         'mod_versions_full',
         selection,
         options,
@@ -108,7 +110,7 @@ export async function getModVersion(
     major: number,
     minor: number,
     patch: string,
-): Promise<DB['mod_versions'] | null> {
+): Promise<ModVersionsRow | null> {
     const query = `
         SELECT 
             id
@@ -124,7 +126,7 @@ export async function getModVersion(
             AND patch = $4
         LIMIT 1;
     `;
-    const result = await pool.query<DB['mod_versions']>(query, [
+    const result = await pool.query<ModVersionsRow>(query, [
         code,
         major,
         minor,

@@ -12,6 +12,7 @@ export type PreparedHullmodData = {
     display_name: string | null;
     manufacturer: string | null;
     hullmod_desc: string | null;
+    hullmod_desc_s_mod: string | null;
     base_value: number | null;
     cost_frigate: number;
     cost_destroyer: number;

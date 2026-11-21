@@ -1,232 +1,127 @@
-import type { ShipVersionDTO, ShipWeaponSlotDTO } from '@shared/ships/types.ts';
-import type { Projection } from '@shared/types.ts';
+import {
+    SHIP_VERSION_FULL_KEYS,
+    SHIP_WEAPON_SLOT_FULL_KEYS,
+    ShipVersionFullSchema,
+    ShipWeaponSlotFullSchema,
+    type ShipVersionFull,
+    type ShipWeaponSlotFull,
+} from '@starsector-builds/shared/ships/schema';
+import type { Projection } from '@starsector-builds/shared/types';
 
-import { SHIP_VERSIONS_FULL_COLUMNS } from './constants.ts';
-import type { DB } from '../../db/db.js';
+import { ROW_LIMIT } from '../../config/database.ts';
 import { makeInsertReturn } from '../../db/helpers/insert.ts';
 import {
-    makeSelect,
     makeSelectCodeIdRecord,
-    makeSelectFull,
     makeSelectOne,
-    selectFull,
-    selectFullWithCount,
+    select,
+    selectWithCount,
     type PaginatedResult,
 } from '../../db/helpers/select.ts';
-import type { Options } from '../../db/types.ts';
+import type {
+    ShipVersionsFullRow,
+    ShipWeaponSlotsFullRow,
+} from '../../db/tables.ts';
+import type { Options, Selection } from '../../db/types.ts';
+import { NotFoundError } from '../../server/error.ts';
 import {
     sanitizeFilter,
     sanitizeLimit,
     sanitizeOffset,
     sanitizeOrder,
 } from '../../server/sanitize.ts';
-import { assertProjectionRowsNonNullableKeys } from '../../utils/assert.ts';
+import { parseProjectionArray } from '../../utils/zod.ts';
 
-export async function fetchShipVersions<
-    TSelection extends readonly (keyof DB['ship_versions_full'])[],
+export async function fetchShipVersionsFull<
+    TSelection extends Selection<ShipVersionsFullRow>,
 >(
     selection: TSelection,
-    options?: Options<DB['ship_versions_full']>,
-): Promise<PaginatedResult<Projection<ShipVersionDTO, TSelection>>> {
+    options?: Options<ShipVersionsFullRow>,
+): Promise<PaginatedResult<Projection<ShipVersionFull, TSelection>>> {
     const safeOptions = {
-        filter: sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
+        filter: sanitizeFilter(options?.filter, SHIP_VERSION_FULL_KEYS),
         order: sanitizeOrder(options?.order),
         limit: sanitizeLimit(options?.limit, 20),
         offset: sanitizeOffset(options?.offset),
         client: options?.client,
     };
 
-    const result = await getShipVersionsFullWithCount(selection, safeOptions);
-
-    return result;
-}
-
-export async function fetchShipVersionsById<
-    TSelection extends readonly (keyof DB['ship_versions_full'])[],
->(
-    shipId: number,
-    selection: TSelection,
-    options?: Options<DB['ship_versions_full']>,
-): Promise<PaginatedResult<Projection<ShipVersionDTO, TSelection>>> {
-    const safeOptions = {
-        filter: {
-            ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
-            ship_id: { values: [shipId] },
-        },
-        order: sanitizeOrder(options?.order),
-        limit: sanitizeLimit(options?.limit, 20),
-        offset: sanitizeOffset(options?.offset),
-        client: options?.client,
-    };
-
-    const result = await getShipVersionsFullWithCount(selection, safeOptions);
-
-    return result;
-}
-
-export async function fetchShipVersionById<
-    TSelection extends readonly (keyof DB['ship_versions_full'])[],
->(
-    shipVersionId: number,
-    selection: TSelection,
-    options?: Options<DB['ship_versions_full']>,
-): Promise<Projection<ShipVersionDTO, TSelection> | null> {
-    const safeOptions = {
-        filter: {
-            ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
-            ship_version_id: { values: [shipVersionId] },
-        },
-        limit: 1,
-        client: options?.client,
-    };
-
-    const result = await getShipVersionsFull(selection, safeOptions);
-
-    return result[0] ?? null;
-}
-
-export async function fetchLatestShipVersionById<
-    TSelection extends readonly (keyof DB['ship_versions_full'])[],
->(
-    shipId: number,
-    selection: TSelection,
-    options?: Options<DB['ship_versions_full']>,
-): Promise<Projection<ShipVersionDTO, TSelection> | null> {
-    const safeOptions = {
-        filter: {
-            ...sanitizeFilter(options?.filter, SHIP_VERSIONS_FULL_COLUMNS),
-            ship_id: { values: [shipId] },
-        },
-        limit: 1,
-        client: options?.client,
-    };
-
-    const result = await getShipVersionsFull(selection, safeOptions);
-
-    return result[0] ?? null;
-}
-
-export async function fetchShipInstanceId(shipVersionId: number) {
-    const result = await getShipInstanceId({ where: { id: shipVersionId } });
-    return result[0]?.ship_instance_id ?? null;
-}
-
-export async function fetchShipWeaponSlots(
-    shipInstanceId: number,
-): Promise<ShipWeaponSlotDTO[]> {
-    const options = {
-        filter: { ship_instance_id: { values: [shipInstanceId] } },
-    };
-
-    return getShipWeaponSlotsFull(SHIP_WEAPON_SLOT_FULL_COLUMNS, options);
-}
-
-export const getShipInstanceId = makeSelect(
-    'ship_versions',
-    ['ship_instance_id'],
-    ['id'],
-);
-
-const SHIP_WEAPON_SLOT_FULL_COLUMNS = [
-    'angle',
-    'arc',
-    'weapon_slot_id',
-    'weapon_slot_code',
-    'ship_instance_id',
-    'mount_type',
-    'mount_type_id',
-    'weapon_size',
-    'weapon_size_id',
-    'weapon_type',
-    'weapon_type_id',
-    'x',
-    'y',
-] as const satisfies readonly (keyof DB['ship_weapon_slots_full'])[];
-
-export async function getShipWeaponSlotsFull<
-    TSelection extends readonly (keyof DB['ship_weapon_slots_full'])[],
->(selection: TSelection, options?: Options<DB['ship_weapon_slots_full']>) {
-    const result = await selectFull(
-        'ship_weapon_slots_full',
-        selection,
-        options,
-    );
-    assertProjectionRowsNonNullableKeys(result, SHIP_WEAPON_SLOT_FULL_COLUMNS);
-    return result;
-}
-
-const SHIP_WEAPON_SLOT_COLUMNS = [
-    'angle',
-    'arc',
-    'code',
-    'id',
-    'mount_type_id',
-    'ship_instance_id',
-    'weapon_size_id',
-    'weapon_type_id',
-    'x',
-    'y',
-] as const satisfies readonly (keyof DB['ship_weapon_slots'])[];
-
-export const getShipWeaponSlots = makeSelectFull(
-    'ship_weapon_slots',
-    SHIP_WEAPON_SLOT_COLUMNS,
-);
-
-const REQUIRED_SHIP_VERSION_KEYS = [
-    'mod_id',
-    'mod_version_id',
-    'ship_id',
-    'ship_code',
-    'ship_version_id',
-    'ship_instance_id',
-    'ship_version_id',
-    'ship_size_id',
-    'ship_size',
-    'shield_type_id',
-    'shield_type',
-    'data_hash',
-    'major',
-    'minor',
-    'patch',
-    'data_hash',
-    'x',
-    'y',
-] satisfies readonly (keyof DB['ship_versions_full'])[];
-
-export async function getShipVersionsFull<
-    TSelection extends readonly (keyof DB['ship_versions_full'])[],
->(selection: TSelection, options?: Options<DB['ship_versions_full']>) {
-    const result = await selectFull('ship_versions_full', selection, options);
-    assertProjectionRowsNonNullableKeys(result, REQUIRED_SHIP_VERSION_KEYS);
-    return result;
-}
-
-export async function getShipVersionsFullWithCount<
-    TSelection extends readonly (keyof DB['ship_versions_full'])[],
->(selection: TSelection, options?: Options<DB['ship_versions_full']>) {
-    const result = await selectFullWithCount(
+    const result = await selectWithCount(
         'ship_versions_full',
         selection,
-        options,
+        safeOptions,
     );
-    assertProjectionRowsNonNullableKeys(
+    const rows = parseProjectionArray(
         result.rows,
-        REQUIRED_SHIP_VERSION_KEYS,
+        selection,
+        ShipVersionFullSchema,
     );
-    return { rows: result.rows, total: result.total };
+
+    return { rows, total: result.total };
 }
 
-export const getShipId = makeSelectOne<'ships', ['id'], 'mod_id' | 'code'>(
-    'ships',
-    ['id'],
-);
+export async function fetchShipVersionFull<
+    TSelection extends Selection<ShipVersionsFullRow>,
+>(
+    selection: TSelection,
+    options?: Options<ShipVersionsFullRow>,
+): Promise<Projection<ShipVersionFull, TSelection>> {
+    const safeOptions = {
+        filter: sanitizeFilter(options?.filter, SHIP_VERSION_FULL_KEYS),
+        order: sanitizeOrder(options?.order),
+        limit: 1,
+        client: options?.client,
+    };
 
-export const getMountTypes = makeSelectCodeIdRecord('mount_types');
+    const result = await select('ship_versions_full', selection, safeOptions);
+    const parsed = parseProjectionArray(
+        result,
+        selection,
+        ShipVersionFullSchema,
+    );
+    const data = parsed[0];
 
-export const getShieldTypes = makeSelectCodeIdRecord('shield_types');
+    if (data == null) {
+        throw new NotFoundError('No ship version found');
+    }
 
-export const getShipSizes = makeSelectCodeIdRecord('ship_sizes');
+    return data;
+}
+
+export async function fetchShipWeaponSlotsFull<
+    TSelection extends Selection<ShipWeaponSlotsFullRow>,
+>(
+    selection: TSelection,
+    options?: Options<ShipWeaponSlotsFullRow>,
+): Promise<PaginatedResult<Projection<ShipWeaponSlotFull, TSelection>>> {
+    const safeOptions = {
+        filter: sanitizeFilter(options?.filter, SHIP_WEAPON_SLOT_FULL_KEYS),
+        order: sanitizeOrder(options?.order),
+        limit: sanitizeLimit(options?.limit, ROW_LIMIT),
+        offset: sanitizeOffset(options?.offset),
+        client: options?.client,
+    };
+
+    const result = await selectWithCount(
+        'ship_weapon_slots_full',
+        selection,
+        safeOptions,
+    );
+    const parsed = parseProjectionArray(
+        result.rows,
+        selection,
+        ShipWeaponSlotFullSchema,
+    );
+
+    return { rows: parsed, total: result.total };
+}
+
+export const selectShipId = makeSelectOne('ships', ['id']);
+
+export const selectMountTypes = makeSelectCodeIdRecord('mount_types');
+
+export const selectShieldTypes = makeSelectCodeIdRecord('shield_types');
+
+export const selectShipSizes = makeSelectCodeIdRecord('ship_sizes');
 
 export const insertShip = makeInsertReturn('ships', ['mod_id', 'code']);
 

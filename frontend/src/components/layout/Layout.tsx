@@ -1,12 +1,13 @@
 import { Link, Outlet } from 'react-router';
 
-import useAuth from '@/hooks/useAuth';
+import useAuth from '@/modules/auth/hooks/useAuth';
 
 import layoutStyles from './Layout.module.css';
 import navbarStyles from './Navbar.module.css';
 
 export default function Layout() {
     const { user, logout } = useAuth();
+    const username = user?.username;
 
     return (
         <div className={layoutStyles.layout}>
@@ -24,7 +25,7 @@ export default function Layout() {
                             {!user && <Link to="/auth">Login</Link>}{' '}
                             {user && (
                                 <>
-                                    <span>{user}</span>
+                                    <span>{username}</span>
                                     <button onClick={() => logout()}>
                                         Logout
                                     </button>

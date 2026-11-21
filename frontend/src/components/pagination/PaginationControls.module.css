@@ -1,3 +1,10 @@
+.pagination {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    place-items: center;
+}
+
 .controls {
     display: flex;
     gap: 1rem;
@@ -5,6 +12,12 @@
 
 .current-page-index {
     font-weight: bold;
+}
+
+.page-index {
+    outline: inherit;
+    background: none;
+    border: none;
 }
 
 .go-to-page {

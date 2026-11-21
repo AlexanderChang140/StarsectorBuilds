@@ -1,16 +1,18 @@
 import type { PoolClient } from 'pg';
 
 import type { ModInfo } from './importMod.ts';
-import { assertDefined } from "../../../utils/assert.ts";
+import { createKeyedFilter } from '../../../db/helpers/filter.ts';
+import { assertDefined } from '../../../utils/assert.ts';
+import { logger } from '../../../utils/logger.ts';
 import { getHullmodId } from '../../hullmods/service.ts';
 import {
-    getShipId,
+    selectShipId,
     insertBuiltInHullmod,
     insertBuiltInWeapon,
     insertBuiltInWing,
 } from '../../ships/service.ts';
-import type { PreparedBuiltIn } from '../../ships/types.ts';
 import { getWeaponId } from '../../weapons/service.ts';
+import type { PreparedBuiltIn } from '../types/ships.ts';
 
 export async function importBuiltIn(
     modInfo: ModInfo,
@@ -34,7 +36,7 @@ export async function importBuiltIn(
                 builtIn.preparedBuiltInWeapons,
             )) {
                 const weapon = await getWeaponId({
-                    where: { code: weaponCode },
+                    where: createKeyedFilter('code', weaponCode),
                     client,
                 });
 
@@ -55,7 +57,7 @@ export async function importBuiltIn(
 
             for (const hullmodCode of builtIn.preparedBuiltInHullmods) {
                 const hullmod = await getHullmodId({
-                    where: { code: hullmodCode },
+                    where: createKeyedFilter('code', hullmodCode),
                     client,
                 });
 
@@ -83,8 +85,11 @@ export async function importBuiltIn(
                     `Failed to find ship code for ${wingCode}`,
                 );
 
-                const wing = await getShipId({
-                    where: { code: wingShipCode, mod_id: modInfo.modId },
+                const wing = await selectShipId({
+                    where: {
+                        ...createKeyedFilter('code', wingShipCode),
+                        ...createKeyedFilter('mod_id', modInfo.modId),
+                    },
                     client,
                 });
 
@@ -103,15 +108,14 @@ export async function importBuiltIn(
                 });
             }
         } catch (err) {
-            const formatted = new Error(
+            throw new Error(
                 `Failed to insert to built-in items for: ${shipCode}`,
                 {
                     cause: err,
                 },
             );
-            console.log(formatted);
         }
     }
-    console.log(`Successfully imported built-in from: ${modInfo.modCode}`);
+    logger.info(`Successfully imported built-in from: ${modInfo.modCode}`);
     return dataChanged;
 }

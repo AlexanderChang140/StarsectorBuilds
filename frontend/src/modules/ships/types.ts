@@ -1,5 +1,5 @@
-import type { ShipVersionDTO } from '@shared/ships/types';
-import type { Projection } from '@shared/types';
+import type { ShipVersionFull } from '@starsector-builds/shared/ships/schema';
+import type { Projection } from '@starsector-builds/shared/types';
 
 export const SHIP_TABLE_ROW_KEYS = [
     'acceleration',
@@ -27,7 +27,7 @@ export const SHIP_TABLE_ROW_KEYS = [
     'mod_id',
     'mod_name',
     'mod_version_id',
-    'op_cost',
+    'op',
     'peak_cr_sec',
     'phase_cost',
     'phase_upkeep',
@@ -43,9 +43,9 @@ export const SHIP_TABLE_ROW_KEYS = [
     'ship_system',
     'ship_version_id',
     'turn_acceleration',
-] as const satisfies readonly (keyof ShipVersionDTO)[];
+] as const satisfies readonly (keyof ShipVersionFull)[];
 
 export type ShipTableRows = Projection<
-    ShipVersionDTO,
+    ShipVersionFull,
     typeof SHIP_TABLE_ROW_KEYS
 >;

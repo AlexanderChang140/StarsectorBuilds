@@ -1,20 +1,33 @@
 {
-  "type": "module",
-  "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
-    "dev:backend": "npm run dev --prefix backend",
-    "dev:frontend": "npm run dev --prefix frontend"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
-  },
-  "private": true,
-  "workspaces": [
-    "frontend",
-    "backend",
-    "shared"
-  ],
-  "dependencies": {
-    "clsx": "^2.1.1"
-  }
+    "type": "module",
+    "scripts": {
+        "lint": "npm run lint --workspace=frontend",
+        "typecheck": "npx tsc --build --noEmit",
+        "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+        "dev:backend": "npm run dev --prefix backend",
+        "dev:frontend": "npm run dev --prefix frontend",
+        "db:setup": "npm run db:setup --workspace=backend",
+        "db:gen": "npm run db:gen --workspace=backend",
+        "db:reset": "npm run db:cleanup --workspace=backend",
+        "import:mod": "npm run import:mod --workspace=backend"
+    },
+    "devDependencies": {
+        "concurrently": "^9.2.1"
+    },
+    "private": true,
+    "workspaces": [
+        "frontend",
+        "backend",
+        "shared"
+    ],
+    "dependencies": {
+        "clsx": "^2.1.1"
+    },
+    "allowScripts": {
+        "argon2@0.44.0": true,
+        "esbuild@0.27.2": true,
+        "esbuild@0.28.1": true,
+        "sharp@0.34.5": true,
+        "unrs-resolver@1.11.1": true
+    }
 }

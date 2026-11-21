@@ -2,14 +2,41 @@ CREATE VIEW ship_versions_full AS
 WITH ship_meta AS (
     SELECT
         si.id AS ship_instance_id,
-        array_agg(DISTINCT sh.code) FILTER (WHERE sh.code IS NOT NULL) AS hints,
-        array_agg(DISTINCT st.code) FILTER (WHERE st.code IS NOT NULL) AS tags
+        COALESCE(array_agg(DISTINCT sh.code) FILTER (WHERE sh.code IS NOT NULL), '{}') AS hints,
+        COALESCE(array_agg(DISTINCT st.code) FILTER (WHERE st.code IS NOT NULL), '{}')AS tags
     FROM ship_instances si
     LEFT JOIN ship_hint_junction shj ON shj.ship_instance_id = si.id
     LEFT JOIN ship_hints sh ON shj.hint_id = sh.id
     LEFT JOIN ship_tag_junction stj ON stj.ship_instance_id = si.id
     LEFT JOIN ship_tags st ON stj.tag_id = st.id
     GROUP BY si.id
+),
+ship_built_in_hullmods AS (
+    SELECT
+        sv.id AS ship_version_id,
+        COALESCE(array_agg(bih.hullmod_id) FILTER (WHERE bih.hullmod_id IS NOT NULL), '{}') AS built_in_hullmods
+    FROM ship_versions sv
+    LEFT JOIN built_in_hullmods bih ON sv.ship_instance_id = bih.ship_instance_id
+    GROUP BY sv.id
+),
+ship_built_in_weapons AS (
+    SELECT
+        sv.id AS ship_version_id,
+        COALESCE(array_agg(ARRAY[sws.id, wv.id]) FILTER (WHERE sws.id IS NOT NULL AND wv.id IS NOT NULL), '{}') AS built_in_weapons
+    FROM ship_versions sv
+    LEFT JOIN built_in_weapons bi ON sv.ship_instance_id = bi.ship_instance_id
+    LEFT JOIN ship_weapon_slots sws ON bi.ship_instance_id = sws.ship_instance_id AND bi.slot_code = sws.code
+    LEFT JOIN weapon_versions wv ON bi.weapon_id = wv.weapon_id
+    GROUP BY sv.id
+),
+ship_built_in_wings AS (
+    SELECT
+        sv.id AS ship_version_id,
+        COALESCE(array_agg(ARRAY[wv.id, bi.num_wings]) FILTER (WHERE wv.id IS NOT NULL), '{}') AS built_in_wings
+    FROM ship_versions sv
+    LEFT JOIN built_in_wings bi ON sv.ship_instance_id = bi.ship_instance_id
+    LEFT JOIN wing_versions wv ON bi.ship_id = wv.ship_id AND wv.mod_version_id = sv.mod_version_id
+    GROUP BY sv.id
 )
 SELECT
     sv.id AS ship_version_id,
@@ -40,7 +67,7 @@ SELECT
     ss.armor_rating,
     ss.max_flux,
     ss.flux_dissipation,
-    ss.op_cost,
+    ss.op,
     ss.fighter_bays,
     ss.max_speed,
     ss.acceleration,
@@ -78,7 +105,11 @@ SELECT
     ps.upkeep AS phase_upkeep,
 
     sm.hints,
-    sm.tags
+    sm.tags,
+
+    sbih.built_in_hullmods,
+    sbiw.built_in_weapons,
+    sbiwi.built_in_wings
 FROM ship_versions sv
 LEFT JOIN ships s ON sv.ship_id = s.id
 LEFT JOIN images i ON sv.ship_image_id = i.id
@@ -97,6 +128,9 @@ LEFT JOIN ship_positions spo ON si.id = spo.ship_instance_id
 LEFT JOIN shield_stats sst ON si.id = sst.ship_instance_id
 LEFT JOIN phase_stats ps ON si.id = ps.ship_instance_id
 LEFT JOIN ship_meta sm ON si.id = sm.ship_instance_id
+LEFT JOIN ship_built_in_hullmods sbih ON sv.id = sbih.ship_version_id
+LEFT JOIN ship_built_in_weapons sbiw ON sv.id = sbiw.ship_version_id
+LEFT JOIN ship_built_in_wings sbiwi ON sv.id = sbiwi.ship_version_id
 WHERE NOT ssi.code = 'FIGHTER'
 AND NOT (coalesce(sm.hints, '{}') && ARRAY['HIDE_IN_CODEX', 'MODULE', 'STATION']);
 
@@ -120,4 +154,4 @@ FROM ship_weapon_slots sws
 LEFT JOIN weapon_sizes ws ON sws.weapon_size_id = ws.id
 LEFT JOIN weapon_types wt ON sws.weapon_type_id = wt.id
 LEFT JOIN mount_types mt ON sws.mount_type_id = mt.id
-WHERE ws.code NOT IN ('LAUNCH_BAY', 'DECORATIVE') AND mt.code NOT IN ('HIDDEN');
+WHERE ws.code NOT IN ('DECORATIVE');

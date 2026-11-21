@@ -2,13 +2,40 @@
     --navbar-height: 3.5rem;
     --sidebar-width: 10%;
 
+    /* Font */
+    --default-font: monospace;
+
     /* Colors */
+    --color-dark-cyan: #16414d;
+    --color-muted-cyan: #477b8d;
+    --color-sky-blue: #cbf5ff;
+    --color-gold: #ffd200;
+    --color-lime-green: #a2ed7f;
+    --color-forest-green: #2e4629;
+    --color-charcoal: #121212;
+    --lotus-blue: #89c6e5;
+
+    /* Colorings */
     --bg-color: #2c2c2c;
     --border-color: #ff1919;
-    --lotus-blue: #89c6e5;
-    --ballistic-color: #eb0;
-    --energy-color: #7dc2ff;
-    --missile-color: #4c4;
+    --text1-color: var(--color-sky-blue);
+    --text2-color: var(--color-gold);
+    --button1-color: var(--color-dark-cyan);
+    --button1-hover-color: var(--color-muted-cyan);
+    --ship-builder-bg-color-light: #071417;
+    --ship-builder-bg-color-dark: #051013;
+    --ship-builder-bg-color-grid: #0b222a;
+    --s-mod-color-light: var(--color-lime-green);
+    --s-mod-color-dark: var(--color-forest-green);
+    --header-color: var(--color-dark-cyan);
+    --positive-color: #9bff00;
+    --negative-color: #ff6400;
+    --build-in-color: var(--color-lime-green);
+
+    /* Weapon colorings */
+    --ballistic-color: #dfbc01;
+    --energy-color: #3dafdf;
+    --missile-color: #97f901;
     --hybrid-color: #f80;
     --composite-color: #ad4;
     --synergy-color: #2ee;

@@ -1,14 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import './Auth.css';
 import { useNavigate } from 'react-router';
 
-import useAuth from '@/hooks/useAuth';
+import useAuth from '@/modules/auth/hooks/useAuth';
+import './Auth.css';
 
 type Auth = 'login' | 'signup';
 
 export default function Authentication() {
+    const [identifier, setIdentifier] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
     const [auth, setAuth] = useState<Auth>('login');
     const [error, setError] = useState('');
 
@@ -18,82 +20,116 @@ export default function Authentication() {
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
             navigate('/');
-            return;
         }
     }, [isAuthenticated, isLoading, navigate]);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setError('');
 
         try {
-            if (username === '' || password === '') {
-                throw new Error('Username and password required');
-            }
-
-            if (auth === 'login') {
-                await login(username, password);
+            if (auth === 'login' && identifier && password) {
+                await login(identifier, password);
+            } else if (auth === 'signup' && username && email) {
+                await signup(username, password, email);
             } else {
-                await signup(username, password);
+                throw new Error('All fields are required');
             }
         } catch (err) {
             setError((err as Error).message);
         }
     };
 
-    const buttonName = auth === 'login' ? 'Login' : 'Signup';
-
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <div className="auth-loading">Loading session...</div>;
     }
 
     return (
-        <div className="auth">
-            <div>
-                <button
-                    onClick={() => {
-                        setAuth('login');
-                        setError('');
-                    }}
-                    disabled={isLoading}
-                >
-                    Login
-                </button>
-                <button
-                    onClick={() => {
-                        setAuth('signup');
-                        setError('');
-                    }}
-                    disabled={isLoading}
-                >
-                    Signup
-                </button>
-            </div>
+        <div className="auth-container">
+            <div className="auth-card">
+                <div className="auth-tabs">
+                    <button
+                        className={`auth-tab ${auth === 'login' ? 'active' : ''}`}
+                        onClick={() => {
+                            setAuth('login');
+                            setError('');
+                        }}
+                        type="button"
+                    >
+                        Login
+                    </button>
+                    <button
+                        className={`auth-tab ${auth === 'signup' ? 'active' : ''}`}
+                        onClick={() => {
+                            setAuth('signup');
+                            setError('');
+                        }}
+                        type="button"
+                    >
+                        Signup
+                    </button>
+                </div>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <input
-                        name="username"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <input
-                        name="password"
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                {error !== '' && (
-                    <div style={{ color: 'red', fontSize: 12 }}>{error}</div>
-                )}
-                <button type="submit" disabled={isLoading}>
-                    {isLoading ? 'Loading...' : buttonName}
-                </button>
-            </form>
+                <form onSubmit={handleSubmit} className="auth-form">
+                    {auth === 'login' && (
+                        <div className="input-group">
+                            <input
+                                name="identifier"
+                                placeholder="Username or email"
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
+                                autoComplete="username"
+                            />
+                        </div>
+                    )}
+
+                    {auth === 'signup' && (
+                        <div className="input-group">
+                            <input
+                                name="username"
+                                placeholder="Username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                autoComplete="username"
+                            />
+                        </div>
+                    )}
+
+                    {auth === 'signup' && (
+                        <div className="input-group">
+                            <input
+                                name="email"
+                                type="email"
+                                placeholder="Email address"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                autoComplete="email"
+                            />
+                        </div>
+                    )}
+
+                    <div className="input-group">
+                        <input
+                            name="password"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoComplete={
+                                auth === 'login'
+                                    ? 'current-password'
+                                    : 'new-password'
+                            }
+                        />
+                    </div>
+
+                    {error && <div className="auth-error">{error}</div>}
+
+                    <button type="submit" className="auth-submit-btn">
+                        {auth === 'login' ? 'Sign In' : 'Create Account'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }

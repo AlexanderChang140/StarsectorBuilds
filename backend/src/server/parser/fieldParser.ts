@@ -1,8 +1,8 @@
 import type { ReqQuery } from '../../types/generic.ts';
 
-export function parseFields<T, TValidKeys extends readonly (keyof T)[]>(
+export function parseFields<T>(
     query: ReqQuery,
-    validKeys: TValidKeys,
+    validKeys: readonly (keyof T)[],
 ): (keyof T)[] {
     const validKeySet = new Set(validKeys);
     const rawFields = String(query.fields).split(',');

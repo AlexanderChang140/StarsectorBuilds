@@ -1,3 +1,4 @@
+import { WEAPON_VERSION_FULL_KEYS } from '@starsector-builds/shared/weapons/schema';
 import type { Request, Response } from 'express';
 
 import {
@@ -5,27 +6,25 @@ import {
     fetchWeaponVersions,
     fetchWeaponVersionsById,
 } from './service.ts';
-import { parseWeaponVersionFields } from './utils/fieldParser.ts';
 import { parseWeaponsVersionsFilter } from './utils/filterParser.ts';
 import { parseWeaponVersionsSort } from './utils/sortParser.ts';
+import { asyncHandler } from '../../server/asyncHandler.ts';
+import { BadRequestError, NotFoundError } from '../../server/error.ts';
+import { parseFields } from '../../server/parser/fieldParser.ts';
 import { parseLimit } from '../../server/parser/limitParser.ts';
 import { parseOffset } from '../../server/parser/offsetParser.ts';
+import { numberOrNull } from '../../utils/parse.ts';
 
-export async function getWeaponVersions(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
+export const getWeaponVersions = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
+        const weaponId = numberOrNull(req.params.weaponId);
 
-        const weaponId = Number(req.params.weaponId);
-
-        if (isNaN(weaponId)) {
-            res.status(400).json({ error: 'Invalid weapon ID' });
-            return;
+        if (weaponId == null) {
+            throw new BadRequestError('Invalid weapon ID');
         }
 
-        const fields = parseWeaponVersionFields(query);
+        const fields = parseFields(query, WEAPON_VERSION_FULL_KEYS);
         const filter = parseWeaponsVersionsFilter(query, ['weapon_id']);
         const order = parseWeaponVersionsSort(query);
         const limit = parseLimit(query);
@@ -37,52 +36,39 @@ export async function getWeaponVersions(
             fields,
             options,
         );
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
 
-export async function getLatestWeaponVersion(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
+        return res.json({ data: rows, meta: { total } });
+    },
+);
+
+export const getLatestWeaponVersion = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
+        const weaponId = numberOrNull(req.params.weaponId);
 
-        const weaponId = Number(req.params.weaponId);
-
-        if (isNaN(weaponId)) {
-            res.status(400).json({ error: 'Invalid weapon ID' });
-            return;
+        if (weaponId == null) {
+            throw new BadRequestError('Invalid weapon ID');
         }
 
-        const fields = parseWeaponVersionFields(query);
+        const fields = parseFields(query, WEAPON_VERSION_FULL_KEYS);
         const filter = parseWeaponsVersionsFilter(query, ['weapon_id']);
 
         const options = { filter };
         const result = await fetchWeaponVersionsById(weaponId, fields, options);
 
         if (result === null) {
-            res.status(400).json({ error: 'No weapon version found' });
-            return;
+            throw new NotFoundError('No weapon version found');
         }
-        res.json({ data: result });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
 
-export async function getAllWeaponVersions(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
+        return res.json({ data: result });
+    },
+);
+
+export const getAllWeaponVersions = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
 
-        const fields = parseWeaponVersionFields(query);
+        const fields = parseFields(query, WEAPON_VERSION_FULL_KEYS);
         const filter = parseWeaponsVersionsFilter(query);
         const order = parseWeaponVersionsSort(query);
         const limit = parseLimit(query);
@@ -90,37 +76,27 @@ export async function getAllWeaponVersions(
 
         const options = { filter, order, limit, offset };
         const { rows, total } = await fetchWeaponVersions(fields, options);
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
 
-export async function getWeaponVersion(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
+        return res.json({ data: rows, meta: { total } });
+    },
+);
+
+export const getWeaponVersion = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
+        const weaponVersionId = numberOrNull(req.params.weaponVersionId);
 
-        const weaponVersionId = Number(req.params.weaponVersionId);
-
-        if (isNaN(weaponVersionId)) {
-            res.status(400).json({ error: 'Invalid weapon version ID' });
-            return;
+        if (weaponVersionId == null) {
+            throw new BadRequestError('Invalid weapon version ID');
         }
 
-        const fields = parseWeaponVersionFields(query);
+        const fields = parseFields(query, WEAPON_VERSION_FULL_KEYS);
         const result = await fetchWeaponVersionById(weaponVersionId, fields);
 
-        if (result === null) {
-            res.status(400).json({ error: 'No weapon version found' });
-            return;
+        if (result == null) {
+            throw new NotFoundError('No weapon version found');
         }
-        res.json({ data: result });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
+
+        return res.json({ data: result });
+    },
+);

@@ -1,0 +1,28 @@
+import type { WingVersionsFullRow } from '../../db/tables.ts';
+
+export const WING_VERSIONS_FULL_COLUMNS = [
+    'wing_version_id',
+    'mod_version_id',
+    'major',
+    'minor',
+    'patch',
+    'mod_id',
+    'mod_name',
+    'wing_instance_id',
+    'fighter_ship_id',
+    'fighter_ship_code',
+    'data_hash',
+    'formation_id',
+    'formation',
+    'role_id',
+    'role',
+    'role_desc',
+    'op_cost',
+    'deployment_range',
+    'num_fighters',
+    'refit_time',
+    'base_value',
+    'vents',
+    'capacitors',
+    'tags',
+] as const satisfies readonly (keyof WingVersionsFullRow)[];

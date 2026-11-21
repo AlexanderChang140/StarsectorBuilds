@@ -1,6 +1,7 @@
 import type { PoolClient } from 'pg';
 
 import type { ModInfo } from './importMod.ts';
+import { logger } from '../../../utils/logger.ts';
 import { insertImage } from '../../images/service.ts';
 import type { PreparedImage } from '../../images/types.ts';
 import {
@@ -25,9 +26,9 @@ export async function importShipSystem(
 
     let dataChanged = false;
     for (const [code, shipSystem] of Object.entries(preparedFullShipSystems)) {
-        const preparedImage = preparedImages[code] ?? null;
-
         try {
+            const preparedImage = preparedImages[code] ?? null;
+
             const image = buildImage(
                 modInfo.modCode,
                 'ship_systems',
@@ -94,15 +95,11 @@ export async function importShipSystem(
                 });
             }
         } catch (err) {
-            const formatted = new Error(
-                `Failed to insert ship_system: ${code}`,
-                {
-                    cause: err,
-                },
-            );
-            console.log(formatted);
+            throw new Error(`Failed to insert ship_system: ${code}`, {
+                cause: err,
+            });
         }
     }
-    console.log(`Successfully imported ship systems from: ${modInfo.modCode}`);
+    logger.info(`Successfully imported ship systems from: ${modInfo.modCode}`);
     return dataChanged;
 }

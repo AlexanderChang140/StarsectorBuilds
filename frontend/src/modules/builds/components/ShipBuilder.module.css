@@ -1,0 +1,49 @@
+.ship-builder {
+    display: grid;
+    grid-template:
+        auto auto 1fr auto auto /
+        2fr 8fr auto auto;
+    grid-template-areas:
+        'name          versions overview  list'
+        'wings         canvas   overview  list'
+        'none          canvas   overview  list'
+        'weapon-groups canvas   overview  list'
+        'desc          desc     desc      desc';
+    gap: 1rem;
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem;
+    background-size: 30px 30px;
+}
+
+.ship-name {
+    grid-area: name;
+}
+
+.version-select {
+    grid-area: versions;
+}
+
+.canvas {
+    display: grid;
+    grid-area: canvas;
+    place-items: center;
+    outline: 1px solid blue;
+}
+
+.list-manager {
+    grid-area: list;
+    place-items: center;
+}
+
+.overview {
+    display: flex;
+    flex-direction: column;
+    grid-area: overview;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.desc {
+    grid-area: desc;
+}

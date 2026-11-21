@@ -14,32 +14,28 @@ import {
     parseModVersionsFilter,
 } from './utils/filterParser.ts';
 import { parseModsSort, parseModVersionsSort } from './utils/sortParser.ts';
+import { asyncHandler } from '../../server/asyncHandler.ts';
 import { parseLimit } from '../../server/parser/limitParser.ts';
 import { parseOffset } from '../../server/parser/offsetParser.ts';
 import { parseSearch } from '../../server/parser/searchParser.ts';
 
-export async function getMods(req: Request, res: Response) {
-    try {
-        const query = req.query;
+export const getMods = asyncHandler(async (req: Request, res: Response) => {
+    const query = req.query;
 
-        const fields = parseModsFields(query);
-        const filter = parseModsFilter(query);
-        const order = parseModsSort(query);
-        const limit = parseLimit(query);
-        const offset = parseOffset(query);
-        const options = { filter, order, limit, offset };
+    const fields = parseModsFields(query);
+    const filter = parseModsFilter(query);
+    const order = parseModsSort(query);
+    const limit = parseLimit(query);
+    const offset = parseOffset(query);
+    const options = { filter, order, limit, offset };
 
-        const { rows, total } = await fetchMods(fields, options);
+    const { rows, total } = await fetchMods(fields, options);
 
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
+    return res.json({ data: rows, meta: { total } });
+});
 
-export async function getModVersions(req: Request, res: Response) {
-    try {
+export const getModVersions = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
 
         const fields = parseModVersionsFields(query);
@@ -51,15 +47,12 @@ export async function getModVersions(req: Request, res: Response) {
 
         const { rows, total } = await fetchModVersions(fields, options);
 
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
+        return res.json({ data: rows, meta: { total } });
+    },
+);
 
-export async function getModSearchDisplayName(req: Request, res: Response) {
-    try {
+export const getModSearchDisplayName = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
 
         const search = parseSearch(query);
@@ -77,9 +70,6 @@ export async function getModSearchDisplayName(req: Request, res: Response) {
             options,
         );
 
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
+        return res.json({ data: rows, meta: { total } });
+    },
+);

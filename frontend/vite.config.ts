@@ -20,6 +20,9 @@ export default defineConfig(({ mode }) => {
             proxy: {
                 '/api': env.VITE_API_URL,
             },
+            fs: {
+                allow: ['..'],
+            },
         },
         resolve: {
             alias: [
@@ -33,6 +36,9 @@ export default defineConfig(({ mode }) => {
             modules: {
                 localsConvention: 'camelCase',
             },
+        },
+        optimizeDeps: {
+            include: ['@starsector-builds/shared'],
         },
     };
 });

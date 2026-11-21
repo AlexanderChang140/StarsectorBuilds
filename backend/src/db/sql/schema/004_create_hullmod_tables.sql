@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS hullmod_versions
     hullmod_image_id integer,
     PRIMARY KEY (id),
     UNIQUE (mod_version_id, hullmod_id),
-    UNIQUE (hullmod_instance_id, mod_version_id),
+    UNIQUE (id, mod_version_id),
     FOREIGN KEY (mod_version_id) REFERENCES mod_versions(id) ON DELETE CASCADE,
     FOREIGN KEY (hullmod_id) REFERENCES hullmods(id) ON DELETE CASCADE,
     FOREIGN KEY (hullmod_instance_id) REFERENCES hullmod_instances(id) ON DELETE CASCADE,
@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS hullmod_data (
     display_name text,
     manufacturer text,
     hullmod_desc text,
+    hullmod_desc_s_mod text,
     base_value integer,
     cost_frigate integer NOT NULL DEFAULT 0,
     cost_destroyer integer NOT NULL DEFAULT 0,
@@ -46,7 +47,8 @@ CREATE TABLE IF NOT EXISTS hullmod_data (
     cost_capital integer NOT NULL DEFAULT 0,
     hide boolean NOT NULL DEFAULT false,
     hide_everywhere boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (hullmod_instance_id)
+    PRIMARY KEY (hullmod_instance_id),
+    FOREIGN KEY (hullmod_instance_id) REFERENCES hullmod_instances(id) ON DELETE CASCADE
 );
 
 

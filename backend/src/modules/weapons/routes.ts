@@ -9,20 +9,12 @@ import {
 
 const router = express.Router();
 
-router.get('/weapons/:weaponId/versions', (req, res) => {
-    getWeaponVersions(req, res);
-});
+router.get('/weapons/:weaponId/versions', getWeaponVersions);
 
-router.get('/weapons/:weaponId/versions/latest', (req, res) => {
-    getLatestWeaponVersion(req, res);
-});
+router.get('/weapons/:weaponId/versions/latest', getLatestWeaponVersion);
 
-router.get('/weapon-versions', (req, res) => {
-    getAllWeaponVersions(req, res);
-});
+router.get('/weapon-versions', getAllWeaponVersions);
 
-router.get('/weapon-versions/:weaponVersionId', (req, res) => {
-    getWeaponVersion(req, res);
-});
+router.get('/weapon-versions/:weaponVersionId', getWeaponVersion);
 
 export default router;

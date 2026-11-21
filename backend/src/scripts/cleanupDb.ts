@@ -6,20 +6,25 @@ import {
     deleteMod,
     deleteModVersion,
 } from '../services/cleanupService.ts';
+import { logger } from '../utils/logger.ts';
 
 async function main() {
     const [command, ...args] = process.argv.slice(2);
     switch (command) {
         case 'deleteMod':
-            if (args.length != 1 || !args[0])
-                throw new Error('Usage: deleteMod <code>');
+            if (args.length != 1 || !args[0]) {
+                process.exitCode = 1;
+                logger.warn('Usage: deleteMod <code>');
+                return;
+            }
+
             const res = await deleteMod(args[0]);
             if (res) {
-                console.log(`Deleted mod: ${args[0]}`);
+                logger.info(`Deleted mod: ${args[0]}`);
             } else {
-                console.log(`Failed to delete mod: ${args[0]}`);
+                logger.error(`Failed to delete mod: ${args[0]}`);
             }
-            
+
             break;
 
         case 'deleteModVersion':
@@ -30,31 +35,37 @@ async function main() {
                 !args[2] ||
                 !args[3]
             ) {
-                throw new Error(
+                process.exitCode = 1;
+                logger.warn(
                     'Usage: deleteModVersion <code> <major> <minor> <patch>',
                 );
+                return;
             }
 
             const [code, major, minor, patch] = args;
             await deleteModVersion(code, Number(major), Number(minor), patch);
-            console.log(`Deleted mod version: code ${major}.${minor}.${patch}`);
+            logger.info(`Deleted mod version: code ${major}.${minor}.${patch}`);
             break;
 
         case 'cleanup':
-            if (args.length != 0) throw new Error('Usage: cleanup');
+            if (args.length != 0) {
+                process.exitCode = 1;
+                logger.warn('Usage: cleanup');
+                return;
+            }
             await cleanup();
-            console.log('Cleaned up');
+            logger.info('Cleaned up sucessfully');
             break;
         default:
-            console.log('Unknown command:', command);
-            console.log(
+            logger.warn('Unknown command:', command);
+            logger.info(
                 'Available commands: deleteMod, deleteModVersion, cleanup',
             );
     }
     pool.end();
 }
 
-main().catch((err) => {
-    console.error(err);
+main().catch((err: Error) => {
+    logger.error(err.message, { error: err.cause });
     process.exit(1);
 });

@@ -4,11 +4,17 @@ import type { ApiEndpoint, ApiRequest, ControlParams } from './types';
 
 export function buildApiRequest<TApiEndpoint extends ApiEndpoint>(
     request: ApiRequest<TApiEndpoint>,
-): `${TApiEndpoint}${string}` {
+): null extends TApiEndpoint
+    ? `${NonNullable<TApiEndpoint>}${string}` | null
+    : `${NonNullable<TApiEndpoint>}${string}` {
+    if (!request.endpoint) {
+        return null as null extends TApiEndpoint ? null : never;
+    }
+
     const queryParams = buildQueryParams(request.params);
     const queryString = queryParams ? `?${queryParams}` : '';
 
-    return `${request.endpoint}${queryString}`;
+    return `${request.endpoint}${queryString}` as `${NonNullable<TApiEndpoint>}${string}`;
 }
 
 export function buildQueryParams(
@@ -54,4 +60,35 @@ export function buildQueryParams(
 
 export function buildFields<TData>(keys: readonly (keyof TData)[]) {
     return keys.join(',');
+}
+
+export function normalizeQueryParams(
+    params: Partial<ControlParams> | undefined,
+) {
+    if (!params) return undefined;
+
+    const filter = params.filter
+        ? Object.fromEntries(
+              Object.entries(params.filter)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([key, cond]) => [
+                      key,
+                      {
+                          ...cond,
+                          values: [...new Set(cond.values)].sort((a, b) =>
+                              String(a).localeCompare(String(b)),
+                          ),
+                      },
+                  ]),
+          )
+        : undefined;
+
+    const sort = params.sort ? [...params.sort] : undefined;
+
+    return {
+        ...(filter !== undefined ? { filter } : {}),
+        ...(sort !== undefined ? { sort } : {}),
+        ...(params.limit !== undefined ? { limit: params.limit } : {}),
+        ...(params.offset !== undefined ? { offset: params.offset } : {}),
+    };
 }

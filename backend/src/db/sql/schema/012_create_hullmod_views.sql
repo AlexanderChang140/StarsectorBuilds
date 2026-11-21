@@ -31,6 +31,7 @@ SELECT
     hd.display_name,
     hd.manufacturer,
     hd.hullmod_desc,
+    hd.hullmod_desc_s_mod,
     hd.base_value,
     hd.cost_frigate,
     hd.cost_destroyer,

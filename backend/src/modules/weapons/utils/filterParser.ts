@@ -1,17 +1,8 @@
-import type { DB } from '../../../db/db.js';
-import {
-    parseFilterWithExcludedKeys,
-    type FilterableColumnKeys,
-} from '../../../server/parser/filterParser.ts';
-import type { ReqQuery } from '../../../types/generic.ts';
-import { removeArrayKeys } from '../../../utils/helpers.ts';
-import { WEAPON_VERSIONS_FULL_COLUMNS } from '../constants.ts';
-import { WeaponVersionsFullSchema } from '../schema.ts';
+import { WeaponVersionFullSchema } from '@starsector-builds/shared/weapons/schema';
 
-const WEAPON_VERSIONS_FILTER_COLUMNS = removeArrayKeys(
-    WEAPON_VERSIONS_FULL_COLUMNS,
-    ['groups', 'hints', 'no_dps_tooltip', 'tags'],
-) satisfies FilterableColumnKeys<DB['weapon_versions_full']>;
+import { parseFilterWithExcludedKeys } from '../../../server/parser/filterParser.ts';
+import type { ReqQuery } from '../../../types/generic.ts';
+import { WEAPON_VERSIONS_FILTER_COLUMNS } from '../constants.ts';
 
 export function parseWeaponsVersionsFilter<
     TExcludeKeys extends
@@ -19,7 +10,7 @@ export function parseWeaponsVersionsFilter<
 >(query: ReqQuery, excludeKeys?: TExcludeKeys) {
     return parseFilterWithExcludedKeys(
         query,
-        WeaponVersionsFullSchema,
+        WeaponVersionFullSchema,
         WEAPON_VERSIONS_FILTER_COLUMNS,
         excludeKeys,
     );

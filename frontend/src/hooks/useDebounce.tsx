@@ -20,7 +20,7 @@ export function debounce<T extends []>(
     cb: (...args: T) => void,
     delay: number,
 ) {
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
     return (...args: T) => {
         clearTimeout(timeout);
         timeout = setTimeout(() => {

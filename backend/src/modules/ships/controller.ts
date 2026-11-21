@@ -1,149 +1,163 @@
+import {
+    SHIP_VERSION_FULL_KEYS,
+    SHIP_WEAPON_SLOT_FULL_KEYS,
+    ShipVersionFullSchema,
+    ShipWeaponSlotFullSchema,
+    type ShipVersionFull,
+} from '@starsector-builds/shared/ships/schema';
 import type { Request, Response } from 'express';
 
 import {
-    fetchShipVersions,
-    fetchShipWeaponSlots,
-    fetchShipInstanceId,
-    fetchShipVersionsById,
-    fetchShipVersionById,
-    fetchLatestShipVersionById,
+    SHIP_VERSION_FULL_FILTER_KEYS,
+    SHIP_VERSION_FULL_SORT_KEYS,
+} from './constants.ts';
+import {
+    fetchShipVersionsFull,
+    fetchShipVersionFull,
+    fetchShipWeaponSlotsFull,
 } from './service.ts';
-import { parseShipVersionFields } from './utils/fieldParser.ts';
-import { parseShipVersionsFilter } from './utils/filterParser.ts';
-import { parseShipVersionsSort } from './utils/sortParser.ts';
-import { parseLimit } from '../../server/parser/limitParser.ts';
-import { parseOffset } from '../../server/parser/offsetParser.ts';
+import {
+    createFilterCondition,
+    createFilterOption,
+} from '../../db/helpers/filter.ts';
+import type { Options } from '../../db/types.ts';
+import { asyncHandler } from '../../server/asyncHandler.ts';
+import { BadRequestError } from '../../server/error.ts';
+import { parseQuery } from '../../server/parser/queryParser.ts';
+import type { ReqQuery } from '../../types/generic.ts';
+import { numberOrNull } from '../../utils/parse.ts';
 
-export async function getShipVersions(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
+export const getShipVersionsByShipId = asyncHandler(
+    async (req: Request, res: Response) => {
         const query = req.query;
+        const shipId = numberOrNull(req.params.shipId);
 
-        const shipId = Number(req.params.shipId);
-
-        if (Number.isNaN(shipId)) {
-            res.status(400).json({ error: 'Invalid ship ID' });
-            return;
+        if (shipId == null) {
+            throw new BadRequestError('Invalid ship ID');
         }
 
-        const fields = parseShipVersionFields(query);
-        const filter = parseShipVersionsFilter(query, ['ship_id']);
-        const order = parseShipVersionsSort(query);
-        const limit = parseLimit(query);
-        const offset = parseOffset(query);
-        const options = { filter, order, limit, offset };
+        const { selection } = parseShipVersionQuery(query);
+        const { rows, total } = await fetchShipVersionsFull(
+            selection,
+            createFilterOption('ship_id', shipId),
+        );
 
-        const { rows, total } = await fetchShipVersionsById(
-            shipId,
-            fields,
+        return res.json({ data: rows, meta: { total } });
+    },
+);
+
+export const getLatestShipVersionByShipId = asyncHandler(
+    async (req: Request, res: Response) => {
+        const query = req.query;
+        const shipId = numberOrNull(req.params.shipId);
+
+        if (shipId == null) {
+            throw new BadRequestError('Invalid ship ID');
+        }
+
+        const { selection } = parseShipVersionQuery(query);
+        const options: Options<ShipVersionFull> = {
+            filter: {
+                ship_id: createFilterCondition(shipId),
+            },
+            order: [
+                { field: 'major', order: 'ASC' },
+                { field: 'minor', order: 'ASC' },
+                { field: 'patch', order: 'ASC' },
+            ],
+        };
+        const result = await fetchShipVersionFull(selection, options);
+
+        return res.json({ data: result });
+    },
+);
+
+export const getShipVersions = asyncHandler(
+    async (req: Request, res: Response) => {
+        const query = req.query;
+
+        const { selection, options } = parseShipVersionQuery(query);
+        const { rows, total } = await fetchShipVersionsFull(selection, options);
+
+        return res.json({ data: rows, meta: { total } });
+    },
+);
+
+export const getShipVersionByVid = asyncHandler(
+    async (req: Request, res: Response) => {
+        const query = req.query;
+        const shipVersionId = numberOrNull(req.params.shipVersionId);
+
+        if (shipVersionId == null) {
+            throw new BadRequestError('Invalid ship version ID');
+        }
+
+        const { selection } = parseShipVersionQuery(query);
+        const result = await fetchShipVersionFull(
+            selection,
+            createFilterOption('ship_version_id', shipVersionId),
+        );
+
+        return res.json(result);
+    },
+);
+
+export const getShipWeaponSlotsByVid = asyncHandler(
+    async (req: Request, res: Response) => {
+        const query = req.query;
+        const shipVersionId = numberOrNull(req.params.shipVersionId);
+
+        if (shipVersionId == null) {
+            throw new BadRequestError('Invalid ship version ID');
+        }
+
+        const shipInstanceId = (
+            await fetchShipVersionFull(
+                ['ship_instance_id'],
+                createFilterOption('ship_instance_id', shipVersionId),
+            )
+        ).ship_instance_id;
+
+        const { selection } = parseShipWeaponSlotQuery(query);
+        const { rows, total } = await fetchShipWeaponSlotsFull(
+            selection,
+            createFilterOption('ship_instance_id', shipInstanceId),
+        );
+
+        return res.json({ data: rows, meta: { total } });
+    },
+);
+
+export const getWeaponSlots = asyncHandler(
+    async (req: Request, res: Response) => {
+        const query = req.query;
+
+        const { selection, options } = parseShipWeaponSlotQuery(query);
+        const { rows, total } = await fetchShipWeaponSlotsFull(
+            selection,
             options,
         );
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
+
+        return res.json({ data: rows, meta: { total } });
+    },
+);
+
+function parseShipVersionQuery(query: ReqQuery) {
+    return parseQuery(
+        query,
+        SHIP_VERSION_FULL_KEYS,
+        SHIP_VERSION_FULL_FILTER_KEYS,
+        ShipVersionFullSchema,
+        SHIP_VERSION_FULL_SORT_KEYS,
+    );
 }
 
-export async function getLatestShipVersion(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
-        const query = req.query;
-
-        const shipId = Number(req.params.shipId);
-
-        if (Number.isNaN(shipId)) {
-            res.status(400).json({ error: 'Invalid ship ID' });
-            return;
-        }
-
-        const fields = parseShipVersionFields(query);
-
-        const result = await fetchLatestShipVersionById(shipId, fields);
-
-        if (result == null) {
-            res.status(404).json({ error: 'Ship version not found' });
-            return;
-        }
-        res.json({ data: result });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
-
-export async function getAllShipVersions(req: Request, res: Response) {
-    try {
-        const query = req.query;
-
-        const fields = parseShipVersionFields(query);
-        const filter = parseShipVersionsFilter(query);
-        const order = parseShipVersionsSort(query);
-        const limit = parseLimit(query);
-        const offset = parseOffset(query);
-        const options = { filter, order, limit, offset };
-
-        const { rows, total } = await fetchShipVersions(fields, options);
-        res.json({ data: rows, meta: { total } });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
-
-export async function getShipVersionById(
-    req: Request,
-    res: Response,
-): Promise<void> {
-    try {
-        const query = req.query;
-
-        const shipVersionId = Number(req.params.shipVersionId);
-
-        if (Number.isNaN(shipVersionId)) {
-            res.status(400).json({ error: 'Invalid ship version ID' });
-            return;
-        }
-
-        const fields = parseShipVersionFields(query);
-
-        const result = await fetchShipVersionById(shipVersionId, fields);
-
-        if (result == null) {
-            res.status(404).json({ error: 'Ship version not found' });
-            return;
-        }
-        res.json({ data: result });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
-}
-
-export async function getShipWeaponSlots(req: Request, res: Response) {
-    try {
-        const shipVersionId = Number(req.params.shipVersionId);
-
-        if (Number.isNaN(shipVersionId)) {
-            res.status(400).json({ error: 'Invalid ship version ID' });
-            return;
-        }
-
-        const shipInstanceId = await fetchShipInstanceId(shipVersionId);
-
-        if (shipInstanceId == null) {
-            res.status(404).json({ error: 'Ship instance not found' });
-            return;
-        }
-
-        const result = await fetchShipWeaponSlots(shipInstanceId);
-        res.json({ data: result });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error 500' });
-    }
+function parseShipWeaponSlotQuery(query: ReqQuery) {
+    return parseQuery(
+        query,
+        SHIP_WEAPON_SLOT_FULL_KEYS,
+        SHIP_WEAPON_SLOT_FULL_KEYS,
+        ShipWeaponSlotFullSchema,
+        SHIP_WEAPON_SLOT_FULL_KEYS,
+    );
 }

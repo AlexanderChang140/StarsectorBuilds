@@ -3,14 +3,17 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import Layout from '@/components/layout/Layout.tsx';
 import { AuthProvider } from '@/modules/auth/AuthProvider.tsx';
 import Auth from '@/modules/auth/pages/Auth.tsx';
-import NewBuild from '@/modules/builds/pages/NewBuild.tsx';
+import { NewBuild } from '@/modules/builds/pages/NewBuild.tsx';
 import HullmodTable from '@/modules/hullmods/pages/HullmodTable.tsx';
 import ShipDisplay from '@/modules/ships/pages/ShipDisplay.tsx';
 import ShipTable from '@/modules/ships/pages/ShipTable.tsx';
 import WeaponDisplay from '@/modules/weapons/pages/WeaponDisplay.tsx';
-import WeaponTable from '@/modules/weapons/pages/WeaponTable.tsx';
-import Home from '@/pages/Home.tsx';
+import { WeaponTable } from '@/modules/weapons/pages/WeaponTable.tsx';
+import { Home } from '@/pages/Home.tsx';
 import NotFound from '@/pages/NotFound.tsx';
+
+import { Builds } from './modules/builds/pages/Builds';
+import { ViewBuild } from './modules/builds/pages/ViewBuild';
 
 const TODO = <div>TODO</div>;
 
@@ -23,6 +26,7 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/auth" element={<Auth />} />
 
+                        {/* Weapons */}
                         <Route path="/weapons" element={<WeaponTable />} />
                         <Route
                             path="/weapons/:weaponId"
@@ -36,6 +40,7 @@ function App() {
                         <Route path="/hullmods" element={<HullmodTable />} />
                         <Route path="/hullmods/:id" element={TODO} />
 
+                        {/* Ships */}
                         <Route path="/ships" element={<ShipTable />} />
                         <Route
                             path="/ships/:shipId"
@@ -46,7 +51,16 @@ function App() {
                             element={<ShipDisplay />}
                         />
 
-                        <Route path="/builds/new/:id" element={<NewBuild />} />
+                        {/* Builds */}
+                        <Route path="/builds" element={<Builds />} />
+                        <Route
+                            path="/builds/new/:shipId/:shipVersionId"
+                            element={<NewBuild />}
+                        />
+                        <Route
+                            path="/builds/:buildId"
+                            element={<ViewBuild />}
+                        />
 
                         <Route path="/user/:id" element={TODO} />
                         <Route path="/settings" element={TODO} />

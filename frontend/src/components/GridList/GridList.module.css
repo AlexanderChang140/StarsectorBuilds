@@ -1,0 +1,24 @@
+.grid-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--grid-gap, 0.3rem);
+    padding: 0.3rem;
+    background-color: var(--bg-color);
+    border: 1px solid white;
+}
+
+.grid-list-item {
+    min-width: 0;
+    max-width: 100px;
+    padding: 0 0.15rem;
+    cursor: pointer;
+
+    &[data-selected] {
+        background-color: green;
+    }
+}
+
+.grid-list-item:hover {
+    cursor: pointer;
+    background-color: gray;
+}

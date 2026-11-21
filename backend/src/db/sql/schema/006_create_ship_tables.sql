@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS ship_stats
     armor_rating integer,
     max_flux integer,
     flux_dissipation integer,
-    op_cost integer,
+    op integer,
     fighter_bays integer,
     max_speed integer,
     acceleration integer,

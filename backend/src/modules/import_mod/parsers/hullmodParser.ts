@@ -4,7 +4,10 @@ import path from 'path';
 import { parse } from 'csv';
 
 import { prepareImage } from './imageParser.ts';
-import type { PreparedFullHullmod, PreparedHullmodData } from '../../hullmods/types.ts';
+import type {
+    PreparedFullHullmod,
+    PreparedHullmodData,
+} from '../../hullmods/types.ts';
 import type { PreparedImage } from '../../images/types.ts';
 import {
     convertBoolean,
@@ -28,8 +31,9 @@ type HullmodRecord = {
     cost_capital: string;
     desc: string;
     sModDesc: string;
+    short: string;
     sprite: string;
-}
+};
 
 /**
  * @param {*} fileDir
@@ -108,8 +112,8 @@ function prepareHullmod(record: HullmodRecord): PreparedFullHullmod {
     const prepared = {
         preparedHullmodInstance: { data_hash: csvHash },
         preparedHullmodData: prepareHullmodData(record),
-        hullmodTags: [],
-        hullmodUiTags: [],
+        hullmodTags: record['tags']?.split(',').map((s) => s.trim()) ?? [],
+        hullmodUiTags: record['uiTags']?.split(',').map((s) => s.trim()) ?? [],
     };
     return prepared;
 }
@@ -119,6 +123,7 @@ function prepareHullmodData(record: HullmodRecord): PreparedHullmodData {
         display_name: convertString(record['name']),
         manufacturer: convertString(record['tech/manufacturer']),
         hullmod_desc: convertString(record['desc']),
+        hullmod_desc_s_mod: convertString(record['sModDesc']),
         base_value: convertInteger(record['base value']),
         cost_frigate: convertInteger(record['cost_frigate']) ?? 0,
         cost_destroyer: convertInteger(record['cost_dest']) ?? 0,

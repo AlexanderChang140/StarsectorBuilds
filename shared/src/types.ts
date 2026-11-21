@@ -13,4 +13,3 @@ export type PaginatedResponse<T> = {
 export type ApiResponse<T> = {
     data: T;
 };
-

@@ -56,6 +56,7 @@ export default defineConfig([
             'import/newline-after-import': 'warn',
             'import/no-duplicates': 'error',
             'react/react-in-jsx-scope': 0,
+            'react/prop-types': 'off',
         },
         settings: {
             'import/resolver': {
